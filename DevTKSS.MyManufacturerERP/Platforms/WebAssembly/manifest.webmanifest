@@ -1,0 +1,10 @@
+{
+  "background_color": "#ffffff",
+  "description": "DevTKSS.MyManufacturerERP",
+  "display": "standalone",
+  "name": "DevTKSS.MyManufacturerERP",
+  "short_name": "DevTKSS.MyManufacturerERP",
+  "start_url": "/index.html",
+  "theme_color": "#ffffff",
+  "scope": "/"
+}

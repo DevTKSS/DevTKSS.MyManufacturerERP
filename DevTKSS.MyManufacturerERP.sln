@@ -1,0 +1,95 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36202.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP", "DevTKSS.MyManufacturerERP\DevTKSS.MyManufacturerERP.csproj", "{F3355C83-3B86-436F-ABD8-5A5B93DE4FEB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.Server", "DevTKSS.MyManufacturerERP.Server\DevTKSS.MyManufacturerERP.Server.csproj", "{11953F76-092B-488D-9F8B-9BF3A22540ED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.DataContracts", "DevTKSS.MyManufacturerERP.DataContracts\DevTKSS.MyManufacturerERP.DataContracts.csproj", "{324B9434-9B43-4F65-A905-C56367720430}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.UITests", "DevTKSS.MyManufacturerERP.UITests\DevTKSS.MyManufacturerERP.UITests.csproj", "{A43ABE56-8AFA-F567-A07D-74269AD82A71}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.Tests", "DevTKSS.MyManufacturerERP.Tests\DevTKSS.MyManufacturerERP.Tests.csproj", "{5FC60EF5-E477-2798-CAC5-51C230B08FAC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{908A7B59-824E-4011-8FCF-F98F55141216}"
+	ProjectSection(SolutionItems) = preProject
+		.env = .env
+		.env.sample = .env.sample
+		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+		Directory.Packages.props = Directory.Packages.props
+		global.json = global.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External OpenApi Specs", "External OpenApi Specs", "{30090C0E-E8F7-44B2-A5F5-FFCC2081B335}"
+	ProjectSection(SolutionItems) = preProject
+		Specs\etsy-open-api-spec-3.0.0.json = Specs\etsy-open-api-spec-3.0.0.json
+		Specs\sevdesk-open-api-spec-2.0.yaml = Specs\sevdesk-open-api-spec-2.0.yaml
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.xUnitTests", "DevTKSS.MyManufacturerERP.xUnitTests\DevTKSS.MyManufacturerERP.xUnitTests.csproj", "{35EA0FE2-8D8E-E033-E169-C6639CB2BB3C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.IdentityServer.Database", "DevTKSS.MyManufacturerERP.IdentityServer.Database\DevTKSS.MyManufacturerERP.IdentityServer.Database.csproj", "{7A507A89-0F9C-4B01-A4B5-4EAC76C497D0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F3355C83-3B86-436F-ABD8-5A5B93DE4FEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3355C83-3B86-436F-ABD8-5A5B93DE4FEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3355C83-3B86-436F-ABD8-5A5B93DE4FEB}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{F3355C83-3B86-436F-ABD8-5A5B93DE4FEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3355C83-3B86-436F-ABD8-5A5B93DE4FEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3355C83-3B86-436F-ABD8-5A5B93DE4FEB}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{11953F76-092B-488D-9F8B-9BF3A22540ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11953F76-092B-488D-9F8B-9BF3A22540ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11953F76-092B-488D-9F8B-9BF3A22540ED}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{11953F76-092B-488D-9F8B-9BF3A22540ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11953F76-092B-488D-9F8B-9BF3A22540ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11953F76-092B-488D-9F8B-9BF3A22540ED}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{324B9434-9B43-4F65-A905-C56367720430}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{324B9434-9B43-4F65-A905-C56367720430}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{324B9434-9B43-4F65-A905-C56367720430}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{324B9434-9B43-4F65-A905-C56367720430}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{324B9434-9B43-4F65-A905-C56367720430}.Release|Any CPU.Build.0 = Release|Any CPU
+		{324B9434-9B43-4F65-A905-C56367720430}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{A43ABE56-8AFA-F567-A07D-74269AD82A71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A43ABE56-8AFA-F567-A07D-74269AD82A71}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A43ABE56-8AFA-F567-A07D-74269AD82A71}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{A43ABE56-8AFA-F567-A07D-74269AD82A71}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A43ABE56-8AFA-F567-A07D-74269AD82A71}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A43ABE56-8AFA-F567-A07D-74269AD82A71}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{5FC60EF5-E477-2798-CAC5-51C230B08FAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FC60EF5-E477-2798-CAC5-51C230B08FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FC60EF5-E477-2798-CAC5-51C230B08FAC}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{5FC60EF5-E477-2798-CAC5-51C230B08FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FC60EF5-E477-2798-CAC5-51C230B08FAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FC60EF5-E477-2798-CAC5-51C230B08FAC}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{35EA0FE2-8D8E-E033-E169-C6639CB2BB3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35EA0FE2-8D8E-E033-E169-C6639CB2BB3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35EA0FE2-8D8E-E033-E169-C6639CB2BB3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35EA0FE2-8D8E-E033-E169-C6639CB2BB3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A507A89-0F9C-4B01-A4B5-4EAC76C497D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A507A89-0F9C-4B01-A4B5-4EAC76C497D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A507A89-0F9C-4B01-A4B5-4EAC76C497D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A507A89-0F9C-4B01-A4B5-4EAC76C497D0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A43ABE56-8AFA-F567-A07D-74269AD82A71} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{5FC60EF5-E477-2798-CAC5-51C230B08FAC} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{35EA0FE2-8D8E-E033-E169-C6639CB2BB3C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B1820EEA-ABC2-45C8-A59E-478FE7808EBF}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,62 @@
+<Project ToolsVersion="15.0">
+  <!--
+    To update the version of Uno, you should instead update the Sdk version in the global.json file.
+
+    See https://aka.platform.uno/using-uno-sdk for more information.
+    See https://aka.platform.uno/using-uno-sdk#implicit-packages for more information regarding the Implicit Packages.
+  -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1-Preview.1" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.5.3" />
+    <PackageVersion Include="Microsoft.Kiota.Bundle" Version="1.19.0" />
+    <PackageVersion Include="Dotenv.Net" Version="3.2.1" />
+  </ItemGroup>
+  <ItemGroup Label="Serilog">
+    <PackageVersion Include="Serilog.Expressions" Version="5.0.0" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
+  </ItemGroup>
+  <ItemGroup Condition="$(UsingUnoSdk) != 'true'">
+    <PackageVersion Include="Uno.Wasm.Bootstrap.Server" Version="9.0.19" />
+  </ItemGroup>
+  <ItemGroup Label="Duende">
+    <PackageVersion Include="Duende.AccessTokenManagement" Version="3.2.0" />
+    <PackageVersion Include="Duende.BFF" Version="3.0.0" />
+    <PackageVersion Include="Duende.IdentityModel" Version="7.1.0" />
+    <PackageVersion Include="Duende.BFF.EntityFramework" Version="3.0.0" />
+    <PackageVersion Include="Duende.IdentityModel.OidcClient" Version="6.0.1" />
+    <PackageVersion Include="Duende.IdentityServer.EntityFramework" version="7.2.4" />
+  </ItemGroup>
+  <ItemGroup Label="EntityFramework">
+    <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.6" />
+  </ItemGroup>
+  <ItemGroup Label="OpenApi Packages">
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="9.0.6">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageVersion>
+  </ItemGroup>
+  <ItemGroup Label="General Test Packages">
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="GitHubActionsTestLogger" Version="2.4.1" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="Shouldly" Version="4.3.0" />
+  </ItemGroup>
+  <ItemGroup Label="xUnit Test Packages">
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.1" />
+  </ItemGroup>
+  <ItemGroup Label="NUnit Test Packages">
+    <PackageVersion Include="NUnit" Version="4.3.2" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="5.0.0" />
+  </ItemGroup>
+  <ItemGroup Label="UITests Packages">
+    <PackageVersion Include="Uno.UITest.Helpers" Version="1.1.0-dev.70" />
+    <PackageVersion Include="Xamarin.UITest" Version="4.4.2" />
+  </ItemGroup>
+</Project>
