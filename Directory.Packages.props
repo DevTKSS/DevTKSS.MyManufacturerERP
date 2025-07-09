@@ -7,9 +7,9 @@
   -->
   <ItemGroup>
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.6" />
-    <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1-Preview.1" />
+    <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.5.3" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.5.6" />
     <PackageVersion Include="Microsoft.Kiota.Bundle" Version="1.19.0" />
     <PackageVersion Include="Dotenv.Net" Version="3.2.1" />
   </ItemGroup>
@@ -19,14 +19,6 @@
   </ItemGroup>
   <ItemGroup Condition="$(UsingUnoSdk) != 'true'">
     <PackageVersion Include="Uno.Wasm.Bootstrap.Server" Version="9.0.19" />
-  </ItemGroup>
-  <ItemGroup Label="Duende">
-    <PackageVersion Include="Duende.AccessTokenManagement" Version="3.2.0" />
-    <PackageVersion Include="Duende.BFF" Version="3.0.0" />
-    <PackageVersion Include="Duende.IdentityModel" Version="7.1.0" />
-    <PackageVersion Include="Duende.BFF.EntityFramework" Version="3.0.0" />
-    <PackageVersion Include="Duende.IdentityModel.OidcClient" Version="6.0.1" />
-    <PackageVersion Include="Duende.IdentityServer.EntityFramework" version="7.2.4" />
   </ItemGroup>
   <ItemGroup Label="EntityFramework">
     <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.6" />

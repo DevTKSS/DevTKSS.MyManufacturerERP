@@ -11,9 +11,7 @@
     <ProjectReference Include="..\DevTKSS.MyManufacturerERP.DataContracts\DevTKSS.MyManufacturerERP.DataContracts.csproj" />
   </ItemGroup>
 
-  <ItemGroup Label="Duende">
-    <PackageReference Include="Duende.AccessTokenManagement" />
-    <PackageReference Include="Duende.BFF" />
+  <ItemGroup Label="Identity Management">
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
   </ItemGroup>
 

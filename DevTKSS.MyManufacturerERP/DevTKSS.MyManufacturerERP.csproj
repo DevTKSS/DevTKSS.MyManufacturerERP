@@ -45,10 +45,10 @@
     <DefineConstants>$(DefineConstants);USE_UITESTS</DefineConstants>
   </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.Kiota.Bundle" />
-        <PackageReference Include="Dotenv.Net" />
-    </ItemGroup>
+ <ItemGroup>
+   <PackageReference Include="Microsoft.Kiota.Bundle" />
+   <PackageReference Include="Dotenv.Net" />
+ </ItemGroup>
     
   <ItemGroup>
     <ProjectReference Include="..\DevTKSS.MyManufacturerERP.DataContracts\DevTKSS.MyManufacturerERP.DataContracts.csproj" />
