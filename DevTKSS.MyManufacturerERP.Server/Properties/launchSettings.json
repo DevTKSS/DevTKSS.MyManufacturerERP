@@ -15,6 +15,7 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "launchUrl": "scalar/v1",
+      "hotReloadEnabled": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

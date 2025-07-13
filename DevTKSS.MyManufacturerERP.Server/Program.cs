@@ -1,12 +1,15 @@
 using System.Text.Json.Serialization.Metadata;
 using DevTKSS.MyManufacturerERP.DataContracts.Serialization;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
-using Uno.Wasm.Bootstrap.Server;
-using Duende.Bff;
-using Microsoft.AspNetCore.Identity;
+// using Uno.Wasm.Bootstrap.Server;
 
 // The initial "bootstrap" logger is able to log errors during start-up. It's completely replaced by the
 // logger configured in `AddSerilog()` below, once configuration and dependency-injection have both been
@@ -48,15 +51,48 @@ try
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     builder.Services.AddOpenApi();
 
-#if DEBUG // this current approach is build along Milan Jovanović's Youtube video: https://www.youtube.com/watch?v=S0RSsHKiD6Y
-    builder.Services.AddAuthorization(); 
-    builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
-    builder.Services.AddIdentityCore<User>()
-        .AddEntityFrameworkStores<ApplicationDbContext>()
-        .AddApiEndpoints();
+#if DEBUG // this current approach is build along Youtube video: https://www.youtube.com/watch?v=V-S5JZJUvvU
+    builder.Services.AddDbContext<AuthDbContext>(options =>
+    {
+        options.UseInMemoryDatabase("AuthDb");
+    });
+
+    builder.Services.AddAuthorization();
+    builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+        .AddEntityFrameworkStores<AuthDbContext>();
+
+    builder.Services.AddAuthentication()
+        .AddOAuth("Etsy", options =>
+        {
+            var EtsyConfig = builder.Configuration.GetSection("Authentication:Etsy");
+            options.UsePkce = true;
+            options.ClientId = EtsyConfig["ClientId"];
+            options.ClientSecret = EtsyConfig["ClientSecret"];
+            options.CallbackPath = EtsyConfig["CallbackPath"];
+            options.AuthorizationEndpoint = EtsyConfig["Authorization"];
+            options.TokenEndpoint = EtsyConfig["Token"];
+            options.UserInformationEndpoint = EtsyConfig["UserInformation"];
+
+            var scopeString = EtsyConfig["Scope"];
+            if (!string.IsNullOrWhiteSpace(scopeString))
+            {
+                foreach (var scope in scopeString.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    options.Scope.Add(scope);
+                }
+            }
+
+            options.SaveTokens = true;
+            // Optional: Map user claims etc.
+        });
+    //builder.Services.AddIdentityCore<User>()
+    //    .AddEntityFrameworkStores<AuthDbContext>()
+    //    .AddApiEndpoints();
 #endif
 
     var app = builder.Build();
+
+    app.MapIdentityApi<IdentityUser>();
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
@@ -75,13 +111,13 @@ try
     }
 
     app.UseHttpsRedirection();
-    app.UseUnoFrameworkFiles();
+    // app.UseUnoFrameworkFiles();
     app.UseStaticFiles();
     app.UseSerilogRequestLogging(); // Recommendation from Serilog.AspNetCore to log HTTP requests
 
     app.MapFallbackToFile("index.html");
 
-    app.MapWeatherApi();
+    //app.MapWeatherApi();
 
     await app.RunAsync();
 }

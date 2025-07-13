@@ -4,15 +4,19 @@
       <Description>This Project is gotten from Uno.Templates with opting in to Server project to be added and is currently trying to reach any usable state for Serverside Authorization and Authentication</Description>
     <TargetFramework>net9.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <UserSecretsId>73d0e72f-3b9d-4ea9-bc0e-ca05efc5cd26</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DevTKSS.MyManufacturerERP\DevTKSS.MyManufacturerERP.csproj" SetTargetFramework="TargetFramework=net9.0-browserwasm" ReferenceOutputAssembly="false" />
+    <!--<ProjectReference Include="..\DevTKSS.MyManufacturerERP\DevTKSS.MyManufacturerERP.csproj" SetTargetFramework="TargetFramework=net9.0-browserwasm" ReferenceOutputAssembly="false" />-->
     <ProjectReference Include="..\DevTKSS.MyManufacturerERP.DataContracts\DevTKSS.MyManufacturerERP.DataContracts.csproj" />
   </ItemGroup>
 
   <ItemGroup Label="Identity Management">
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
   </ItemGroup>
 
 
@@ -24,13 +28,15 @@
      <PackageReference Include="Serilog.Expressions" />
   </ItemGroup>
     
-  <ItemGroup Label="Uno">
+  <!--<ItemGroup Label="Uno">
      <PackageReference Include="Uno.Wasm.Bootstrap.Server" />
-  </ItemGroup>
+  </ItemGroup>-->
 
   <ItemGroup Label="Docs">
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" />
     <PackageReference Include="Scalar.AspNetCore" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 </Project>
