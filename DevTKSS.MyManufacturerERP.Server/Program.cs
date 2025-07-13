@@ -81,8 +81,8 @@ try
                     options.Scope.Add(scope);
                 }
             }
-
             options.SaveTokens = true;
+            options.Validate()
             // Optional: Map user claims etc.
         });
     //builder.Services.AddIdentityCore<User>()
