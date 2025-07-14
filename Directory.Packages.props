@@ -11,6 +11,7 @@
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.5.6" />
     <PackageVersion Include="Microsoft.Kiota.Bundle" Version="1.19.0" />
+    <PackageVersion Include="Microsoft.Kiota.Abstractions" Version="1.19.0" />
     <PackageVersion Include="Dotenv.Net" Version="3.2.1" />
   </ItemGroup>
   <ItemGroup Label="Serilog">

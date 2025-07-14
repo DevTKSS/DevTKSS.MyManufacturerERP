@@ -3,7 +3,9 @@ using DevTKSS.MyManufacturerERP.DataContracts.Serialization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Server.HttpSys;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
@@ -61,37 +63,51 @@ try
     builder.Services.AddIdentityApiEndpoints<IdentityUser>()
         .AddEntityFrameworkStores<AuthDbContext>();
 
-    builder.Services.AddAuthentication()
-        .AddOAuth("Etsy", options =>
+    builder.Services.AddAuthentication(configureOptions =>
+    {
+        configureOptions.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        configureOptions.DefaultChallengeScheme = OAuthDefaults.DisplayName;
+    })
+    .AddCookie()
+    .AddOAuth("Etsy", options =>
+    {
+        var EtsyConfig = builder.Configuration.GetSection("Authentication:Etsy");
+        options.UsePkce = true;
+        options.ClientId = EtsyConfig["ClientId"];
+        options.ClientSecret = EtsyConfig["ClientSecret"];
+        options.CallbackPath = EtsyConfig["CallbackPath"];
+        options.AuthorizationEndpoint = EtsyConfig["Authorization"];
+        options.TokenEndpoint = EtsyConfig["Token"];
+        options.UserInformationEndpoint = EtsyConfig["UserInformation"];
+        options.Events = new OAuthEvents
         {
-            var EtsyConfig = builder.Configuration.GetSection("Authentication:Etsy");
-            options.UsePkce = true;
-            options.ClientId = EtsyConfig["ClientId"];
-            options.ClientSecret = EtsyConfig["ClientSecret"];
-            options.CallbackPath = EtsyConfig["CallbackPath"];
-            options.AuthorizationEndpoint = EtsyConfig["Authorization"];
-            options.TokenEndpoint = EtsyConfig["Token"];
-            options.UserInformationEndpoint = EtsyConfig["UserInformation"];
-
-            var scopeString = EtsyConfig["Scope"];
-            if (!string.IsNullOrWhiteSpace(scopeString))
+            OnRemoteFailure = context =>
             {
-                foreach (var scope in scopeString.Split(' ', StringSplitOptions.RemoveEmptyEntries))
-                {
-                    options.Scope.Add(scope);
-                }
+                context.Response.Redirect("/Home/Error?message=" + context.Failure.Message);
+                context.HandleResponse();
+                return Task.CompletedTask;
             }
-            options.SaveTokens = true;
-            options.Validate()
-            // Optional: Map user claims etc.
-        });
+
+        };
+        var scopeString = EtsyConfig["Scope"];
+        if (!string.IsNullOrWhiteSpace(scopeString))
+        {
+            foreach (var scope in scopeString.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            {
+                options.Scope.Add(scope);
+            }
+        }
+        options.SaveTokens = true;
+        options.Validate();
+        // Optional: Map user claims etc.
+    });
     //builder.Services.AddIdentityCore<User>()
     //    .AddEntityFrameworkStores<AuthDbContext>()
     //    .AddApiEndpoints();
 #endif
 
     var app = builder.Build();
-
+    
     app.MapIdentityApi<IdentityUser>();
 
     // Configure the HTTP request pipeline.
