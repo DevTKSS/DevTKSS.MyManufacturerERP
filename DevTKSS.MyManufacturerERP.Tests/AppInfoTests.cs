@@ -12,7 +12,7 @@ public class AppInfoTests
     {
         var appInfo = new AppConfig { Environment = "Test" };
 
-        appInfo.Should().NotBeNull();
-        appInfo.Environment.Should().Be("Test");
+        appInfo.ShouldNotBeNull();
+        appInfo.Environment.ShouldBe("Test");
     }
 }

@@ -1,3 +1,3 @@
 global using DevTKSS.MyManufacturerERP.Models;
-global using FluentAssertions;
+global using Shouldly;
 global using NUnit.Framework;
