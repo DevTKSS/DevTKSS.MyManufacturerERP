@@ -6,14 +6,16 @@
     See https://aka.platform.uno/using-uno-sdk#implicit-packages for more information regarding the Implicit Packages.
   -->
   <ItemGroup>
-
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
-    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.5.6" />
+
     <PackageVersion Include="Microsoft.Kiota.Bundle" Version="1.19.0" />
     <PackageVersion Include="Microsoft.Kiota.Abstractions" Version="1.19.0" />
-    <PackageVersion Include="Dotenv.Net" Version="3.2.1" />
+    <PackageVersion Include="Dotenv.Net" Version="4.0.0" />
   </ItemGroup>
+
+    <ItemGroup Label="OpenApi">
+        
+    </ItemGroup>
   <ItemGroup Label="Serilog">
     <PackageVersion Include="Serilog.Expressions" Version="5.0.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
@@ -22,18 +24,20 @@
     <PackageVersion Include="Uno.Wasm.Bootstrap.Server" Version="9.0.19" />
   </ItemGroup>
   <ItemGroup Label="EntityFramework">
-    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.6" />
-      <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.6"/>
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.7" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.7" />
     <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.6" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.6" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.7" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.7" />
   </ItemGroup>
   <ItemGroup Label="OpenApi Packages">
-    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.6" />
-    <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="9.0.6">
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
+    <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="9.0.7">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.6.1" />
   </ItemGroup>
   <ItemGroup Label="General Test Packages">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
@@ -43,7 +47,7 @@
   </ItemGroup>
   <ItemGroup Label="xUnit Test Packages">
     <PackageVersion Include="xunit" Version="2.9.3" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.1" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.2" />
   </ItemGroup>
   <ItemGroup Label="NUnit Test Packages">
     <PackageVersion Include="NUnit" Version="4.3.2" />

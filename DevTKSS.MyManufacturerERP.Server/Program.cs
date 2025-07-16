@@ -1,21 +1,8 @@
-using System.Text.Json.Serialization.Metadata;
-using DevTKSS.MyManufacturerERP.DataContracts.Serialization;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Server.HttpSys;
-using Microsoft.EntityFrameworkCore;
-using Scalar.AspNetCore;
-using Serilog;
-using Serilog.Templates;
-using Serilog.Templates.Themes;
-// using Uno.Wasm.Bootstrap.Server;
-
 // The initial "bootstrap" logger is able to log errors during start-up. It's completely replaced by the
 // logger configured in `AddSerilog()` below, once configuration and dependency-injection have both been
 // set up successfully.
+
+using DevTKSS.MyManufacturerERP.Server.Extensions;
 
 Log.Logger = new LoggerConfiguration()
       .WriteTo.Console()
@@ -33,18 +20,19 @@ try
          .ReadFrom.Services(services)
          .Enrich.FromLogContext()
          .WriteTo.Console(
-            formatter:new ExpressionTemplate(
+            formatter: new ExpressionTemplate(
                 // Include trace and span IDs when present.
                 template: "[{@t:HH:mm:ss} {@l:u3}{#if @tr is not null} ({substring(@tr,0,4)}:{substring(@sp,0,4)}){#end}] {@m}\n{@x}",
                 theme: TemplateTheme.Code
             ))
          );
 
-    // Add services to the container.
+    //// Add services to the container.
     builder.Services.Configure<JsonOptions>(options =>
                 // Configure the JsonSerializerOptions to use the generated WeatherForecastContext
-                options.JsonSerializerOptions.TypeInfoResolver = JsonTypeInfoResolver.Combine(
-                WeatherForecastContext.Default));
+                options.SerializerOptions.TypeInfoResolver = JsonTypeInfoResolver.Combine(
+                WeatherForecastContext.Default,
+                TodoItemContext.Default));
 
     builder.Services.Configure<RouteOptions>(options =>
                 // Configure the RouteOptions to use lowercase URLs
@@ -53,62 +41,55 @@ try
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     builder.Services.AddOpenApi();
 
-#if DEBUG // this current approach is build along Youtube video: https://www.youtube.com/watch?v=V-S5JZJUvvU
-    builder.Services.AddDbContext<AuthDbContext>(options =>
-    {
-        options.UseInMemoryDatabase("AuthDb");
-    });
 
-    builder.Services.AddAuthorization();
+    
+    // Definition from the TodoList example of the Minimal APIs Tutorial
+    // <see href="https://learn.microsoft.com/de-de/aspnet/core/tutorials/min-web-api?view=aspnetcore-9.0&tabs=visual-studio" />
+    builder.Services.AddDbContext<TodoDb>(opt =>
+        {
+            opt.UseInMemoryDatabase("TodoList");
+        });
+
+    // This AuthDb approach is build along Youtube video: https://www.youtube.com/watch?v=V-S5JZJUvvU
+    builder.Services.AddDbContext<AuthDbContext>(options =>
+        {
+            options.UseInMemoryDatabase("AuthDb");
+        });
+
+    builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+    #region Refactored to /Extensions Directory for brevity
+    builder.Services.AddSecurityServices(builder.Configuration);
+    builder.Services.AddAuthServices(builder.Configuration);
+    #endregion
+
     builder.Services.AddIdentityApiEndpoints<IdentityUser>()
         .AddEntityFrameworkStores<AuthDbContext>();
 
-    builder.Services.AddAuthentication(configureOptions =>
-    {
-        configureOptions.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        configureOptions.DefaultChallengeScheme = OAuthDefaults.DisplayName;
-    })
-    .AddCookie()
-    .AddOAuth("Etsy", options =>
-    {
-        var EtsyConfig = builder.Configuration.GetSection("Authentication:Etsy");
-        options.UsePkce = true;
-        options.ClientId = EtsyConfig["ClientId"];
-        options.ClientSecret = EtsyConfig["ClientSecret"];
-        options.CallbackPath = EtsyConfig["CallbackPath"];
-        options.AuthorizationEndpoint = EtsyConfig["Authorization"];
-        options.TokenEndpoint = EtsyConfig["Token"];
-        options.UserInformationEndpoint = EtsyConfig["UserInformation"];
-        options.Events = new OAuthEvents
-        {
-            OnRemoteFailure = context =>
-            {
-                context.Response.Redirect("/Home/Error?message=" + context.Failure.Message);
-                context.HandleResponse();
-                return Task.CompletedTask;
-            }
 
-        };
-        var scopeString = EtsyConfig["Scope"];
-        if (!string.IsNullOrWhiteSpace(scopeString))
-        {
-            foreach (var scope in scopeString.Split(' ', StringSplitOptions.RemoveEmptyEntries))
-            {
-                options.Scope.Add(scope);
-            }
-        }
-        options.SaveTokens = true;
-        options.Validate();
-        // Optional: Map user claims etc.
-    });
-    //builder.Services.AddIdentityCore<User>()
-    //    .AddEntityFrameworkStores<AuthDbContext>()
-    //    .AddApiEndpoints();
-#endif
+    builder.Services.AddIdentityCore<User>()
+        .AddEntityFrameworkStores<AuthDbContext>()
+        .AddApiEndpoints();
 
     var app = builder.Build();
-    
-    app.MapIdentityApi<IdentityUser>();
+
+    // Would be genious to be able to use a error page without the need of Razor pages.
+    // But I don't know how to do this with Uno Platform as there is no Server Project Documentation available
+    // that could be used as Reference, only the ASP.NET Core documentation, which tells you to use Razor pages or MVC Controllers.
+    //if(app.Environment.IsDevelopment())
+    //{
+    //    app.UseExceptionHandler("/Error");
+    //}
+
+    app.UseHttpsRedirection();
+
+    app.UseSecurityServices(); // Register the security services, like CORS, Antiforgery, etc.
+    app.UseAuthServices(); // Register the authentication services, like Cookie Authentication, OAuth, etc.
+
+    app.UseUnoFrameworkFiles(); // Mysterious Uno function, no one tells you what it does,
+                                // but it is required to maybe serve/host the WebAssembly Target in Uno Platform applications.
+    app.UseStaticFiles();
+    app.UseSerilogRequestLogging(); // Recommendation from Serilog.AspNetCore to log HTTP requests
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
@@ -122,18 +103,16 @@ try
                     .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
                     .WithLayout(ScalarLayout.Modern)
                     .WithDocumentDownloadType(DocumentDownloadType.Both);
-            
         });
     }
 
-    app.UseHttpsRedirection();
-    // app.UseUnoFrameworkFiles();
-    app.UseStaticFiles();
-    app.UseSerilogRequestLogging(); // Recommendation from Serilog.AspNetCore to log HTTP requests
-
+    // This **Should** map the Identity API endpoints for IdentityUser,
+    // but does **NOT** publish any endpoints looking at the Endoint Explorer
+    // I think this is the reason why the login of the client application does not work.
+    app.MapIdentityApi<IdentityUser>(); 
     app.MapFallbackToFile("index.html");
-
-    //app.MapWeatherApi();
+    app.MapWeatherApi();
+    app.MapTodoItemApi(); // Map the TodoItem API endpoints generated via the Minimal-API Tutorial
 
     await app.RunAsync();
 }

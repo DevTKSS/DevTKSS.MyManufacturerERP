@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
 namespace DevTKSS.MyManufacturerERP.Server.Database;
 
 public class AuthDbContext : IdentityDbContext<User>

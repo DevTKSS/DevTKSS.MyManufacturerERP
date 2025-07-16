@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace DevTKSS.MyManufacturerERP.Server.Extensions;
 
 public static class MigrationExtensions
@@ -10,7 +8,7 @@ public static class MigrationExtensions
         var services = scope.ServiceProvider;
         try
         {
-            var context = services.GetRequiredService<ApplicationDbContext>();
+            var context = services.GetRequiredService<AuthDbContext>();
             context.Database.Migrate();
         }
         catch (Exception ex)
