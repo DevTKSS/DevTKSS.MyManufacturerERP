@@ -83,7 +83,12 @@ public partial class App : Application
                 .UseLocalization()
                 // Register Json serializers (ISerializer and ISerializer)
                 .UseSerialization((context, services) => services
-                    .AddContentSerializer(context))
+                    // Adding String TypeInfo <see href="https://github.com/unoplatform/uno/issues/20546"/>
+                    .AddContentSerializer(context)
+                    .AddJsonTypeInfo(WeatherForecastContext.Default.String)
+                    .AddJsonTypeInfo(WeatherForecastContext.Default.IImmutableListWeatherForecast)
+                    .AddJsonTypeInfo(TodoItemContext.Default.String)
+                    .AddJsonTypeInfo(TodoItemContext.Default.IImmutableListTodoItem))
                 .UseHttp((context, services) =>
                 {
 #if DEBUG
