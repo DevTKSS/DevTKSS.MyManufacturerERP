@@ -1,4 +1,4 @@
-﻿<Page x:Class="DevTKSS.MyManufacturerERP.Presentation.LoginPage"
+<Page x:Class="DevTKSS.MyManufacturerERP.Presentation.LoginPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:local="using:DevTKSS.MyManufacturerERP.Presentation"
@@ -10,7 +10,7 @@
       mc:Ignorable="d"
       NavigationCacheMode="Required"
       Background="{ThemeResource BackgroundBrush}">
-
+  <!--BUG: targeting WASM the `utu` Namespace is not recognized. See issue: https://github.com/unoplatform/uno/issues/19871 for more details -->
   <Grid utu:SafeArea.Insets="VisibleBounds">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />

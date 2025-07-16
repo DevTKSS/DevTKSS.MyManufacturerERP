@@ -4,7 +4,6 @@
 
     <OutputType>Exe</OutputType>
     <UnoSingleProject>true</UnoSingleProject>
-
     <!-- Display name -->
     <ApplicationTitle>DevTKSS.MyManufacturerERP</ApplicationTitle>
     <!-- App Identifier -->
