@@ -41,7 +41,7 @@ If you have ideas, suggestions, or improvements, please feel free to open an iss
 ## Knowledge Base and Known Current Issues
 
 The solution is currently in an early stage of development and is missing proper server integration.
-Find a detailed list of known issues, but also a comprehensive knowledge base on the [Additional Resources](./AdditionalResources.md) page.]
+Find a detailed list of known issues, but also a comprehensive knowledge base on the [Additional Resources](./Additional-References-Readme.md).
 
 ## License
 
