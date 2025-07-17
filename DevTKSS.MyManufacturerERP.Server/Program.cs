@@ -39,7 +39,9 @@ try
                 options.LowercaseUrls = true);
 
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-    builder.Services.AddOpenApi();
+    builder.Services.AddOpenApi(options =>
+        options.AddScalarTransformers()
+    );
 
 
     
@@ -63,13 +65,8 @@ try
     builder.Services.AddAuthServices(builder.Configuration);
     #endregion
 
-    builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+    builder.Services.AddIdentityApiEndpoints<User>()
         .AddEntityFrameworkStores<AuthDbContext>();
-
-
-    builder.Services.AddIdentityCore<User>()
-        .AddEntityFrameworkStores<AuthDbContext>()
-        .AddApiEndpoints();
 
     var app = builder.Build();
 
@@ -90,6 +87,7 @@ try
                                 // but it is required to maybe serve/host the WebAssembly Target in Uno Platform applications.
     app.UseStaticFiles();
     app.UseSerilogRequestLogging(); // Recommendation from Serilog.AspNetCore to log HTTP requests
+    app.UseWelcomePage("/Home"); // This is a simple welcome page that shows the application is running
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
@@ -109,8 +107,12 @@ try
     // This **Should** map the Identity API endpoints for IdentityUser,
     // but does **NOT** publish any endpoints looking at the Endoint Explorer
     // I think this is the reason why the login of the client application does not work.
-    app.MapIdentityApi<IdentityUser>(); 
+    app.MapIdentityApi<User>()
+        .WithGroupName("Identity")
+        .WithOpenApi(); 
+
     app.MapFallbackToFile("index.html");
+    app.MapFallback(() => "/scalar/v1"); // Fallback to the Scalar API Reference
     app.MapWeatherApi();
     app.MapTodoItemApi(); // Map the TodoItem API endpoints generated via the Minimal-API Tutorial
 

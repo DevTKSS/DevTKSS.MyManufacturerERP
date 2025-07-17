@@ -25,29 +25,29 @@ public static class SecurityServiceExtensions
 
             string[] Methods = [
                 HttpMethods.Get,
-            HttpMethods.Post,
-            HttpMethods.Put,
-            HttpMethods.Delete,
-            HttpMethods.Patch
+                HttpMethods.Post,
+                HttpMethods.Put,
+                HttpMethods.Delete,
+                HttpMethods.Patch
             ];
             string[] Headers = [
                 HeaderNames.ContentType,
-            HeaderNames.Cookie, // Adding Cookie header to allow cookies in CORS requests, as I want to use Cookie Authentication
-            HeaderNames.Authorization,
-            // Adding headers referring to MDN Docs
-            // <see href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS" />
-            // to avoid problems with browsers like Safari or Nightly
-            HeaderNames.ContentLanguage,
-            HeaderNames.AcceptLanguage,
-            HeaderNames.AcceptEncoding,
-            // Adding Preflight request headers from samples
-            // <see href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#preflighted_requests"/>
-            HeaderNames.Origin,
-            HeaderNames.UserAgent,
-            HeaderNames.AccessControlRequestHeaders,
-            HeaderNames.AccessControlRequestMethod,
-            HeaderNames.Host
-                ];
+                HeaderNames.Cookie, // Adding Cookie header to allow cookies in CORS requests, as I want to use Cookie Authentication
+                HeaderNames.Authorization,
+                // Adding headers referring to MDN Docs
+                // <see href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS" />
+                // to avoid problems with browsers like Safari or Nightly
+                HeaderNames.ContentLanguage,
+                HeaderNames.AcceptLanguage,
+                HeaderNames.AcceptEncoding,
+                // Adding Preflight request headers from samples
+                // <see href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#preflighted_requests"/>
+                HeaderNames.Origin,
+                HeaderNames.UserAgent,
+                HeaderNames.AccessControlRequestHeaders,
+                HeaderNames.AccessControlRequestMethod,
+                HeaderNames.Host
+            ];
 
 
             options.AddPolicy("MyCorsPolicy", policy =>

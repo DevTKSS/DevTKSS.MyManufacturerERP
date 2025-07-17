@@ -67,7 +67,6 @@ public static class AuthServiceExtensions
     }
     public static IApplicationBuilder UseAuthServices(this IApplicationBuilder app)
     {
-
         // Use authentication middleware
         app.UseAuthentication();
         // Use authorization middleware
