@@ -1,5 +1,7 @@
 # DevTKSS.MyManufacturerERP.Server
 
+This document contains additional references and known issues related to the DevTKSS.MyManufacturerERP project, particularly focusing on the Uno Platform and its integration with ASP.NET Core Identity.
+
 ## Table of Contents
 
 1. [Issues](#issues)
