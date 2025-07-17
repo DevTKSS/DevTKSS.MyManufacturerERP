@@ -36,6 +36,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External OpenApi Specs", "E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.xUnitTests", "DevTKSS.MyManufacturerERP.xUnitTests\DevTKSS.MyManufacturerERP.xUnitTests.csproj", "{35EA0FE2-8D8E-E033-E169-C6639CB2BB3C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.Server.WebApi", "DevTKSS.MyManufacturerERP.Server.WebApi\DevTKSS.MyManufacturerERP.Server.WebApi.csproj", "{511D78C2-8DC1-62C0-7DF5-55F9865C793A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -76,6 +78,10 @@ Global
 		{35EA0FE2-8D8E-E033-E169-C6639CB2BB3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{35EA0FE2-8D8E-E033-E169-C6639CB2BB3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{35EA0FE2-8D8E-E033-E169-C6639CB2BB3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{511D78C2-8DC1-62C0-7DF5-55F9865C793A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{511D78C2-8DC1-62C0-7DF5-55F9865C793A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{511D78C2-8DC1-62C0-7DF5-55F9865C793A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{511D78C2-8DC1-62C0-7DF5-55F9865C793A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
