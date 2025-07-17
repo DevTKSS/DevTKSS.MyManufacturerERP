@@ -40,6 +40,7 @@ This document contains additional references and known issues related to the Dev
 
 ### Authentication & Server Issues
 
+- Splashscreen not disapears targeting WASM, while targeting Desktop the Login button does only open a browser with no connection to the server
 - Server startup problems when clicking "Login" button in client application
 - Port configuration conflicts between WebAssembly and Server targets
 - Missing Identity API endpoints in Endpoint Explorer
