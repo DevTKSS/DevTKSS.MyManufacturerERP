@@ -1,0 +1,11 @@
+{
+    "$schema": "https://raw.githubusercontent.com/DavidAnson/markdownlint/v0.38.0/schema/markdownlint-config-schema.json",
+    "line-length": false,
+    "no-emphasis-as-heading": false,
+    "no-inline-html": false,
+    "first-line-heading": false,
+    "default": true,
+    "commands-show-output": false,
+    "heading-start-left": false,
+    "link-fragments": false
+}

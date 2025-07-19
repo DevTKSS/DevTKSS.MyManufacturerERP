@@ -1,54 +1,106 @@
-# DevTKSS.MyManufacturerERP.Server
+# Connecting Client and Server Projects
 
-This document contains additional references and known issues related to the DevTKSS.MyManufacturerERP project, particularly focusing on the Uno Platform and its integration with ASP.NET Core Identity.
+## Setting up `launchSettings.json` for Uno Platform Projects
 
-## Table of Contents
+When working with Uno Platform projects, especially those targeting WebAssembly and ASP.NET Core, you may encounter issues related to the `launchSettings.json` configuration. This document outlines common problems and their solutions or at least some notes you might should notice on the way to get to a Solution.
 
-1. [Issues](#issues)
-   - 1.1 [Workarounds](#workarounds)
-   - 1.2 [Uno Platform Documentation Problems](#uno-platform-documentation-problems)
-   - 1.3 [Authentication & Server Issues](#authentication--server-issues)
-2. [Useful References](#useful-references)
-3. [Documentation & Learning References](#documentation--learning-references)
-4. [API Documentation & Services](#api-documentation--services)
-5. [CORS & WebAssembly](#cors--webassembly)
+- Server might not have been started when clicking "Login" button in client application (desktop target)
+  -> As workaround, we are required to start the server with one of those options:
 
----
+    1. manually from command line with `dotnet run`
+    1. use Visual Studio Build order
+    1. Aspire/Docker Compose Orchestration (Aspire maybe only for WebAssembly target)
 
-## Issues
+### Port configuration conflicts between WebAssembly and Server targets
 
-### Workarounds
+To avoid this issue, it's important, to make sure the ports of our WebAssembly Project are not "trying" to listen on the same Ports as our ASP.NET Core aka "Server" Project does.
 
-- [Uno Platform GitHub Issue #20546](https://github.com/unoplatform/uno/issues/20546) - String TypeInfo serialization
+By default, the `launchSettings.json` file in a templated Uno App with WebAssembly / `net9.0-browserwasm` target, does come with these settings:
 
-### Uno Platform Documentation Problems
+```json
+{
+"iisSettings": {
+  "windowsAuthentication": false,
+  "anonymousAuthentication": true,
+  "iisExpress": {
+    "applicationUrl": "http://localhost:8080",
+    "sslPort": 0
+  }
+},
+"profiles": {
+  // This profile is first in order for dotnet run to pick it up by default
+  "UnoApp1 (WebAssembly)": {
+    "commandName": "Project",
+    "dotnetRunMessages": true,
+    "launchBrowser": true,
+    "applicationUrl": "http://localhost:5000",
+    "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
+    "environmentVariables": {
+      "ASPNETCORE_ENVIRONMENT": "Development"
+    }
+  },
+  "UnoApp1 (WebAssembly IIS Express)": {
+    "commandName": "IISExpress",
+    "launchBrowser": true,
+    "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
+    "environmentVariables": {
+      "ASPNETCORE_ENVIRONMENT": "Development"
+    }
+  },
+// code of eventual other target platforms obmitted for brevity
+```
 
-- [Uno Platform Post-Login Token Processing](https://platform.uno/docs/articles/external/uno.extensions/doc/Learn/Authentication/HowTo-WebAuthentication.html#4-process-post-login-tokens) - Process post-login tokens
-  while the docs are introducing us to do this for web auth, [this is not working as documented](./DevTKSS.MyManufacturerERP/App.xaml.cs#L116)
+So if you may notice, we are serving our Application at the `http` port with the number `5000` or if we are working with the `ISS` launch profile, this will be the `http` port `8080`.
 
-  ```bash
-  CS1593
-  Delegate "AsyncFunc<IDictionary<string, string>, IDictionary<string, string>?>" does not accept 3 arguments.
-  DevTKSS.MyManufacturerERP (net9.0-browserwasm)
-  C:\Users\Sonja\source\sample apps\DevTKSS.MyManufacturerERP\DevTKSS.MyManufacturerERP\App.xaml.cs 116
-  ```
-  ![Screenshot of IDE Type info for parameters](./Images/IDE-Login-Typeinfo-screenshot.png)]
+Now, we comparing to the `launchSettings.json` file of our ASP.NET Core Server Project, we will find the following settings:
 
-- [Uno Platform Cookie Authentication](https://platform.uno/docs/articles/external/uno.extensions/doc/Learn/Authentication/HowTo-Cookies.html) - Configure cookie options
+```json
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:5001",
+      "sslPort": 5002
+    }
+  },
+  "profiles": {
+    "UnoApp1.Server": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "",
+      "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
+      "applicationUrl": "http://localhost:5001;https://localhost:5002",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "launchUrl": "",
+      "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
+```
 
-  This is missing kind of all docs about working with cookies. The provided links are not very helpfull for learning only if you might not know the words, but still you will not know how to use that in development.
+Notice here, that the Ports are `5001` for `http` and `5002` for `https`. This means, that if we are running our Uno Platform WebAssembly Project, they are not listening on the same ports as our ASP.NET Core Server Project does. So, we are safe here.
 
-### Authentication & Server Issues
+But still, now lets say nowerdays, we need to integrate https with [Cross-Side Request Forgery (CSRF)](https://learn.microsoft.com/en-us/aspnet/core/security/anti-request-forgery?view=aspnetcore-9.0) protection, which is required by the Etsy API, for example. This means, that we need to run our Uno Platform WebAssembly Project with `https` enabled. As you can see, this is not so far the case in our `launchSettings.json` file, so we need to add the `https` port to our Uno Platform WebAssembly Project.
 
-- Splashscreen not disapears targeting WASM, while targeting Desktop the Login button does only open a browser with no connection to the server
-- Server startup problems when clicking "Login" button in client application
-- Port configuration conflicts between WebAssembly and Server targets
-- Missing Identity API endpoints in Endpoint Explorer
-- Delegate signature mismatch in Uno Platform authentication [CS1593 error](#uno-platform-documentation-problems)
-  -> Commented out now until some fix is known
-- Web Socket Error in ws_wasm_create:
+Problem with this is, no-one is telling us, how to do this, so we need to figure it out by ourselves, while missing any documentation about this.
 
-  ```
+### Issues may occur when setting the ports up conflicting
+
+- Web Socket Error in ws_wasm_create most likely caused by not proper launchsettings.json configuration and both projects are trying to use the same port:
+
+  ```plaintext
   Verbose logs are written to:
   C:\Users\Sonja\AppData\Local\Temp\visualstudio-js-debugger.txt
   Das Programm "service-worker.js" wurde mit Code 4294967295 (0xffffffff) beendet.
@@ -225,27 +277,4 @@ This document contains additional references and known issues related to the Dev
     at <anonymous> (c:\Users\Sonja\source\sample apps\DevTKSS.MyManufacturerERP\DevTKSS.MyManufacturerERP\_framework\https:\raw.githubusercontent.com\dotnet\runtime\3c298d9f00936d651cc47d221762474e25277672\src\mono\browser\runtime\startup.ts:351:15)
   ```
 
-## Useful References
-
-- [Browser Link](https://learn.microsoft.com/en-us/aspnet/core/client-side/using-browserlink?view=aspnetcore-9.0)
-- [Debugging ASP.NET Core Launch Settings incl. Ports](https://learn.microsoft.com/en-us/visualstudio/debugger/how-to-enable-debugging-for-aspnet-applications?view=vs-2022#debug-aspnet-core-apps)
-- [Fundamentals of ASP.NET environment specific settings](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/environments?view=aspnetcore-9.0)
-
-## Documentation & Learning References
-
-- [ASP.NET Core Cookie Authentication Guide](https://learn.microsoft.com/de-de/aspnet/core/security/authentication/cookie?view=aspnetcore-9.0) - Cookie authentication implementation
-- [ASP.NET Core Policy Schemes Documentation](https://learn.microsoft.com/de-de/aspnet/core/security/authentication/policyschemes?view=aspnetcore-9.0) - Authentication forwarding configuration
-- [ASP.NET Core Minimal Web API Tutorial](https://learn.microsoft.com/de-de/aspnet/core/tutorials/min-web-api?view=aspnetcore-9.0&tabs=visual-studio) - TodoList example implementation
-- [Uno Platform Web Authentication Guide](https://platform.uno/docs/articles/external/uno.extensions/doc/Learn/Authentication/HowTo-WebAuthentication.html#3-configure-the-provider) - Web authentication provider configuration
-
-## API Documentation & Services
-
-- [Etsy OAuth Token Requests](https://developers.etsy.com/documentation/essentials/authentication#requesting-an-oauth-token) - CSRF protection requirements
-- [SevDesk API Authentication Reference](https://api.sevdesk.de/#section/Authentication-and-Authorization) - Token-based authentication
-
-## CORS & WebAssembly
-
-- [MDN CORS Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS) - Cross-origin resource sharing
-- [MDN CORS Preflight Requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#preflighted_requests) - Preflight request headers
-- [WebAssembly Multi-threading Features](https://github.com/dotnet/runtime/blob/main/src/mono/wasm/features.md#multi-threading) - WASM threading support
-- [Substack CORS Configuration Reference](https://substack.com/home/post/p-164745710) - CORS policy setup
+To resolve the Web Socket Error in `ws_wasm_create`, you need to ensure that your `launchsettings.json` configuration is set up correctly, particularly regarding the ports used by your projects.

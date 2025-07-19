@@ -1,0 +1,16 @@
+{
+    "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+    "language": "en;de",
+    "version": "0.2",
+    "dictionaries": [
+        "companies",
+        "softwareTerms",
+        "csharp"
+    ],
+    "words": [
+        "DevTKSS",
+        "TKSS",
+        "MyManufacturerERP",
+        "unoapp"
+    ]
+}

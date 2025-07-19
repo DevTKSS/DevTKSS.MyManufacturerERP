@@ -46,7 +46,6 @@
 
  <ItemGroup>
    <PackageReference Include="Microsoft.Kiota.Bundle" />
-   <PackageReference Include="Dotenv.Net" />
  </ItemGroup>
     
   <ItemGroup>

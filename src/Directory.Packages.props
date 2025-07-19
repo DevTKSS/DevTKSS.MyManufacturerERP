@@ -11,8 +11,7 @@
     <PackageVersion Include="Microsoft.Kiota.Abstractions" Version="1.19.0" />
     <PackageVersion Include="Dotenv.Net" Version="4.0.0" />
   </ItemGroup>
-  <ItemGroup Label="OpenApi">
-  </ItemGroup>
+  
   <ItemGroup Label="Serilog">
     <PackageVersion Include="Serilog.Expressions" Version="5.0.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
@@ -28,6 +27,7 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.7" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.7" />
   </ItemGroup>
+
   <ItemGroup Label="OpenApi Packages">
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
     <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="9.0.7">

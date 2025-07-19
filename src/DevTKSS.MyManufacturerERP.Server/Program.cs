@@ -70,7 +70,7 @@ try
 
     var app = builder.Build();
 
-    // Would be genious to be able to use a error page without the need of Razor pages.
+    // Would be genius to be able to use a error page without the need of Razor pages.
     // But I don't know how to do this with Uno Platform as there is no Server Project Documentation available
     // that could be used as Reference, only the ASP.NET Core documentation, which tells you to use Razor pages or MVC Controllers.
     //if(app.Environment.IsDevelopment())

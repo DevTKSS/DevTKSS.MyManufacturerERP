@@ -4,7 +4,7 @@ This repository is under development and is not yet ready for production use. It
 
 ## The MyManufacturerERP solution
 
-MyManufacturerERP is a comprehensive ERP solution designed for highly scalable manufacturing business needcases. It provides tools for managing production, inventory, sales, and financials, all in one app, but on all platforms.
+MyManufacturerERP is a comprehensive ERP solution designed for highly scalable manufacturing business need cases. It provides tools for managing production, inventory, sales, and accounting, all in one app, but on all platforms.
 
 The initial target is to create this solution for my own manufacturing business, but it could get also a solution that can be used by other manufacturers as well.
 
@@ -38,10 +38,20 @@ We welcome contributions to the MyManufacturerERP solution!
 
 If you have ideas, suggestions, or improvements, please feel free to open an issue or submit a pull request!
 
-## Knowledge Base and Known Current Issues
+## Knowledge Base and Resources
+
+While developing this, I collected a knowledge base of resources, articles and documentation that helped me to understand the concepts and technologies used in this solution up to the state I am now.
+
+You can find this knowledge base here:
+
+- [Additional References](./docs/Additional-References-Readme.md)
+- [Connecting client and server projects](./docs/connecting-client-and-server-projects.md)
+
+## Known Current Issues
 
 The solution is currently in an early stage of development and is missing proper server integration.
-Find a detailed list of known issues, but also a comprehensive knowledge base on the [Additional Resources](./Additional-References-Readme.md).
+
+If you may want to contribute, you can find a list of known issues in the [List of Issues](./List-of-issues-with-details.md) file.
 
 ## License
 
