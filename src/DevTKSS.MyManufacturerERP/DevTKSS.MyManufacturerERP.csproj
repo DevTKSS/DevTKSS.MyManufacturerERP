@@ -12,7 +12,7 @@
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <ApplicationVersion>1</ApplicationVersion>
     <!-- Package Publisher -->
-    <ApplicationPublisher>Sonja</ApplicationPublisher>
+    <ApplicationPublisher>TKSS Development</ApplicationPublisher>
     <!-- Package Description -->
     <Description>DevTKSS.MyManufacturerERP powered by Uno Platform.</Description>
 

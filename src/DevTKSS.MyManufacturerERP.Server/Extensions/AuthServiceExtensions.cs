@@ -20,7 +20,7 @@ public static class AuthServiceExtensions
         .AddOAuth("Etsy", options =>
         {
             var etsyConfig = configuration.GetSection("Authentication")
-                                                                    .GetSection("Etsy");
+                                                            .GetSection("Etsy");
 
             options.ClientId = etsyConfig.GetValue<string>("ClientId") ?? throw new ArgumentNullException(nameof(options.ClientId));
             options.ClientSecret = etsyConfig.GetValue<string>("ClientSecret") ?? throw new ArgumentNullException(nameof(options.ClientSecret));
@@ -34,9 +34,11 @@ public static class AuthServiceExtensions
             options.Events = new OAuthEvents
             {
                 OnRemoteFailure = context =>
-                {
-                    context.Response.Redirect("/Home/Error?message=" + context.Failure?.Message);
-                    context.HandleResponse();
+                { 
+                    // This should somehow fit a route, but unable to connect any ui with an endpoint so far
+                   // context.Response.Redirect("/Home/Error?message=" + context.Failure?.Message);
+                   // context.HandleResponse();
+                   
                     return Task.CompletedTask;
                 },
                 OnCreatingTicket = context =>

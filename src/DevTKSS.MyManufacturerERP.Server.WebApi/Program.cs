@@ -2,10 +2,6 @@
 // logger configured in `AddSerilog()` below, once configuration and dependency-injection have both been
 // set up successfully.
 
-using System.Net;
-
-using Microsoft.AspNetCore.DataProtection;
-
 Log.Logger = new LoggerConfiguration()
       .WriteTo.Console()
       .CreateBootstrapLogger();
@@ -62,41 +58,42 @@ try
     builder.Services.AddAntiforgery();
 
     builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-        .AddOAuth("Etsy", options =>
-        {
-            var etsyConfig = builder.Configuration
-                                    .GetSection("Authentication")
-                                    .GetSection("Etsy");
-            options.ClientId = etsyConfig["ClientId"] ?? throw new ArgumentNullException(nameof(options.ClientId));
-            options.ClientSecret = etsyConfig["ClientSecret"] ?? throw new ArgumentNullException(nameof(options.ClientSecret));
-            options.CallbackPath = new PathString(etsyConfig.GetValue<PathString>("CallbackPath","/etsy-auth-callback"));
-            options.AuthorizationEndpoint = etsyConfig.GetValue("AuthorizationEndpoint", "https://www.etsy.com/oauth/connect");
-            options.TokenEndpoint = etsyConfig.GetValue("TokenEndpoint", "https://api.etsy.com/v3/public/oauth/token");
-            options.UserInformationEndpoint = etsyConfig.GetValue("UserInformationEndpoint", "https://api.etsy.com/v3/application/users/me");
-            options.UsePkce = etsyConfig.GetValue("UsePkce", true);
+        //.AddOAuth("Etsy", options =>
+        //{
+        //    var etsyConfig = builder.Configuration
+        //                          .GetSection("Authentication")
+        //                          .GetSection("Etsy");
 
-            options.Events = new OAuthEvents
-            {
-                OnRemoteFailure = context =>
-                {
-                    context.Response.Redirect("/Home/Error?message=" + context.Failure?.Message);
-                    context.HandleResponse();
-                    return Task.CompletedTask;
-                }
+        //    options.ClientId = etsyConfig["ClientId"] ?? throw new ArgumentNullException(nameof(options.ClientId));
+        //    options.ClientSecret = etsyConfig["ClientSecret"] ?? throw new ArgumentNullException(nameof(options.ClientSecret));
+        //    options.CallbackPath = new PathString(etsyConfig.GetValue<PathString>("CallbackPath","/etsy-auth-callback"));
+        //    options.AuthorizationEndpoint = etsyConfig.GetValue("AuthorizationEndpoint", "https://www.etsy.com/oauth/connect");
+        //    options.TokenEndpoint = etsyConfig.GetValue("TokenEndpoint", "https://api.etsy.com/v3/public/oauth/token");
+        //    options.UserInformationEndpoint = etsyConfig.GetValue("UserInformationEndpoint", "https://api.etsy.com/v3/application/users/me");
+        //    options.UsePkce = etsyConfig.GetValue("UsePkce", true);
 
-            };
+            //options.Events = new OAuthEvents
+            //{
+            //    OnRemoteFailure = context =>
+            //    {
+            //        context.Response.Redirect("/Home/Error?message=" + context.Failure?.Message);
+            //        context.HandleResponse();
+            //        return Task.CompletedTask;
+            //    }
 
-            var scopes = etsyConfig.GetValue("Scope", string.Empty)
-                                       .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            //};
 
-            foreach (var scope in scopes)
-            {
-                options.Scope.Add(scope);
-            }
+        //    var scopes = etsyConfig.GetValue("Scope", string.Empty)
+        //                               .Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-            options.SaveTokens = true;
-            options.Validate();
-        });
+        //    foreach (var scope in scopes)
+        //    {
+        //        options.Scope.Add(scope);
+        //    }
+
+        //    options.SaveTokens = true;
+        //    options.Validate();
+        //});
     builder.Services.AddAuthorization();
 
     #endregion
@@ -106,12 +103,15 @@ try
 
     app.UseHttpsRedirection();
     app.UseSerilogRequestLogging();
-    app.UseStaticFiles();
-    app.UseAntiforgery();
+    // app.UseAntiforgery();
     app.UseAuthentication();
     app.UseAuthorization();
 
-    app.MapFallback(() => "/scalar/v1");
+    app.Map("/api", (HttpContext context) => context.Response.Redirect("/scalar/v1"))
+        .WithName("ApiReference")
+        .WithDisplayName("Api Reference")
+        .WithDescription("Redirects to the Scalar API Reference documentation.");
+
     app.MapTodoItemApi();
 
 

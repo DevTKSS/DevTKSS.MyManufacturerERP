@@ -1,9 +1,5 @@
 using Uno.Resizetizer;
-// using dotenv.net;
-using Microsoft.Kiota.Abstractions.Extensions;
-using Microsoft.Extensions.Configuration;
 using Serilog;
-using Windows.Security.Authentication.Web;
 namespace DevTKSS.MyManufacturerERP;
 public partial class App : Application
 {

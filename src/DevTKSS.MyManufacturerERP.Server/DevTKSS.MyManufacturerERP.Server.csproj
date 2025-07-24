@@ -4,6 +4,7 @@
       <Description>This Project is gotten from Uno.Templates with opting in to Server project to be added and is currently trying to reach any usable state for Serverside Authorization and Authentication</Description>
     <TargetFramework>net9.0</TargetFramework>
     <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
+    <OpenApiDocumentsDirectory>.</OpenApiDocumentsDirectory>
     <UserSecretsId>73d0e72f-3b9d-4ea9-bc0e-ca05efc5cd26</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   
@@ -22,13 +23,13 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <!--<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />-->
   </ItemGroup>
 
 
-    <ItemGroup Label="Docker">
+    <!--<ItemGroup Label="Docker">
         <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
-    </ItemGroup>
+    </ItemGroup>-->
   <ItemGroup Label="Serilog">
      <PackageReference Include="Serilog.AspNetCore" />
      <PackageReference Include="Serilog.Expressions" />

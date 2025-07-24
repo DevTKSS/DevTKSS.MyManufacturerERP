@@ -5,7 +5,6 @@ global using DevTKSS.MyManufacturerERP.Server.Apis;
 global using DevTKSS.MyManufacturerERP.Server.Database;
 global using Microsoft.AspNetCore.Authentication.Cookies;
 global using Microsoft.AspNetCore.Authentication.OAuth;
-global using Microsoft.AspNetCore.Cors.Infrastructure;
 global using Microsoft.AspNetCore.Http.HttpResults;
 global using Microsoft.AspNetCore.Http.Json;
 global using Microsoft.AspNetCore.Identity;

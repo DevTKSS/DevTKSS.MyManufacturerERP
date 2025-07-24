@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Routing.Patterns;
+
 namespace DevTKSS.MyManufacturerERP.Server.Apis;
 
 internal static class WeatherForecastApi
@@ -18,24 +20,13 @@ internal static class WeatherForecastApi
         var weatherGroup = app.MapGroup("/api/weather")
             .WithTags(Tag)
             .WithOpenApi()
-            .WithDescription("Weather forecasting endpoints for demonstration purposes");
+            .WithDescription("Weather forecasting endpoints");
 
         weatherGroup.MapGet("/forecast", GetForecast)
             .WithName("GetWeatherForecast")
             .WithSummary("Gets a 5-day weather forecast")
-            .WithDescription("Creates a make believe weather forecast for the next 5 days with random temperature and weather conditions.")
-            .Produces<WeatherForecast[]>(StatusCodes.Status200OK, "application/json")
-            .ProducesValidationProblem()
-            .ProducesProblem(StatusCodes.Status500InternalServerError)
-            .WithOpenApi(operation => new(operation)
-            {
-                Summary = "5-Day Weather Forecast",
-                Description = "Returns a fake weather forecast for the next 5 days. This is a demonstration endpoint showcasing Minimal API integration with Scalar documentation.",
-                Tags = new List<Microsoft.OpenApi.Models.OpenApiTag>
-                {
-                    new() { Name = Tag, Description = "Weather related operations" }
-                }
-            });
+            .WithOpenApi()
+            .AllowAnonymous();
 
         return app;
     }
@@ -56,10 +47,10 @@ internal static class WeatherForecastApi
     ///   }
     /// ]
     /// </example>
-    private static Ok<WeatherForecast[]> GetForecast(ILogger logger)
+    private static async Task<Ok<WeatherForecast[]>> GetForecast(ILogger logger)
     {
         logger.Debug("Getting Weather Forecast for Scalar documentation demonstration.");
-
+        await Task.Delay(TimeSpan.FromSeconds(2)); // Simulate some delay for demonstration purposes
         var forecasts = Enumerable.Range(1, 5).Select(index =>
         {
             var forecast = new WeatherForecast(

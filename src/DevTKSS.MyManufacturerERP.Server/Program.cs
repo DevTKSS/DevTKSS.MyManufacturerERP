@@ -27,11 +27,10 @@ try
             ))
          );
 
-    //// Add services to the container.
+    // Add services to the container.
     builder.Services.Configure<JsonOptions>(options =>
                 // Configure the JsonSerializerOptions to use the generated WeatherForecastContext
                 options.SerializerOptions.TypeInfoResolver = JsonTypeInfoResolver.Combine(
-                WeatherForecastContext.Default,
                 TodoItemContext.Default));
 
     builder.Services.Configure<RouteOptions>(options =>
@@ -40,11 +39,29 @@ try
 
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     builder.Services.AddOpenApi(options =>
-        options.AddScalarTransformers()
-    );
+    {
+        options.AddDocumentTransformer((document,_,_) =>
+        {
+            // This is a workaround to remove the "v1" prefix from the OpenAPI document title
+            // as it is not needed in this application.
+            document.Info = new Microsoft.OpenApi.Models.OpenApiInfo
+            {
+                Title = "MyManufacturerERP API",
+                Version = "v1",
+                Description = "This is the API for MyManufacturerERP, a sample application demonstrating ASP.NET Core Minimal APIs with Uno Platform.",
+                Contact = new Microsoft.OpenApi.Models.OpenApiContact
+                {
+                    Name = "DevTKSS",
+                    Email = "info@technische-konstruktion.com",
+                    Url = new Uri("https://www.technische-konstruktion.com")
+                    
+                }
+            };
+            return Task.CompletedTask;
+        });
+        options.AddScalarTransformers();
+    });
 
-
-    
     // Definition from the TodoList example of the Minimal APIs Tutorial
     // <see href="https://learn.microsoft.com/de-de/aspnet/core/tutorials/min-web-api?view=aspnetcore-9.0&tabs=visual-studio" />
     builder.Services.AddDbContext<TodoDb>(opt =>
@@ -87,8 +104,6 @@ try
                                 // but it is required to maybe serve/host the WebAssembly Target in Uno Platform applications.
     app.UseStaticFiles();
     app.UseSerilogRequestLogging(); // Recommendation from Serilog.AspNetCore to log HTTP requests
-    app.UseWelcomePage("/Home"); // This is a simple welcome page that shows the application is running
-
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
     {
@@ -108,12 +123,12 @@ try
     // but does **NOT** publish any endpoints looking at the Endoint Explorer
     // I think this is the reason why the login of the client application does not work.
     app.MapIdentityApi<User>()
-        .WithGroupName("Identity")
+        .WithTags("Identity")
         .WithOpenApi(); 
 
     app.MapFallbackToFile("index.html");
     app.MapFallback(() => "/scalar/v1"); // Fallback to the Scalar API Reference
-    app.MapWeatherApi();
+   
     app.MapTodoItemApi(); // Map the TodoItem API endpoints generated via the Minimal-API Tutorial
 
     await app.RunAsync();
