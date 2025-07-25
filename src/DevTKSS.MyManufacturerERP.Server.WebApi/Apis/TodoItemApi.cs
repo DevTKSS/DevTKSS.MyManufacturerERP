@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-
-namespace DevTKSS.MyManufacturerERP.Server.WebApi.Api;
-
+namespace DevTKSS.MyManufacturerERP.Server.WebApi.Apis;
 public static class TodoItemApi
 {
     public static RouteGroupBuilder MapTodoItemApi(this IEndpointRouteBuilder routes)
@@ -37,7 +34,6 @@ public static class TodoItemApi
 
         group.MapDelete("/{id:int}", DeleteTodoItem)
             .WithName("DeleteTodoItem")
-            .RequireAuthorization(CookieAuthenticationDefaults.AuthenticationScheme)
             .WithSummary("Delete todo item")
             .WithDescription("Delete a todo item by its ID");
 
@@ -59,8 +55,8 @@ public static class TodoItemApi
     private static async Task<Results<Ok<TodoItem>, NotFound>> GetTodoItemById(int id, TodoDb db)
     {
         var item = await db.TodoItems.FindAsync(id);
-        return item is not null 
-            ? TypedResults.Ok(item) 
+        return item is not null
+            ? TypedResults.Ok(item)
             : TypedResults.NotFound();
     }
 
@@ -74,10 +70,18 @@ public static class TodoItemApi
                 ["Name"] = ["Name is required"]
             });
         }
-
+        var existingTodo = await db.TodoItems
+            .AnyAsync(t => t.Name == todo.Name);
+        if (existingTodo)
+        {
+            return TypedResults.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["Name"] = ["A todo item with this name already exists"]
+            });
+        }
         db.TodoItems.Add(todo);
         await db.SaveChangesAsync();
-        
+
         return TypedResults.Created($"/todoitems/{todo.Id}", todo);
     }
 
@@ -100,7 +104,7 @@ public static class TodoItemApi
 
         existingTodo.Name = inputTodo.Name;
         existingTodo.IsComplete = inputTodo.IsComplete;
-        
+
         await db.SaveChangesAsync();
         return TypedResults.NoContent();
     }

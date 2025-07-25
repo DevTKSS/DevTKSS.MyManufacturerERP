@@ -23,9 +23,10 @@ try
                 theme: TemplateTheme.Code
             ))
          );
-    // Add services to the container.
+    //  Add services to the container.
     //builder.Services.Configure<JsonOptions>(options =>
-    //    // Configure the SerializerOptions to use the generated TodoItemContext
+    //     Configure the SerializerOptions to use the generated TodoItemContext
+
     //    options.SerializerOptions.TypeInfoResolver = JsonTypeInfoResolver.Combine(
     //        TodoItemContext.Default));
 
@@ -51,49 +52,55 @@ try
 
     builder.Services.AddDatabaseDeveloperPageExceptionFilter();
     builder.Services.AddIdentityApiEndpoints<User>()
-                    .AddEntityFrameworkStores<AuthDbContext>();
+        .AddSignInManager()
+        .AddDefaultTokenProviders()
+        .AddRoles<IdentityRole>()
+        .AddUserConfirmation<DefaultUserConfirmation<User>>()
+        .AddUserManager<UserManager<User>>()
+        .AddErrorDescriber<IdentityErrorDescriber>()
+        .AddEntityFrameworkStores<AuthDbContext>();
     #endregion
 
     #region Add Authentication and Authorization Services
     builder.Services.AddAntiforgery();
-
+    builder.Services.AddCors();
     builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-        //.AddOAuth("Etsy", options =>
-        //{
-        //    var etsyConfig = builder.Configuration
-        //                          .GetSection("Authentication")
-        //                          .GetSection("Etsy");
+        .AddCookie()
+        .AddOAuth("Etsy", options =>
+        {
+            var etsyConfig = builder.Configuration
+                                  .GetSection("Authentication")
+                                  .GetSection("Etsy");
 
-        //    options.ClientId = etsyConfig["ClientId"] ?? throw new ArgumentNullException(nameof(options.ClientId));
-        //    options.ClientSecret = etsyConfig["ClientSecret"] ?? throw new ArgumentNullException(nameof(options.ClientSecret));
-        //    options.CallbackPath = new PathString(etsyConfig.GetValue<PathString>("CallbackPath","/etsy-auth-callback"));
-        //    options.AuthorizationEndpoint = etsyConfig.GetValue("AuthorizationEndpoint", "https://www.etsy.com/oauth/connect");
-        //    options.TokenEndpoint = etsyConfig.GetValue("TokenEndpoint", "https://api.etsy.com/v3/public/oauth/token");
-        //    options.UserInformationEndpoint = etsyConfig.GetValue("UserInformationEndpoint", "https://api.etsy.com/v3/application/users/me");
-        //    options.UsePkce = etsyConfig.GetValue("UsePkce", true);
+            options.ClientId = etsyConfig["ClientId"] ?? throw new ArgumentNullException(options.ClientId);
+            options.ClientSecret = etsyConfig["ClientSecret"] ?? throw new ArgumentNullException(options.ClientSecret);
+            options.CallbackPath = new PathString(etsyConfig.GetValue<string>("CallbackPath", "/etsy-auth-callback"));
+            options.AuthorizationEndpoint = etsyConfig.GetValue<string>("AuthorizationEndpoint", "https://www.etsy.com/oauth/connect");
+            options.TokenEndpoint = etsyConfig.GetValue<string>("TokenEndpoint", "https://api.etsy.com/v3/public/oauth/token");
+            options.UserInformationEndpoint = etsyConfig.GetValue<string>("UserInformationEndpoint", "https://api.etsy.com/v3/application/users/me");
+            options.UsePkce = etsyConfig.GetValue<bool>("usePkce", true);
 
-            //options.Events = new OAuthEvents
-            //{
-            //    OnRemoteFailure = context =>
-            //    {
-            //        context.Response.Redirect("/Home/Error?message=" + context.Failure?.Message);
-            //        context.HandleResponse();
-            //        return Task.CompletedTask;
-            //    }
+            options.Events = new OAuthEvents
+            {
+                OnRemoteFailure = context =>
+                {
+                    context.Response.Redirect("/error?message=" + context.Failure?.Message);
+                    context.HandleResponse();
+                    return Task.CompletedTask;
+                }
+            };
 
-            //};
+            var scopes = (etsyConfig.GetValue("Scope", string.Empty) ?? string.Empty)
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-        //    var scopes = etsyConfig.GetValue("Scope", string.Empty)
-        //                               .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var scope in scopes)
+            {
+                options.Scope.Add(scope);
+            }
 
-        //    foreach (var scope in scopes)
-        //    {
-        //        options.Scope.Add(scope);
-        //    }
-
-        //    options.SaveTokens = true;
-        //    options.Validate();
-        //});
+            options.SaveTokens = true;
+            options.Validate();
+        });
     builder.Services.AddAuthorization();
 
     #endregion
@@ -103,7 +110,9 @@ try
 
     app.UseHttpsRedirection();
     app.UseSerilogRequestLogging();
-    // app.UseAntiforgery();
+    app.UseCors();
+    app.UseCookiePolicy();
+    app.UseAntiforgery();
     app.UseAuthentication();
     app.UseAuthorization();
 
@@ -111,9 +120,6 @@ try
         .WithName("ApiReference")
         .WithDisplayName("Api Reference")
         .WithDescription("Redirects to the Scalar API Reference documentation.");
-
-    app.MapTodoItemApi();
-
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
@@ -127,18 +133,18 @@ try
                 .WithLayout(ScalarLayout.Modern)
                 .WithDarkModeToggle(true)
                 .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
-                .WithDocumentDownloadType(DocumentDownloadType.Json)
-                .WithFavicon("/Assets/styled-logo.ico")
-                .AddMetadata("title","MyManufacturerERP API Reference Title")
-                .AddMetadata("ogImage", "/Assets/styled-logo-small.png");
+                .WithDocumentDownloadType(DocumentDownloadType.Json);
         }); 
     }
-
+    app.MapTodoItemApi();
     // Identity endpoints with OpenAPI and tags
     app.MapIdentityApi<User>()
         .WithTags("Identity")
         .WithOpenApi();
-
+    app.MapGet("/error", () => "An unexpected Error occured!")
+        .AllowAnonymous()
+        .WithName("Error")
+        .WithOpenApi();
     #region Endpoint reference
     //var summaries = new[]
     //{

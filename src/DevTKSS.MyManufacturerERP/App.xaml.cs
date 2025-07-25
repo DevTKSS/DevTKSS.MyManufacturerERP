@@ -82,9 +82,9 @@ public partial class App : Application
                 .UseSerialization((context, services) => services
                     // Adding String TypeInfo <see href="https://github.com/unoplatform/uno/issues/20546"/>
                     .AddContentSerializer(context)
-                    .AddJsonTypeInfo(WeatherForecastContext.Default.String)
+                    .AddJsonTypeInfo(WeatherForecastContext.Default.WeatherForecast)
                     .AddJsonTypeInfo(WeatherForecastContext.Default.IImmutableListWeatherForecast)
-                    .AddJsonTypeInfo(TodoItemContext.Default.String)
+                    .AddJsonTypeInfo(TodoItemContext.Default.TodoItem)
                     .AddJsonTypeInfo(TodoItemContext.Default.IImmutableListTodoItem))
                 .UseHttp((context, services) =>
                 {
@@ -95,7 +95,7 @@ public partial class App : Application
 
                     // services.AddKiotaClient<MyManufacturerERPApiClient>(context);
                 })
-                .UseAuthentication(authBuilder =>
+                //.UseAuthentication(authBuilder =>
                 //{
                 //    // Configure authentication services
                 //    // Refering to the docs: <see href="https://platform.uno/docs/articles/external/uno.extensions/doc/Learn/Authentication/HowTo-WebAuthentication.html#3-configure-the-provider"/>
@@ -103,7 +103,7 @@ public partial class App : Application
                 //    // BUG: Clicking on the "Login" button on the LoginPage opens a Browser (correct) but seems like the server never gets started
                 //    // Setting the port in launchSettings.json to 5000 and server to 5001+5002 does fail to build
                 //    // Setting the port of WebAssembly Target to 5001+5002 also, gets stuck at the SplashScreen
-                    authBuilder.AddWeb(name: "WebAuth"),//,configure:webAuthBuilder =>
+                //    authBuilder.AddWeb(name: "WebAuth")//,configure:webAuthBuilder =>
                 //    {
                 //        // Configure the PostLogin processor
                 //        // <see href="https://platform.uno/docs/articles/external/uno.extensions/doc/Learn/Authentication/HowTo-WebAuthentication.html#4-process-post-login-tokens"/>
@@ -125,16 +125,16 @@ public partial class App : Application
                 //         })
                 //);
                 //},
-                configureAuthorization: configure =>
-                {
-                    // Configure Cookies using the Uno Docs
-                    // <see href="https://platform.uno/docs/articles/external/uno.extensions/doc/Learn/Authentication/HowTo-Cookies.html"/>
-                    // Absolutly no Idea how to use this, but it is in the Uno docs
-                    // I just would like to get Cookie Authentication to my Server Project API
-                    // Are there any examples? How can or should we name the Tokens below? Conventions?
-                    configure.Cookies("AccessToken", "RefreshToken");
-                    // configure.AuthorizationHeader("Bearer");
-                })
+                //configureAuthorization: configure =>
+                //{
+                //    // Configure Cookies using the Uno Docs
+                //    // <see href="https://platform.uno/docs/articles/external/uno.extensions/doc/Learn/Authentication/HowTo-Cookies.html"/>
+                //    // Absolutly no Idea how to use this, but it is in the Uno docs
+                //    // I just would like to get Cookie Authentication to my Server Project API
+                //    // Are there any examples? How can or should we name the Tokens below? Conventions?
+                //    configure.Cookies("AccessToken", "RefreshToken");
+                    // configure.AuthorizationHeader("Bearer"); }
+              // )
                 .ConfigureServices((context, services) =>
                 {
                     // TODO: Register your services
@@ -149,20 +149,20 @@ public partial class App : Application
 #endif
         MainWindow.SetWindowIcon();
 
-        Host = await builder.NavigateAsync<Shell>
-            (initialNavigate: async (services, navigator) =>
-            {
-                var auth = services.GetRequiredService<IAuthenticationService>();
-                var authenticated = await auth.RefreshAsync();
-                if (authenticated)
-                {
-                    await navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.Nested);
-                }
-                else
-                {
-                    await navigator.NavigateViewModelAsync<LoginModel>(this, qualifier: Qualifiers.Nested);
-                }
-            });
+        Host = await builder.NavigateAsync<Shell>();
+            //(initialNavigate: async (services, navigator) =>
+            //{
+            //    var auth = services.GetRequiredService<IAuthenticationService>();
+            //    var authenticated = await auth.RefreshAsync();
+            //    if (authenticated)
+            //    {
+            //        await navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.Nested);
+            //    }
+            //    else
+            //    {
+            //        await navigator.NavigateViewModelAsync<LoginModel>(this, qualifier: Qualifiers.Nested);
+            //    }
+            //});
     }
 
     private static void RegisterRoutes(IViewRegistry views, IRouteRegistry routes)

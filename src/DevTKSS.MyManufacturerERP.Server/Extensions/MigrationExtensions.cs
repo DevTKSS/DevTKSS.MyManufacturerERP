@@ -8,7 +8,7 @@ public static class MigrationExtensions
         var services = scope.ServiceProvider;
         try
         {
-            var context = services.GetRequiredService<AuthDbContext>();
+            var context = services.GetRequiredService<ApplicationDbContext>();
             context.Database.Migrate();
         }
         catch (Exception ex)

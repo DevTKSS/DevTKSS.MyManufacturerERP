@@ -1,11 +1,8 @@
 namespace DevTKSS.MyManufacturerERP.Server.Database;
 
-public class TodoDb : DbContext
+public class TodoDb(DbContextOptions<TodoDb> options)
+    : DbContext(options)
 {
-    public TodoDb(DbContextOptions<TodoDb> options)
-        : base(options)
-    {
-    }
     public DbSet<TodoItem> TodoItems => Set<TodoItem>();
 
 }

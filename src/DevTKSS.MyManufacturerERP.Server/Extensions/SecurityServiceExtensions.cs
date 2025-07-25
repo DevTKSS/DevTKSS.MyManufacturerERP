@@ -62,11 +62,4 @@ public static class SecurityServiceExtensions
         });
         return services;
     }
-    public static IApplicationBuilder UseSecurityServices(this IApplicationBuilder app)
-    {
-        app.UseCookiePolicy();
-        app.UseAntiforgery();
-        app.UseCors("MyCorsPolicy");
-        return app;
-    }
 }
