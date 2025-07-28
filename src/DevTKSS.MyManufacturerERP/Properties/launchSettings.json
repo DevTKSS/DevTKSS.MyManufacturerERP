@@ -36,6 +36,14 @@
       "commandLineArgs": "{ProjectDir}/bin/Debug/net9.0-desktop/DevTKSS.MyManufacturerERP.dll",
       "distributionName": "",
       "compatibleTargetFramework": "desktop"
+    },
+    "DevTKSS.MyManufacturerERP (WinAppSDK Unpackaged)": {
+      "commandName": "Project",
+      "compatibleTargetFramework": "windows"
+    },
+    "DevTKSS.MyManufacturerERP (WinAppSDK Packaged)": {
+      "commandName": "MsixPackage",
+      "compatibleTargetFramework": "windows"
     }
   }
 }
