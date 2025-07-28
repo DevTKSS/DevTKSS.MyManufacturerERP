@@ -52,4 +52,8 @@
     <ProjectReference Include="..\DevTKSS.MyManufacturerERP.DataContracts\DevTKSS.MyManufacturerERP.DataContracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\AppData\*.json" CopyToOutputDirectory="PreserveNewest" LinkBase="AppData" />
+  </ItemGroup>
 </Project>
+<!---->

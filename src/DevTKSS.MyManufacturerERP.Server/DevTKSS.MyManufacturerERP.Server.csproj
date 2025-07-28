@@ -48,10 +48,4 @@
     <PackageReference Include="Scalar.AspNetCore" />
     <PackageReference Include="Scalar.AspNetCore.Microsoft" />
   </ItemGroup>
-
-  <ProjectExtensions>
-      <VisualStudio>
-          <UserProperties appsettings_1json__JsonSchema="" />
-      </VisualStudio>
-  </ProjectExtensions>
 </Project>

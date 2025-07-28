@@ -23,7 +23,8 @@ try
                 theme: TemplateTheme.Code
             ))
          );
-
+   // builder.Services.AddDirectoryBrowser(); // Dont know how to use this but could be needed in the future
+    
     // Add services to the container.
     //builder.Services.Configure<JsonOptions>(options =>
     //            // Configure the JsonSerializerOptions to use the generated WeatherForecastContext
@@ -144,10 +145,10 @@ try
         .WithName("Forbidden")
         .WithOpenApi();
 
-    app.MapGet("/", () => "Welcome to MyManufacturerERP API!")
-        .WithName("Welcome")
-        .AllowAnonymous()
-        .WithOpenApi();
+    //app.MapGet("/", () => "Welcome to MyManufacturerERP API!")
+    //    .WithName("Welcome")
+    //    .AllowAnonymous()
+    //    .WithOpenApi();
 
     app.MapFallbackToFile("index.html");
     app.MapFallback(() => "/scalar/v1"); // Fallback to the Scalar API Reference

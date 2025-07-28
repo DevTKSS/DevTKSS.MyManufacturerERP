@@ -1,9 +1,6 @@
-using Microsoft.AspNetCore.Http.HttpResults;
+namespace DevTKSS.MyManufacturerERP.WebApi.Endpoints.Weather;
 
-
-namespace DevTKSS.MyManufacturerERP.Server.WebApi.Apis;
-
-internal static class WeatherForecastApi
+internal static class WeatherForecastEndpoints
 {
     private const string Tag = "Weather";
     private static readonly string[] Summaries = new[]
@@ -16,7 +13,7 @@ internal static class WeatherForecastApi
     /// </summary>
     /// <param name="app">The WebApplication instance</param>
     /// <returns>The configured WebApplication</returns>
-    internal static WebApplication MapWeatherApi(this WebApplication app)
+    internal static WebApplication MapWeatherEndpoints(this WebApplication app)
     {
         var weatherGroup = app.MapGroup("/api/weather")
             .WithTags(Tag)

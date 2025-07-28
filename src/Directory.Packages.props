@@ -10,8 +10,14 @@
     <PackageVersion Include="Microsoft.Kiota.Bundle" Version="1.19.0" />
     <PackageVersion Include="Microsoft.Kiota.Abstractions" Version="1.19.0" />
     <PackageVersion Include="Dotenv.Net" Version="4.0.0" />
+    <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="7.0.0" />
+    <PackageVersion Include="OpenIddict.Server.AspNetCore" Version="7.0.0" />
+    <PackageVersion Include="OpenIddict.Validation.AspNetCore" Version="7.0.0" />
   </ItemGroup>
-  
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.3.0" />
+    <PackageVersion Include="OpenIddict.AspNetCore" Version="7.0.0" />
+  </ItemGroup>
   <ItemGroup Label="Serilog">
     <PackageVersion Include="Serilog.Expressions" Version="5.0.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
@@ -20,14 +26,13 @@
     <PackageVersion Include="Uno.Wasm.Bootstrap.Server" Version="9.0.20" />
   </ItemGroup>
   <ItemGroup Label="EntityFramework">
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.7"/>
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.7" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.7" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.7" />
     <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.7" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.7" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.7" />
   </ItemGroup>
-
   <ItemGroup Label="OpenApi Packages">
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
     <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="9.0.7">

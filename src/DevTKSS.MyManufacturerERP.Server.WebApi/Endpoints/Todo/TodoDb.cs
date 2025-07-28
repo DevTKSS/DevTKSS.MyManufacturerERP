@@ -1,4 +1,4 @@
-namespace DevTKSS.MyManufacturerERP.Server.WebApi.Database;
+namespace DevTKSS.MyManufacturerERP.WebApi.Endpoints.Todo;
 
 public class TodoDb : DbContext
 {

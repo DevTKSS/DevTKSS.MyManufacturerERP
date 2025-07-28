@@ -1,7 +1,7 @@
-namespace DevTKSS.MyManufacturerERP.Server.WebApi.Apis;
-public static class TodoItemApi
+namespace DevTKSS.MyManufacturerERP.WebApi.Endpoints.Todo;
+public static class TodoItemEndpoints
 {
-    public static RouteGroupBuilder MapTodoItemApi(this IEndpointRouteBuilder routes)
+    public static RouteGroupBuilder MapTodoEnpoints(this IEndpointRouteBuilder routes)
     {
         var group = routes.MapGroup("/todoitems")
             .WithTags("TodoItems")

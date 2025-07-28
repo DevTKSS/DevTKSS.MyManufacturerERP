@@ -82,10 +82,7 @@ public partial class App : Application
                 .UseSerialization((context, services) => services
                     // Adding String TypeInfo <see href="https://github.com/unoplatform/uno/issues/20546"/>
                     .AddContentSerializer(context)
-                    .AddJsonTypeInfo(WeatherForecastContext.Default.WeatherForecast)
-                    .AddJsonTypeInfo(WeatherForecastContext.Default.IImmutableListWeatherForecast)
-                    .AddJsonTypeInfo(TodoItemContext.Default.TodoItem)
-                    .AddJsonTypeInfo(TodoItemContext.Default.IImmutableListTodoItem))
+                    )
                 .UseHttp((context, services) =>
                 {
 #if DEBUG
@@ -95,8 +92,8 @@ public partial class App : Application
 
                     // services.AddKiotaClient<MyManufacturerERPApiClient>(context);
                 })
-                //.UseAuthentication(authBuilder =>
-                //{
+                .UseAuthentication(authBuilder =>
+                {
                 //    // Configure authentication services
                 //    // Refering to the docs: <see href="https://platform.uno/docs/articles/external/uno.extensions/doc/Learn/Authentication/HowTo-WebAuthentication.html#3-configure-the-provider"/>
                 //    // The Auth Provider is named equal to the appsettings section name
@@ -133,8 +130,8 @@ public partial class App : Application
                 //    // I just would like to get Cookie Authentication to my Server Project API
                 //    // Are there any examples? How can or should we name the Tokens below? Conventions?
                 //    configure.Cookies("AccessToken", "RefreshToken");
-                    // configure.AuthorizationHeader("Bearer"); }
-              // )
+                // configure.AuthorizationHeader("Bearer"); }
+                // )
                 .ConfigureServices((context, services) =>
                 {
                     // TODO: Register your services
