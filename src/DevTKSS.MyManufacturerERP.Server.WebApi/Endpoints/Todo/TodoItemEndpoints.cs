@@ -1,4 +1,4 @@
-namespace DevTKSS.MyManufacturerERP.WebApi.Endpoints.Todo;
+namespace DevTKSS.MyManufacturerERP.Web.Endpoints.Todo;
 public static class TodoItemEndpoints
 {
     public static RouteGroupBuilder MapTodoEnpoints(this IEndpointRouteBuilder routes)

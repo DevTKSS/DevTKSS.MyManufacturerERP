@@ -13,6 +13,7 @@
     <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="7.0.0" />
     <PackageVersion Include="OpenIddict.Server.AspNetCore" Version="7.0.0" />
     <PackageVersion Include="OpenIddict.Validation.AspNetCore" Version="7.0.0" />
+    <!--<PackageVersion Include="Yllibed.HttpServer" Version="1.0.0-dev.11" />-->
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.3.0" />
@@ -40,8 +41,8 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.6.3" />
-    <PackageVersion Include="Scalar.AspNetCore.Microsoft" Version="2.6.3" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.6.4" />
+    <PackageVersion Include="Scalar.AspNetCore.Microsoft" Version="2.6.4" />
   </ItemGroup>
   <ItemGroup Label="General Test Packages">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />

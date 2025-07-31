@@ -1,6 +1,6 @@
 using OpenIddict.EntityFrameworkCore.Models;
 
-namespace DevTKSS.MyManufacturerERP.WebApi.Server;
+namespace DevTKSS.MyManufacturerERP.Web.Server;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
     : DbContext(options)

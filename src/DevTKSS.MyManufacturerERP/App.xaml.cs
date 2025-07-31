@@ -1,5 +1,8 @@
 using Uno.Resizetizer;
 using Serilog;
+#if WINDOWS
+using Microsoft.Security.Authentication.OAuth;
+#endif
 namespace DevTKSS.MyManufacturerERP;
 public partial class App : Application
 {
@@ -65,10 +68,6 @@ public partial class App : Application
                 }, enableUnoLogging: true)
                 .UseSerilog(consoleLoggingEnabled: true, fileLoggingEnabled: true)
                 .UseConfiguration(
-                //configureHostConfiguration:configurationBuilder =>
-                //{
-                //    configurationBuilder.AddEnvironmentVariables();
-                //},
                 configure: unoConfigBuilder =>
                 {
                     // Used encapusated write syntax to improve readability, its doing the same as without brackets + return
@@ -78,64 +77,10 @@ public partial class App : Application
                 })
                 // Enable localization (see appsettings.json for supported languages)
                 .UseLocalization()
-                // Register Json serializers (ISerializer and ISerializer)
-                .UseSerialization((context, services) => services
-                    // Adding String TypeInfo <see href="https://github.com/unoplatform/uno/issues/20546"/>
-                    .AddContentSerializer(context)
-                    )
-                .UseHttp((context, services) =>
-                {
-#if DEBUG
-                    // DelegatingHandler will be automatically injected
-                    services.AddTransient<DelegatingHandler, DebugHttpHandler>();
-#endif
-
-                    // services.AddKiotaClient<MyManufacturerERPApiClient>(context);
-                })
-                .UseAuthentication(authBuilder =>
-                {
-                //    // Configure authentication services
-                //    // Refering to the docs: <see href="https://platform.uno/docs/articles/external/uno.extensions/doc/Learn/Authentication/HowTo-WebAuthentication.html#3-configure-the-provider"/>
-                //    // The Auth Provider is named equal to the appsettings section name
-                //    // BUG: Clicking on the "Login" button on the LoginPage opens a Browser (correct) but seems like the server never gets started
-                //    // Setting the port in launchSettings.json to 5000 and server to 5001+5002 does fail to build
-                //    // Setting the port of WebAssembly Target to 5001+5002 also, gets stuck at the SplashScreen
-                //    authBuilder.AddWeb(name: "WebAuth")//,configure:webAuthBuilder =>
-                //    {
-                //        // Configure the PostLogin processor
-                //        // <see href="https://platform.uno/docs/articles/external/uno.extensions/doc/Learn/Authentication/HowTo-WebAuthentication.html#4-process-post-login-tokens"/>
-                //        // But looking at the Type VS2022 IntelliSense shows, the first parameter is no AuthService, then a <see cref="IDictionary<string, string>"/>
-                //        // so I am not sure if this is correct, but it's what the Uno Docs saying
-                //        webAuthBuilder.PostLogin(async (authService, tokens, ct) =>
-                //        {
-                //            // Process the Response here
-                //            return tokens;
-                //        });
-                //    });
-                // No idea how to use this for e.g. oAuth2 so I will not use it for now
-                // authBuilder.AddCustom(customAuth =>
-                //     customAuth.Login(
-                //         async (sp, dispatcher, credentials, cancellationToken) =>
-                //         {
-                //             var isValid = credentials.TryGetValue("Username", out var username) && username == "Bob";
-                //             return isValid ? credentials : default;
-                //         })
-                //);
-                //},
-                //configureAuthorization: configure =>
-                //{
-                //    // Configure Cookies using the Uno Docs
-                //    // <see href="https://platform.uno/docs/articles/external/uno.extensions/doc/Learn/Authentication/HowTo-Cookies.html"/>
-                //    // Absolutly no Idea how to use this, but it is in the Uno docs
-                //    // I just would like to get Cookie Authentication to my Server Project API
-                //    // Are there any examples? How can or should we name the Tokens below? Conventions?
-                //    configure.Cookies("AccessToken", "RefreshToken");
-                // configure.AuthorizationHeader("Bearer"); }
-                // )
                 .ConfigureServices((context, services) =>
                 {
                     // TODO: Register your services
-                    //services.AddSingleton<IMyService, MyService>();
+
                 })
                 .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
             );
@@ -147,19 +92,19 @@ public partial class App : Application
         MainWindow.SetWindowIcon();
 
         Host = await builder.NavigateAsync<Shell>();
-            //(initialNavigate: async (services, navigator) =>
-            //{
-            //    var auth = services.GetRequiredService<IAuthenticationService>();
-            //    var authenticated = await auth.RefreshAsync();
-            //    if (authenticated)
-            //    {
-            //        await navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.Nested);
-            //    }
-            //    else
-            //    {
-            //        await navigator.NavigateViewModelAsync<LoginModel>(this, qualifier: Qualifiers.Nested);
-            //    }
-            //});
+        (initialNavigate: async (services, navigator) =>
+        {
+            var auth = services.GetRequiredService<IAuthenticationService>();
+            var authenticated = await auth.RefreshAsync();
+            if (authenticated)
+            {
+                await navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.Nested);
+            }
+            else
+            {
+                await navigator.NavigateViewModelAsync<LoginModel>(this, qualifier: Qualifiers.Nested);
+            }
+        });
     }
 
     private static void RegisterRoutes(IViewRegistry views, IRouteRegistry routes)

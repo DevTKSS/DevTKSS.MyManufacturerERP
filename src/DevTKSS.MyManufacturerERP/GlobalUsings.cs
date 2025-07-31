@@ -1,6 +1,4 @@
 global using System.Collections.Immutable;
-global using DevTKSS.MyManufacturerERP.DataContracts;
-global using DevTKSS.MyManufacturerERP.DataContracts.Serialization;
 global using DevTKSS.MyManufacturerERP.Models;
 global using DevTKSS.MyManufacturerERP.Presentation;
 global using DevTKSS.MyManufacturerERP.Services.Endpoints;

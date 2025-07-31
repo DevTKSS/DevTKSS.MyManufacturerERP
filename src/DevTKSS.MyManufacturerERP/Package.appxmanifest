@@ -29,8 +29,8 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="Client"
-        Description="Client"
+        DisplayName="DevTKSS.MyManufacturerERP"
+        Description="DevTKSS.MyManufacturerERP"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\styled_logo.png"
         Square44x44Logo="Assets\styled_logo.png"/>

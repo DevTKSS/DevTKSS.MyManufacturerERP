@@ -1,4 +1,4 @@
-namespace DevTKSS.MyManufacturerERP.WebApi.Server;
+namespace DevTKSS.MyManufacturerERP.Web.Server;
 
 public class ClientSeeder(IServiceScopeFactory scopeFactory) : IHostedService
 {

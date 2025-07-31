@@ -1,4 +1,4 @@
-namespace DevTKSS.MyManufacturerERP.WebApi.Endpoints.Weather;
+namespace DevTKSS.MyManufacturerERP.Web.Endpoints.Weather;
 
 internal static class WeatherForecastEndpoints
 {

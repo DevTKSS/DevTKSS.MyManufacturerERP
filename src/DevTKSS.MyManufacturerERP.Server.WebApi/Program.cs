@@ -2,8 +2,7 @@
 // logger configured in `AddSerilog()` below, once configuration and dependency-injection have both been
 // set up successfully.
 
-using DevTKSS.MyManufacturerERP.WebApi.Endpoints.Authentication;
-using DevTKSS.MyManufacturerERP.WebApi.Endpoints.Weather;
+using DevTKSS.MyManufacturerERP.Web.Endpoints.Weather;
 
 Log.Logger = new LoggerConfiguration()
       .WriteTo.Console()
@@ -199,88 +198,88 @@ try
 
     app.MapTodoEnpoints();
     app.MapWeatherEndpoints();
-    // app.MapAuthenticationEndpoints(); // TODO: Implement this endpoint by fixing the lintings in /Endpoints/Authentication
+    app.MapAuthenticationEndpoints(); // TODO: Implement this endpoint by fixing the lintings in /Endpoints/Authentication
     // <see href="https://github.com/dotnet/AspNetCore.Docs/issues/35835#issuecomment-3128169445" />
     // If done, remove the following mappings and use the refactored method here instead.
-    app.MapGet("/connect/authorize", async context =>
-    {
-        var request = context.GetOpenIddictServerRequest() ?? throw new InvalidOperationException("Invalid request");
+    //app.MapGet("/connect/authorize", async context =>
+    //{
+    //    var request = context.GetOpenIddictServerRequest() ?? throw new InvalidOperationException("Invalid request");
 
-        var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme, Claims.Name, Claims.Role);
-        identity.AddClaim(Claims.Subject, "dummy_user_id");
-        identity.AddClaim(Claims.Name, "Test User");
+    //    var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme, Claims.Name, Claims.Role);
+    //    identity.AddClaim(Claims.Subject, "dummy_user_id");
+    //    identity.AddClaim(Claims.Name, "Test User");
 
-        var principal = new ClaimsPrincipal(identity);
-        principal.SetScopes(Scopes.OpenId, Scopes.Profile, Scopes.Email);
+    //    var principal = new ClaimsPrincipal(identity);
+    //    principal.SetScopes(Scopes.OpenId, Scopes.Profile, Scopes.Email);
 
-        await context.SignInAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme, principal);
+    //    await context.SignInAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme, principal);
 
-        context.Response.Clear();
+    //    context.Response.Clear();
 
-        var template = await File.ReadAllTextAsync("page.html");
-        var code = Uri.EscapeDataString(context.GetOpenIddictServerResponse()!.Code!);
-        var state = Uri.EscapeDataString(context.GetOpenIddictServerResponse()!.State!);
-        var redirect = new UriBuilder(request.RedirectUri!)
-        {
-            Query = $"code={code}&state={state}"
-        }.Uri.ToString();
+    //    var template = await File.ReadAllTextAsync("page.html");
+    //    var code = Uri.EscapeDataString(context.GetOpenIddictServerResponse()!.Code!);
+    //    var state = Uri.EscapeDataString(context.GetOpenIddictServerResponse()!.State!);
+    //    var redirect = new UriBuilder(request.RedirectUri!)
+    //    {
+    //        Query = $"code={code}&state={state}"
+    //    }.Uri.ToString();
 
-        var html = string.Format(template, redirect);
+    //    var html = string.Format(template, redirect);
 
-        context.Response.ContentType = "text/html; charset=utf-8";
-        await context.Response.WriteAsync(html);
-    });
+    //    context.Response.ContentType = "text/html; charset=utf-8";
+    //    await context.Response.WriteAsync(html);
+    //});
 
-    app.MapPost("/connect/token", async context =>
-    {
-        var request = context.GetOpenIddictServerRequest() ??
-                      throw new InvalidOperationException("Invalid request.");
+    //app.MapPost("/connect/token", async context =>
+    //{
+    //    var request = context.GetOpenIddictServerRequest() ??
+    //                  throw new InvalidOperationException("Invalid request.");
 
-        if (request.IsAuthorizationCodeGrantType())
-        {
-            // Normally you retrieve the principal associated with the code.
-            // For simplicity, here you recreate it – in production, check that the code has not
-            // already been consumed and perform all necessary validations.
-            var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-            identity.AddClaim(Claims.Subject, "dummy_user_id");
-            identity.AddClaim(Claims.Name, "Test User");
+    //    if (request.IsAuthorizationCodeGrantType())
+    //    {
+    //        // Normally you retrieve the principal associated with the code.
+    //        // For simplicity, here you recreate it – in production, check that the code has not
+    //        // already been consumed and perform all necessary validations.
+    //        var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+    //        identity.AddClaim(Claims.Subject, "dummy_user_id");
+    //        identity.AddClaim(Claims.Name, "Test User");
 
-            var principal = new ClaimsPrincipal(identity);
-            principal.SetScopes(request.GetScopes());
+    //        var principal = new ClaimsPrincipal(identity);
+    //        principal.SetScopes(request.GetScopes());
 
-            await context.SignInAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme, principal);
-        }
-        else
-        {
-            // If the grant type is not recognized, trigger a Challenge or
-            // return an error.
-            await context.ChallengeAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-        }
-    });
+    //        await context.SignInAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme, principal);
+    //    }
+    //    else
+    //    {
+    //        // If the grant type is not recognized, trigger a Challenge or
+    //        // return an error.
+    //        await context.ChallengeAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+    //    }
+    //});
 
-    app.MapGet("/connect/userinfo", async context =>
-    {
-        // Check that the request is authenticated
-        var user = context.User;
+    //app.MapGet("/connect/userinfo", async context =>
+    //{
+    //    // Check that the request is authenticated
+    //    var user = context.User;
 
-        if (user?.Identity is null || !user.Identity.IsAuthenticated)
-        {
-            context.Response.StatusCode = 401;
-            await context.Response.WriteAsync("Unauthorized.");
-            return;
-        }
+    //    if (user?.Identity is null || !user.Identity.IsAuthenticated)
+    //    {
+    //        context.Response.StatusCode = 401;
+    //        await context.Response.WriteAsync("Unauthorized.");
+    //        return;
+    //    }
 
-        // Create the object to return. You can include more claims if necessary.
-        var userInfo = new
-        {
-            sub = user.FindFirst(Claims.Subject)?.Value,
-            name = user.FindFirst(Claims.Name)?.Value,
-            email = user.FindFirst(Claims.Email)?.Value
-        };
+    //    // Create the object to return. You can include more claims if necessary.
+    //    var userInfo = new
+    //    {
+    //        sub = user.FindFirst(Claims.Subject)?.Value,
+    //        name = user.FindFirst(Claims.Name)?.Value,
+    //        email = user.FindFirst(Claims.Email)?.Value
+    //    };
 
-        // Return the JSON with the user's information
-        await context.Response.WriteAsJsonAsync(userInfo);
-    });
+    //    // Return the JSON with the user's information
+    //    await context.Response.WriteAsJsonAsync(userInfo);
+    //});
 
     #region Endpoint reference
     //var summaries = new[]
