@@ -29,6 +29,8 @@
       LoggingSerilog;
       MVUX;
       Configuration;
+      <!--HttpKiota;-->
+      HttpRefit;
       Serialization;
       Localization;
       Authentication;

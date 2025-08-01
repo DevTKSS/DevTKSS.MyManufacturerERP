@@ -1,6 +1,8 @@
+using DevTKSS.MyManufacturerERP.Infrastructure.Services;
+
 namespace DevTKSS.MyManufacturerERP.Presentation;
 
-public partial record LoginModel(IDispatcher Dispatcher, INavigator Navigator, IAuthenticationService Authentication)
+public partial record LoginModel(IDispatcher Dispatcher, INavigator Navigator, OAuth2AuthenticationProvider Authentication)
 {
     public string Title { get; } = "Login";
 

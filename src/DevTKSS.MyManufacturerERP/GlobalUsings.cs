@@ -1,3 +1,5 @@
+global using DevTKSS.MyManufacturerERP.Infrastructure.Endpoints;
+global using DevTKSS.MyManufacturerERP.Infrastructure.Serialization;
 global using System.Collections.Immutable;
 global using DevTKSS.MyManufacturerERP.Models;
 global using DevTKSS.MyManufacturerERP.Presentation;
@@ -7,6 +9,6 @@ global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Localization;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
-global using Uno.Extensions.Http.Kiota;
-global using ApplicationExecutionState = Windows.ApplicationModel.Activation.ApplicationExecutionState;
+global using Refit;
+global using System.Text.Json;
 [assembly: Uno.Extensions.Reactive.Config.BindableGenerationTool(3)]
