@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="OpenIddict.Abstractions" />
+    <PackageReference Include="OpenIddict.Client" />
+    <PackageReference Include="OpenIddict.Client.SystemNetHttp" />
+    <PackageReference Include="OpenIddict.Client.WebIntegration" />
+    <PackageReference Include="OpenIddict.EntityFrameworkCore" />
+    <!--<PackageReference Include="OpenIddict.Client.SystemIntegration" />-->
+  </ItemGroup>
+  <ItemGroup>
+    <Using  Include="OpenIddict.UnoClient"/>
+    <Using Include="OpenIddict.Client" />
+    <Using  Include="OpenIddict.EntityFrameworkCore"/>
+    <Using Include="OpenIddict.Abstractions" />
+    <Using Include="OpenIddict.Core"/>
+    <Using Include="Microsoft.EntityFrameworkCore" />
+    <Using Include="OpenIddict.Client" />
+    <Using Include="OpenIddict.Abstractions.OpenIddictConstants" Static="true" />
+  </ItemGroup>
+</Project>
