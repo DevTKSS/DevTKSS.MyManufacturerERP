@@ -8,7 +8,7 @@
     <UserSecretsId>73d0e72f-3b9d-4ea9-bc0e-ca05efc5cd26</UserSecretsId>
     <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
   </PropertyGroup>
-
+ 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" />
     <PackageReference Include="OpenIddict.AspNetCore" />
@@ -39,7 +39,8 @@
     <PackageReference Include="Scalar.AspNetCore.Microsoft" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup> 
+   <Content Include="..\AppData\*.json" CopyToOutputDirectory="PreserveNewest" LinkBase="AppData" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 
