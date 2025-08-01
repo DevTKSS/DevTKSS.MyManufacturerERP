@@ -1,19 +1,15 @@
 // System usings
 global using System.Security.Claims;
 global using System.Text.Json;
-global using System.Text.Json.Serialization.Metadata;
 // Project usings
 global using DevTKSS.MyManufacturerERP.DataContracts;
-global using DevTKSS.MyManufacturerERP.DataContracts.Serialization;
 global using DevTKSS.MyManufacturerERP.Server.Apis;
 global using DevTKSS.MyManufacturerERP.Server.Database;
 global using DevTKSS.MyManufacturerERP.Server.Extensions;
 // Http and authentication usings
 global using Microsoft.AspNetCore.Authentication.Cookies;
 global using Microsoft.AspNetCore.Authentication.OAuth;
-global using Microsoft.AspNetCore.Authentication;
 global using Microsoft.AspNetCore.Http.HttpResults;
-global using Microsoft.AspNetCore.Http.Json;
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore;
