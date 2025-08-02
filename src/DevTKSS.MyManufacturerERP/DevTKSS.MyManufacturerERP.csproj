@@ -38,6 +38,7 @@
       ThemeService;
       SkiaRenderer;
     </UnoFeatures>
+    <UserSecretsId>0bec60db-3975-4de2-bc42-f4dc8937eb67</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug' or '$(IsUiAutomationMappingEnabled)'=='True'">
@@ -48,6 +49,10 @@
   <ItemGroup>
     <UnoImage Include="Assets\Images\*.png" />
     <Content Include="..\AppData\*.json" CopyToOutputDirectory="PreserveNewest" LinkBase="AppData" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" />
   </ItemGroup>
 </Project>
 <!---->

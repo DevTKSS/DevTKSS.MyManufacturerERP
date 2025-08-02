@@ -1,12 +1,14 @@
 using System.Text.Json.Serialization;
+using DevTKSS.MyManufacturerERP.Infrastructure.Endpoints.Responses;
 using DevTKSS.MyManufacturerERP.Infrastructure.Entitys;
 
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Serialization;
 [JsonSerializable(typeof(OAuthConfiguration))]
-[JsonSerializable(typeof(TokenRequestPayload))]
+[JsonSerializable(typeof(AuthorizationCodeResponse))]
 [JsonSerializable(typeof(TokenResponse))]
-[JsonSerializable(typeof(UserMe))]
-[JsonSerializable(typeof(UserDetails))]
+[JsonSerializable(typeof(UserMeResponse))]
+[JsonSerializable(typeof(UserDetailsResponse))]
+[JsonSerializable(typeof(PingResponse))]
 public partial class EtsyJsonContext : JsonSerializerContext
 {
 }

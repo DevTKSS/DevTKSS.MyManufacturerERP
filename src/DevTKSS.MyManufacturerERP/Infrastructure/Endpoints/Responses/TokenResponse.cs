@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace DevTKSS.MyManufacturerERP.Infrastructure.Entitys;
+namespace DevTKSS.MyManufacturerERP.Infrastructure.Endpoints.Responses;
 
 public class TokenResponse
 {

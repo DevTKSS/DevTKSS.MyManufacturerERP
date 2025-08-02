@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
-using DevTKSS.MyManufacturerERP.Infrastructure.Entitys;
+using DevTKSS.MyManufacturerERP.Infrastructure.Endpoints.Responses;
 
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Services;
 

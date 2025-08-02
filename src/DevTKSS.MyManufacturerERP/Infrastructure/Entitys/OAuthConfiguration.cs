@@ -1,14 +1,14 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace DevTKSS.MyManufacturerERP.Models;
+namespace DevTKSS.MyManufacturerERP.Infrastructure.Entitys;
 
 public class OAuthConfiguration : OAuth2Configuration
 {
 
     //  public string? ClientSecret { get; set; } // Seems like not actually in use, might be in the past for OAuth 1.0 or Etsy API <v3
 }
-public class OAuth2Configuration
+public class OAuth2Configuration : EndpointOptions
 {
     [DefaultValue("https://www.etsy.com/oauth/connect")]
     [Url(ErrorMessage = "Invalid authorization endpoint format.")]
@@ -33,6 +33,5 @@ public class OAuth2Configuration
 
     public string? AccessTokenKey { get; init; }
     public string? RefreshTokenKey { get; init; }
-    public string? IdTokenKey { get; init; }
-    public IDictionary<string, string>? OtherTokenKeys { get; init; }
+
 }

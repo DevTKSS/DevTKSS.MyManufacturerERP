@@ -1,4 +1,4 @@
-using DevTKSS.MyManufacturerERP.Infrastructure.Entitys;
+using DevTKSS.MyManufacturerERP.Infrastructure.Endpoints.Responses;
 using Refit;
 using System.Net.Mime;
 
@@ -9,14 +9,14 @@ public interface IEtsyUserEndpoints
 {
     // Get current authenticated user (minimal info, requires shops_r scope)
     [Get("/v3/application/users/me")]
-    Task<UserMe> GetMeAsync(
-        [Header("Authorization")] string bearerToken,
+    Task<UserMeResponse> GetMeAsync(
+        [Authorize(scheme:"Bearer")] string bearerToken,
         [Header("x-api-key")] string apiKey);
 
     // Get user details (requires email_r scope, user_id must be int64 >= 1)
     [Get("/v3/application/users/{user_id}")]
-    Task<UserDetails> GetUserAsync(
+    Task<UserDetailsResponse> GetUserAsync(
         long user_id,
-        [Header("Authorization")] string bearerToken,
+        [Authorize(scheme: "Bearer")] string bearerToken,
         [Header("x-api-key")] string apiKey);
 }

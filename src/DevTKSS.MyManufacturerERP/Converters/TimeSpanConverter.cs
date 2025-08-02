@@ -5,7 +5,7 @@ namespace DevTKSS.MyManufacturerERP.Converters;
 
 //public class TimeSpanObjectConverter : JsonConverter<TimeSpanObject>
 //{
-//	public override TimeSpanObject Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+//	public override TimeSpanObject Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions _options)
 //	{
 //		if (reader.TokenType == JsonTokenType.Null)
 //		{
@@ -34,7 +34,7 @@ namespace DevTKSS.MyManufacturerERP.Converters;
 //		throw new JsonException($"Cannot parse {root} as a TimeSpanObject");
 //	}
 
-//	public override void Write(Utf8JsonWriter writer, TimeSpanObject value, JsonSerializerOptions options)
+//	public override void Write(Utf8JsonWriter writer, TimeSpanObject value, JsonSerializerOptions _options)
 //	{
 //		writer.WriteStartObject();
 //		writer.WriteNumber("ticks", value.Ticks ?? 0);

@@ -1,6 +1,6 @@
-namespace DevTKSS.MyManufacturerERP.Infrastructure.Entitys;
+namespace DevTKSS.MyManufacturerERP.Infrastructure.Endpoints.Responses;
 
-public class UserDetails
+public class UserDetailsResponse
 {
     public long? user_id { get; set; }
     public string? primary_email { get; set; }

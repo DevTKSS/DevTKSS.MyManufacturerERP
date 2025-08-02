@@ -1,5 +1,7 @@
 
+using DevTKSS.MyManufacturerERP.Infrastructure.Entitys;
 using Serilog;
+
 #if WINDOWS
 using Microsoft.Security.Authentication.OAuth;
 #endif
@@ -29,97 +31,97 @@ public partial class App : Application
         //        .Read();
 
         var builder = this.CreateBuilder(args) // add await if uncommenting OpenIddict
-            
-//        // https://github.com/Ecierge/openiddict-core/blob/uno/sandbox/OpenIddict.Sandbox.Uno.Client/App.xaml.cs
-//            .UseOpenIddictClientActivationHandlingAsync((context, services) =>
-//            {
-//                services.AddDbContext<DbContext>(options =>
-//                {
-//                    options.UseSqlite($"Filename={Path.Combine(Path.GetTempPath(), "devtkss-my-manufacturer-erp.sqlite3")}");
-//                    options.UseOpenIddict();
-//                });
-//                services.AddOpenIddict()
-//                    // Register the OpenIddict core components
-//                    .AddCore(options =>
-//                    {
-//                        // Configure OpenIddict to use the Entity Framework Core stores
-//                        options.UseEntityFrameworkCore()
-//                            .UseDbContext<DbContext>();
-//                    })
-//                    // Register the OpenIddict client components.
-//                    .AddClient(options =>
-//                    {
-//                        // Note: this sample uses the authorization code and refresh token
-//                        // flows, but you can enable the other flows if necessary.
-//                        options.AllowAuthorizationCodeFlow()
-//                               .AllowRefreshTokenFlow();
+        #region Try using OpenIddict Client - failed on mobile target         
+            //        // https://github.com/Ecierge/openiddict-core/blob/uno/sandbox/OpenIddict.Sandbox.Uno.Client/App.xaml.cs
+            //            .UseOpenIddictClientActivationHandlingAsync((context, services) =>
+            //            {
+            //                services.AddDbContext<DbContext>(_options =>
+            //                {
+            //                    _options.UseSqlite($"Filename={Path.Combine(Path.GetTempPath(), "devtkss-my-manufacturer-erp.sqlite3")}");
+            //                    _options.UseOpenIddict();
+            //                });
+            //                services.AddOpenIddict()
+            //                    // Register the OpenIddict core components
+            //                    .AddCore(_options =>
+            //                    {
+            //                        // Configure OpenIddict to use the Entity Framework Core stores
+            //                        _options.UseEntityFrameworkCore()
+            //                            .UseDbContext<DbContext>();
+            //                    })
+            //                    // Register the OpenIddict client components.
+            //                    .AddClient(_options =>
+            //                    {
+            //                        // Note: this sample uses the authorization code and refresh token
+            //                        // flows, but you can enable the other flows if necessary.
+            //                        _options.AllowAuthorizationCodeFlow()
+            //                               .AllowRefreshTokenFlow();
 
-//                        // Register the signing and encryption credentials used to protect
-//                        // sensitive data like the state tokens produced by OpenIddict.
-//                        options.AddDevelopmentEncryptionCertificate()
-//                               .AddDevelopmentSigningCertificate();
+            //                        // Register the signing and encryption credentials used to protect
+            //                        // sensitive data like the state tokens produced by OpenIddict.
+            //                        _options.AddDevelopmentEncryptionCertificate()
+            //                               .AddDevelopmentSigningCertificate();
 
-//                        //options.UseSystemIntegration();
-//                        options.UseUnoIntegration()
-//#if ANDROID || IOS
-//                            .DisableEmbeddedWebServer()
-//                            .DisablePipeServer()
-//#endif
-//                        ;
-//                        // Register the System.Net.Http integration and use the identity of the current
-//                        // assembly as a more specific user agent, which can be useful when dealing with
-//                        // providers that use the user agent as a way to throttle requests (e.g Reddit).
-//                        options.UseSystemNetHttp()
-//                               .SetProductInformation(typeof(App).Assembly);
+            //                        //_options.UseSystemIntegration();
+            //                        _options.UseUnoIntegration()
+            //#if ANDROID || IOS
+            //                            .DisableEmbeddedWebServer()
+            //                            .DisablePipeServer()
+            //#endif
+            //                        ;
+            //                        // Register the System.Net.Http integration and use the identity of the current
+            //                        // assembly as a more specific user agent, which can be useful when dealing with
+            //                        // providers that use the user agent as a way to throttle requests (e.g Reddit).
+            //                        _options.UseSystemNetHttp()
+            //                               .SetProductInformation(typeof(App).Assembly);
 
-//                        // Add a client registration matching the client application definition in the server project.
-//                        options.AddRegistration(new OpenIddictClientRegistration
-//                        {
-//#if ANDROID
-//                            Issuer = new Uri("https://10.0.2.2:44395/", UriKind.Absolute),
-//#else
-//                            Issuer = new Uri("https://localhost:5001/", UriKind.Absolute),
-//#endif
-//                            DefaultName = "Local",
+            //                        // Add a client registration matching the client application definition in the server project.
+            //                        _options.AddRegistration(new OpenIddictClientRegistration
+            //                        {
+            //#if ANDROID
+            //                            Issuer = new Uri("https://10.0.2.2:44395/", UriKind.Absolute),
+            //#else
+            //                            Issuer = new Uri("https://localhost:5001/", UriKind.Absolute),
+            //#endif
+            //                            DefaultName = "Local",
 
-//                            ClientId = "uno",
+            //                            ClientId = "uno",
 
-//                            // This sample uses protocol activations with a custom URI scheme to handle callbacks.
-//                            //
-//                            // For more information on how to construct private-use URI schemes,
-//                            // read https://www.rfc-editor.org/rfc/rfc8252#section-7.1 and
-//                            // https://www.rfc-editor.org/rfc/rfc7595#section-3.8.
-//                            PostLogoutRedirectUri = new Uri("com.DevTKSS.MyManufacturerERP:/callback/logout/local", UriKind.Absolute),
-//                            RedirectUri = new Uri("com.openiddict.sandbox.uno.client:/callback/login/local", UriKind.Absolute),
+            //                            // This sample uses protocol activations with a custom URI scheme to handle callbacks.
+            //                            //
+            //                            // For more information on how to construct private-use URI schemes,
+            //                            // read https://www.rfc-editor.org/rfc/rfc8252#section-7.1 and
+            //                            // https://www.rfc-editor.org/rfc/rfc7595#section-3.8.
+            //                            PostLogoutRedirectUri = new Uri("com.DevTKSS.MyManufacturerERP:/callback/logout/local", UriKind.Absolute),
+            //                            RedirectUri = new Uri("com.openiddict.sandbox.uno.client:/callback/login/local", UriKind.Absolute),
 
-//                            Scopes = { Scopes.Email, Scopes.Profile, Scopes.OfflineAccess, "demo_api" }
-//                        });
+            //                            Scopes = { Scopes.Email, Scopes.Profile, Scopes.OfflineAccess, "demo_api" }
+            //                        });
 
-//                        //// Register the Web providers integrations.
-//                        ////
-//                        //// Note: to mitigate mix-up attacks, it's recommended to use a unique redirection endpoint
-//                        //// address per provider, unless all the registered providers support returning an "iss"
-//                        //// parameter containing their URL as part of authorization responses. For more information,
-//                        //// see https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics#section-4.4.
-//                        //options.UseWebProviders()
+            //                        //// Register the Web providers integrations.
+            //                        ////
+            //                        //// Note: to mitigate mix-up attacks, it's recommended to use a unique redirection endpoint
+            //                        //// address per provider, unless all the registered providers support returning an "iss"
+            //                        //// parameter containing their URL as part of authorization responses. For more information,
+            //                        //// see https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics#section-4.4.
+            //                        //_options.UseWebProviders()
 
-//                        //       .AddGitHub(options =>
-//                        //       {
-//                        //           options.SetClientId("8abc54b6d5f4e39d78aa")
-//                        //                  .SetClientSecret("f37ef38bdb18a0f5f2d430a8edbed4353c012dc3")
-//                        //                  // Note: GitHub doesn't support the recommended ":/" syntax and requires using "://".
-//                        //                  .SetRedirectUri("com.openiddict.sandbox.uno.client://callback/login/github");
-//                        //       });
-//                    });
+            //                        //       .AddGitHub(_options =>
+            //                        //       {
+            //                        //           _options.SetClientId("8abc54b6d5f4e39d78aa")
+            //                        //                  .SetClientSecret("f37ef38bdb18a0f5f2d430a8edbed4353c012dc3")
+            //                        //                  // Note: GitHub doesn't support the recommended ":/" syntax and requires using "://".
+            //                        //                  .SetRedirectUri("com.openiddict.sandbox.uno.client://callback/login/github");
+            //                        //       });
+            //                    });
 
-//                // Register the worker responsible for creating the database used to store tokens
-//                // and adding the registry entries required to register the custom URI scheme.
-//                //
-//                // Note: in a real world application, this step should be part of a setup script.
-//                services.AddHostedService<Worker>();
-//            },
-//            "DevTKSS.MyManufacturerERP");
-        
+            //                // Register the worker responsible for creating the database used to store tokens
+            //                // and adding the registry entries required to register the custom URI scheme.
+            //                //
+            //                // Note: in a real world application, this step should be part of a setup script.
+            //                services.AddHostedService<Worker>();
+            //            },
+            //            "DevTKSS.MyManufacturerERP");
+        #endregion
             // Add navigation support for toolkit controls such as TabBar and NavigationView
             .UseToolkitNavigation()
             .Configure(host => host
@@ -172,9 +174,12 @@ public partial class App : Application
                 .UseSerialization((context, services) => services
                     // Adding String TypeInfo <see href="https://github.com/unoplatform/uno/issues/20546"/>
                     .AddContentSerializer(context)
-                    .AddJsonTypeInfo(EtsyJsonContext.Default.TokenRequestPayload)
+                    .AddJsonTypeInfo(EtsyJsonContext.Default.AuthorizationCodeResponse)
                     .AddJsonTypeInfo(EtsyJsonContext.Default.TokenResponse)
-                    .AddJsonTypeInfo(EtsyJsonContext.Default.EtsyOAuthOptions)
+                    .AddJsonTypeInfo(EtsyJsonContext.Default.OAuthConfiguration)
+                    .AddJsonTypeInfo(EtsyJsonContext.Default.UserDetailsResponse)
+                    .AddJsonTypeInfo(EtsyJsonContext.Default.UserMeResponse)
+                    .AddJsonTypeInfo(EtsyJsonContext.Default.PingResponse)
                 )
                 .UseHttp((context, services) =>
                 {
@@ -184,14 +189,14 @@ public partial class App : Application
 #endif
                     services.AddRefitClientWithEndpoint<IEtsyUserEndpoints, OAuthConfiguration>(
                        context,
-                       name:"EtsyClient",
+                       name: "EtsyClient",
                        configure: (clientBuilder, options) => clientBuilder
                        .ConfigureHttpClient(httpClient =>
                        {
-                           httpClient.BaseAddress = new Uri(options?.Url ?? throw new ArgumentNullException(nameof(OAuthConfiguration.Url)));
-                           httpClient.DefaultRequestHeaders.Add("x-api-key", options.ApiKey);
-                       }))
-                       ;//.AddRefitClient<IEtsyUserEndpoints>(context);
+                           httpClient.BaseAddress = new Uri(options?.Url ?? "https://openapi.etsy.com");
+                           httpClient.DefaultRequestHeaders.Add("client_id", options.ApiKey);
+                       }));
+                       //.AddRefitClient<IEtsyUserEndpoints>(context);
 
 
                     // services.AddKiotaClient<MyManufacturerERPApiClient>(context);

@@ -1,10 +1,11 @@
 using System.Net;
 using System.Text;
 using System.Web;
+using DevTKSS.MyManufacturerERP.Infrastructure.Endpoints.Responses;
 using DevTKSS.MyManufacturerERP.Infrastructure.Entitys;
-using Microsoft.Extensions.Options;
+using DevTKSS.MyManufacturerERP.Infrastructure.Services;
 
-namespace DevTKSS.MyManufacturerERP.Infrastructure.Services;
+namespace DevTKSS.MyManufacturerERP.Services.Auth;
 
 public record OAuth2AuthenticationProvider(
     ILogger<OAuth2AuthenticationProvider> ProviderLogger,
@@ -14,11 +15,11 @@ public record OAuth2AuthenticationProvider(
 ) : BaseAuthenticationProvider(ProviderLogger, DefaultName, Tokens)
 {
     private const string OAuthRedirectUriParameter = "redirect_uri";
-    public const string DefaultName = "Etsy";
+    public const string DefaultName = "oAuth2";
 
-    private OAuthConfiguration InternalSettings => Configuration.Get(DefaultName);
+    internal OAuthConfiguration? InternalSettings => Configuration.CurrentValue;
 
-    private UserMe? _currentUser;
+    private UserMeResponse? _currentUser;
     private string? _lastState;
     private string CodeVerifier { get; set; } = string.Empty;
     private string CodeChallenge { get; set; } = string.Empty;
@@ -38,14 +39,12 @@ public record OAuth2AuthenticationProvider(
         var success = await LoginWithOAuthFlowAsync(dispatcher, cancellationToken);
         if (!success)
             return null;
-    var tokenDict = new Dictionary<string, string>
-    {
-        { "access_token", _currentToken?.AccesToken ?? "" },
-        { "refresh_token", _currentToken?.RefreshToken ?? "" },
-        { "expires_in", _currentToken?.ExpiresIn.ToString() ?? "0" },
-        { "user_id", _currentUser?.UserId.ToString() ?? "" }
-    };
-    await Tokens.SaveAsync(DefaultName, tokenDict, cancellationToken);
+
+        var tokenDict = await Tokens.GetAsync(cancellationToken);
+        if(_currentUser!= null && !tokenDict.ContainsKey("user_id"))
+            tokenDict["user_id"] = _currentUser.UserId.ToString();
+
+        await Tokens.SaveAsync(DefaultName, tokenDict, cancellationToken);
 
     return tokenDict;
     }
@@ -66,8 +65,8 @@ public record OAuth2AuthenticationProvider(
             client_id = InternalSettings.ApiKey,
             refresh_token = _refreshToken
         };
-        var json = JsonSerializer.Serialize(payload, EtsyJsonContext.Default.TokenRequestPayload);
-        var content = new StringContent(json, Encoding.UTF8, System.Net.Mime.MediaTypeNames.Application.Json);
+        var json = JsonSerializer.Serialize(payload, EtsyJsonContext.Default.AuthorizationCodeResponse);
+        var content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
         var response = await client.PostAsync(InternalSettings.TokenEndpoint, content, cancellationToken).ConfigureAwait(false);
         var responseJson = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
@@ -75,7 +74,7 @@ public record OAuth2AuthenticationProvider(
             Logger.LogError("Failed to refresh Etsy OAuth token. Status: {StatusCode}, Response: {Response}", response.StatusCode, responseJson);
             return null;
         }
-        var token = JsonSerializer.Deserialize<TokenResponse>(responseJson, EtsyJsonContext.Default.TokenResponse);
+        var token = JsonSerializer.Deserialize(responseJson, EtsyJsonContext.Default.TokenResponse);
         if (token == null)
         {
             Logger.LogError(_lastState != null ? "Failed to deserialize token response for state {State}." : "Failed to deserialize token response.", _lastState);
@@ -195,7 +194,7 @@ public record OAuth2AuthenticationProvider(
     /// </summary>
     /// <param name="code">The authorization code received from the OAuth2 callback.</param>
     /// <returns>A tuple containing the token response and user information.</returns>
-    private async Task<(TokenResponse token, UserMe user)> AuthenticateAndFetchUserAsync(string code)
+    private async Task<(TokenResponse token, UserMeResponse user)> AuthenticateAndFetchUserAsync(string code)
     {
         var token = await ExchangeCodeForTokenAsync(code);
         OAuth2Utilitys.SetTokenState(ref _currentToken, ref _refreshToken, ref _tokenExpiry, token);
@@ -213,7 +212,7 @@ public record OAuth2AuthenticationProvider(
     private async Task<TokenResponse> ExchangeCodeForTokenAsync(string code)
     {
         using var client = new HttpClient();
-        var payload = new TokenRequestPayload
+        var payload = new AuthorizationCodeResponse
         {
             client_id = InternalSettings.ApiKey,
             redirect_uri = InternalSettings.RedirectUri,
@@ -221,14 +220,14 @@ public record OAuth2AuthenticationProvider(
             code_verifier = CodeVerifier
         };
         var json = JsonSerializer.Serialize(payload, EtsyJsonContext.Default.TokenRequestPayload);
-        var content = new StringContent(json, Encoding.UTF8, System.Net.Mime.MediaTypeNames.Application.Json);
+        var content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
         var response = await client.PostAsync(InternalSettings.TokenEndpoint, content).ConfigureAwait(false);
         var responseJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
             throw new HttpRequestException($"Token exchange failed: {response.StatusCode} {responseJson}");
         }
-        var token = JsonSerializer.Deserialize<TokenResponse>(responseJson, EtsyJsonContext.Default.TokenResponse);
+        var token = JsonSerializer.Deserialize(responseJson, EtsyJsonContext.Default.TokenResponse);
         if (token == null)
             throw new InvalidOperationException("Failed to deserialize token response.");
         OAuth2Utilitys.SetTokenState(ref _currentToken, ref _refreshToken, ref _tokenExpiry, token);
@@ -269,5 +268,3 @@ public record OAuth2AuthenticationProvider(
     public async ValueTask<IDictionary<string, string>?> RefreshAsync(CancellationToken cancellationToken)
         => await InternalRefreshAsync(cancellationToken);
 }
-
-

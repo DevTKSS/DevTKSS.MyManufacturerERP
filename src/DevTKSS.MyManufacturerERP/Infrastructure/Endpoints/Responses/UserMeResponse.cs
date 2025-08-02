@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
 
-namespace DevTKSS.MyManufacturerERP.Infrastructure.Entitys;
+namespace DevTKSS.MyManufacturerERP.Infrastructure.Endpoints.Responses;
 
-public class UserMe
+public class UserMeResponse
 {
     [JsonPropertyName("user_id")]
     public long? UserId { get; set; }
