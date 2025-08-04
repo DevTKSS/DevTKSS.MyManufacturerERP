@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Uno.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -12,16 +12,18 @@
     <PackageReference Include="OpenIddict.Client.SystemNetHttp" />
     <PackageReference Include="OpenIddict.Client.WebIntegration" />
     <PackageReference Include="OpenIddict.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.Net.Http.Headers" />
+    <PackageReference Include="Uno.Extensions.Hosting.WinUI" />
     <!--<PackageReference Include="OpenIddict.Client.SystemIntegration" />-->
   </ItemGroup>
   <ItemGroup>
-    <Using  Include="OpenIddict.UnoClient"/>
-    <Using Include="OpenIddict.Client" />
-    <Using  Include="OpenIddict.EntityFrameworkCore"/>
     <Using Include="OpenIddict.Abstractions" />
-    <Using Include="OpenIddict.Core"/>
-    <Using Include="Microsoft.EntityFrameworkCore" />
-    <Using Include="OpenIddict.Client" />
     <Using Include="OpenIddict.Abstractions.OpenIddictConstants" Static="true" />
+    <Using Include="OpenIddict.Abstractions.OpenIddictResources" Alias="SR" />
+    <Using Include="OpenIddict.Client.OpenIddictClientEvents" Static="true" />
+    <Using Include="OpenIddict.Client.OpenIddictClientHandlers" Static="true" />
+    <Using Include="OpenIddict.Client.OpenIddictClientHandlerFilters" Static="true" />
+    <Using Include="OpenIddict.Client.SystemIntegration.OpenIddictClientSystemIntegrationHandlers" Static="true" />
+    <Using Include="OpenIddict.Client.SystemIntegration.OpenIddictClientSystemIntegrationHandlerFilters" Static="true" />
   </ItemGroup>
 </Project>

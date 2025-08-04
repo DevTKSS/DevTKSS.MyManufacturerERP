@@ -1,15 +1,15 @@
+using System.Net.Http.Headers;
 using Refit;
 
 public interface IEtsyOAuthEndpoints
 {
     [Get("/oauth/connect")]
-    [Headers("Accept: application/json")]
-    [Pkce]
-    Task<HttpResponseMessage> RequestAuthorizationCodeAsync(
+    [Headers($"Accept: {MediaTypeNames.Application.Json}")]
+    Task<HttpResponseMessage> SendAuthorizationCodeRequestAsync(
         [Query] string response_type,
         [Query] string redirect_uri,
         [Query] string scope,
-        [Header("x-api-key")] string client_id,
+        [Query("client_id")] string client_id,
         [Query] string state,
         [Query] string code_challenge,
         [Query] string code_challenge_method

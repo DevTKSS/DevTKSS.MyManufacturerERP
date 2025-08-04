@@ -56,3 +56,7 @@ If you may want to contribute, you can find a list of known issues in the [List 
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE.md) file for details.
+
+### Disclaimer
+
+*The term 'Etsy' is a trademark of Etsy, Inc. This application uses the Etsy API but is not endorsed or certified by Etsy, Inc.*

@@ -23,6 +23,12 @@
           VerticalAlignment="Center"
           Width="200"
           Spacing="16">
+      <TextBox Text="{Binding Username, Mode=TwoWay}"
+             PlaceholderText="Username"
+             HorizontalAlignment="Stretch" />
+      <PasswordBox Password="{Binding Password, Mode=TwoWay}"
+                 PlaceholderText="Password"
+                 HorizontalAlignment="Stretch" />
       <Button Content="Login"
           Command="{Binding Login}"
           HorizontalAlignment="Stretch" />

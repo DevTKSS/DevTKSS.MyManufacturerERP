@@ -1,7 +1,3 @@
-using System.Text.Json.Serialization;
-using DevTKSS.MyManufacturerERP.Infrastructure.Endpoints.Responses;
-using DevTKSS.MyManufacturerERP.Infrastructure.Entitys;
-
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Serialization;
 [JsonSerializable(typeof(OAuthConfiguration))]
 [JsonSerializable(typeof(AuthorizationCodeResponse))]

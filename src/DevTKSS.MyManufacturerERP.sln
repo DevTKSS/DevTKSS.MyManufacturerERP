@@ -24,24 +24,32 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Packages.props = Directory.Packages.props
 		global.json = global.json
 		List-of-issues-with-details.md = List-of-issues-with-details.md
-		README.md = README.md
+		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External OpenApi Specs", "External OpenApi Specs", "{30090C0E-E8F7-44B2-A5F5-FFCC2081B335}"
 	ProjectSection(SolutionItems) = preProject
-		Specs\etsy-open-api-spec-3.0.0.json = Specs\etsy-open-api-spec-3.0.0.json
-		Specs\sevdesk-open-api-spec-2.0.yaml = Specs\sevdesk-open-api-spec-2.0.yaml
+		OpenApiSpecs\etsy-open-api-spec-3.0.0.json = OpenApiSpecs\etsy-open-api-spec-3.0.0.json
+		OpenApiSpecs\sevdesk-open-api-spec-2.0.yaml = OpenApiSpecs\sevdesk-open-api-spec-2.0.yaml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.xUnitTests", "DevTKSS.MyManufacturerERP.xUnitTests\DevTKSS.MyManufacturerERP.xUnitTests.csproj", "{35EA0FE2-8D8E-E033-E169-C6639CB2BB3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "DevTKSS.MyManufacturerERP.Server.WebApi\Web.csproj", "{511D78C2-8DC1-62C0-7DF5-55F9865C793A}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebApi", "WebApi", "{CAFF3A25-6F05-4437-8ED7-BC3EB9E50198}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{DCBC0675-2A91-4CE7-B5C6-6FCD18A30840}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "WebApi\Application\Application.csproj", "{2FE82DF5-7293-26CE-5C11-15AB47FC8B14}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "ApplicationSL\Application.csproj", "{5D3BCA03-89D1-66D7-B7E5-30F69F75B929}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "WebApi\Domain\Domain.csproj", "{C8EFA65D-771C-050D-5E08-E571F72060F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi", "WebApi\WebApi\WebApi.csproj", "{64BD1B3A-9E2F-2982-1233-9B15CD10350A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.WasmServer", "DevTKSS.MyManufacturerERP.WasmServer\DevTKSS.MyManufacturerERP.WasmServer.csproj", "{56F71209-EC13-1A65-20E7-05039CD34E67}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.AspNet.Security.OAuth.Etsy", "DevTKSS.AspNet.Security.OAuth.Etsy\DevTKSS.AspNet.Security.OAuth.Etsy.csproj", "{A0349742-EAC1-49E8-9251-CC687B68FF66}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIddict.Client.UnoIntegrations", "OpenIddict.Client.UnoIntegrations\OpenIddict.Client.UnoIntegrations.csproj", "{F182A818-196D-2ED2-DDB3-AAF33E7E8645}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Temp.Extensibility.DesktopAuthBroker", "Temp.Extensibility.SystemAuthBrokerServer\Temp.Extensibility.DesktopAuthBroker.csproj", "{4D4AB05E-A708-4927-9033-66CA521EA530}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,18 +79,34 @@ Global
 		{35EA0FE2-8D8E-E033-E169-C6639CB2BB3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{35EA0FE2-8D8E-E033-E169-C6639CB2BB3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{35EA0FE2-8D8E-E033-E169-C6639CB2BB3C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{511D78C2-8DC1-62C0-7DF5-55F9865C793A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{511D78C2-8DC1-62C0-7DF5-55F9865C793A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{511D78C2-8DC1-62C0-7DF5-55F9865C793A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{511D78C2-8DC1-62C0-7DF5-55F9865C793A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DCBC0675-2A91-4CE7-B5C6-6FCD18A30840}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DCBC0675-2A91-4CE7-B5C6-6FCD18A30840}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DCBC0675-2A91-4CE7-B5C6-6FCD18A30840}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DCBC0675-2A91-4CE7-B5C6-6FCD18A30840}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5D3BCA03-89D1-66D7-B7E5-30F69F75B929}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5D3BCA03-89D1-66D7-B7E5-30F69F75B929}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5D3BCA03-89D1-66D7-B7E5-30F69F75B929}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5D3BCA03-89D1-66D7-B7E5-30F69F75B929}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FE82DF5-7293-26CE-5C11-15AB47FC8B14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FE82DF5-7293-26CE-5C11-15AB47FC8B14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FE82DF5-7293-26CE-5C11-15AB47FC8B14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FE82DF5-7293-26CE-5C11-15AB47FC8B14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8EFA65D-771C-050D-5E08-E571F72060F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8EFA65D-771C-050D-5E08-E571F72060F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8EFA65D-771C-050D-5E08-E571F72060F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8EFA65D-771C-050D-5E08-E571F72060F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64BD1B3A-9E2F-2982-1233-9B15CD10350A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64BD1B3A-9E2F-2982-1233-9B15CD10350A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64BD1B3A-9E2F-2982-1233-9B15CD10350A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64BD1B3A-9E2F-2982-1233-9B15CD10350A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56F71209-EC13-1A65-20E7-05039CD34E67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56F71209-EC13-1A65-20E7-05039CD34E67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56F71209-EC13-1A65-20E7-05039CD34E67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56F71209-EC13-1A65-20E7-05039CD34E67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0349742-EAC1-49E8-9251-CC687B68FF66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0349742-EAC1-49E8-9251-CC687B68FF66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0349742-EAC1-49E8-9251-CC687B68FF66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0349742-EAC1-49E8-9251-CC687B68FF66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F182A818-196D-2ED2-DDB3-AAF33E7E8645}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F182A818-196D-2ED2-DDB3-AAF33E7E8645}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F182A818-196D-2ED2-DDB3-AAF33E7E8645}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F182A818-196D-2ED2-DDB3-AAF33E7E8645}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D4AB05E-A708-4927-9033-66CA521EA530}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D4AB05E-A708-4927-9033-66CA521EA530}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D4AB05E-A708-4927-9033-66CA521EA530}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D4AB05E-A708-4927-9033-66CA521EA530}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -91,9 +115,10 @@ Global
 		{A43ABE56-8AFA-F567-A07D-74269AD82A71} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{5FC60EF5-E477-2798-CAC5-51C230B08FAC} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{35EA0FE2-8D8E-E033-E169-C6639CB2BB3C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{511D78C2-8DC1-62C0-7DF5-55F9865C793A} = {CAFF3A25-6F05-4437-8ED7-BC3EB9E50198}
-		{DCBC0675-2A91-4CE7-B5C6-6FCD18A30840} = {CAFF3A25-6F05-4437-8ED7-BC3EB9E50198}
-		{5D3BCA03-89D1-66D7-B7E5-30F69F75B929} = {CAFF3A25-6F05-4437-8ED7-BC3EB9E50198}
+		{2FE82DF5-7293-26CE-5C11-15AB47FC8B14} = {CAFF3A25-6F05-4437-8ED7-BC3EB9E50198}
+		{C8EFA65D-771C-050D-5E08-E571F72060F2} = {CAFF3A25-6F05-4437-8ED7-BC3EB9E50198}
+		{64BD1B3A-9E2F-2982-1233-9B15CD10350A} = {CAFF3A25-6F05-4437-8ED7-BC3EB9E50198}
+		{A0349742-EAC1-49E8-9251-CC687B68FF66} = {CAFF3A25-6F05-4437-8ED7-BC3EB9E50198}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B1820EEA-ABC2-45C8-A59E-478FE7808EBF}

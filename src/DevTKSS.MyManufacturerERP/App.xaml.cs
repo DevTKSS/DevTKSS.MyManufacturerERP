@@ -1,6 +1,12 @@
-
-using DevTKSS.MyManufacturerERP.Infrastructure.Entitys;
+using System.Buffers.Text;
+using System.Threading;
+using System.Web;
 using Serilog;
+// this is somehow not detected even while its the correct namespace
+using IWebAuthenticationBrokerProvider = Uno.AuthenticationBroker.IWebAuthenticationBrokerProvider;
+using Uno.Extensions;
+using Uno.Extensions.Configuration.Internal;
+
 
 #if WINDOWS
 using Microsoft.Security.Authentication.OAuth;
@@ -22,223 +28,115 @@ public partial class App : Application
 
     protected async override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        //IDictionary<string,string> envVars = DotEnv.Fluent()
-        //        .WithEnvFiles(".env")
-        //        .WithoutTrimValues() // Important to keep this, 
-        //        .WithExceptions()
-        //        .WithOverwriteExistingVars()
-        //        .WithProbeForEnv(5)
-        //        .Read();
+        var builder = /*await*/ this.CreateBuilder(args)
 
-        var builder = this.CreateBuilder(args) // add await if uncommenting OpenIddict
-        #region Try using OpenIddict Client - failed on mobile target         
-            //        // https://github.com/Ecierge/openiddict-core/blob/uno/sandbox/OpenIddict.Sandbox.Uno.Client/App.xaml.cs
-            //            .UseOpenIddictClientActivationHandlingAsync((context, services) =>
-            //            {
-            //                services.AddDbContext<DbContext>(_options =>
-            //                {
-            //                    _options.UseSqlite($"Filename={Path.Combine(Path.GetTempPath(), "devtkss-my-manufacturer-erp.sqlite3")}");
-            //                    _options.UseOpenIddict();
-            //                });
-            //                services.AddOpenIddict()
-            //                    // Register the OpenIddict core components
-            //                    .AddCore(_options =>
-            //                    {
-            //                        // Configure OpenIddict to use the Entity Framework Core stores
-            //                        _options.UseEntityFrameworkCore()
-            //                            .UseDbContext<DbContext>();
-            //                    })
-            //                    // Register the OpenIddict client components.
-            //                    .AddClient(_options =>
-            //                    {
-            //                        // Note: this sample uses the authorization code and refresh token
-            //                        // flows, but you can enable the other flows if necessary.
-            //                        _options.AllowAuthorizationCodeFlow()
-            //                               .AllowRefreshTokenFlow();
+          // Add navigation support for toolkit controls such as TabBar and NavigationView
 
-            //                        // Register the signing and encryption credentials used to protect
-            //                        // sensitive data like the state tokens produced by OpenIddict.
-            //                        _options.AddDevelopmentEncryptionCertificate()
-            //                               .AddDevelopmentSigningCertificate();
-
-            //                        //_options.UseSystemIntegration();
-            //                        _options.UseUnoIntegration()
-            //#if ANDROID || IOS
-            //                            .DisableEmbeddedWebServer()
-            //                            .DisablePipeServer()
-            //#endif
-            //                        ;
-            //                        // Register the System.Net.Http integration and use the identity of the current
-            //                        // assembly as a more specific user agent, which can be useful when dealing with
-            //                        // providers that use the user agent as a way to throttle requests (e.g Reddit).
-            //                        _options.UseSystemNetHttp()
-            //                               .SetProductInformation(typeof(App).Assembly);
-
-            //                        // Add a client registration matching the client application definition in the server project.
-            //                        _options.AddRegistration(new OpenIddictClientRegistration
-            //                        {
-            //#if ANDROID
-            //                            Issuer = new Uri("https://10.0.2.2:44395/", UriKind.Absolute),
-            //#else
-            //                            Issuer = new Uri("https://localhost:5001/", UriKind.Absolute),
-            //#endif
-            //                            DefaultName = "Local",
-
-            //                            ClientId = "uno",
-
-            //                            // This sample uses protocol activations with a custom URI scheme to handle callbacks.
-            //                            //
-            //                            // For more information on how to construct private-use URI schemes,
-            //                            // read https://www.rfc-editor.org/rfc/rfc8252#section-7.1 and
-            //                            // https://www.rfc-editor.org/rfc/rfc7595#section-3.8.
-            //                            PostLogoutRedirectUri = new Uri("com.DevTKSS.MyManufacturerERP:/callback/logout/local", UriKind.Absolute),
-            //                            RedirectUri = new Uri("com.openiddict.sandbox.uno.client:/callback/login/local", UriKind.Absolute),
-
-            //                            Scopes = { Scopes.Email, Scopes.Profile, Scopes.OfflineAccess, "demo_api" }
-            //                        });
-
-            //                        //// Register the Web providers integrations.
-            //                        ////
-            //                        //// Note: to mitigate mix-up attacks, it's recommended to use a unique redirection endpoint
-            //                        //// address per provider, unless all the registered providers support returning an "iss"
-            //                        //// parameter containing their URL as part of authorization responses. For more information,
-            //                        //// see https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics#section-4.4.
-            //                        //_options.UseWebProviders()
-
-            //                        //       .AddGitHub(_options =>
-            //                        //       {
-            //                        //           _options.SetClientId("8abc54b6d5f4e39d78aa")
-            //                        //                  .SetClientSecret("f37ef38bdb18a0f5f2d430a8edbed4353c012dc3")
-            //                        //                  // Note: GitHub doesn't support the recommended ":/" syntax and requires using "://".
-            //                        //                  .SetRedirectUri("com.openiddict.sandbox.uno.client://callback/login/github");
-            //                        //       });
-            //                    });
-
-            //                // Register the worker responsible for creating the database used to store tokens
-            //                // and adding the registry entries required to register the custom URI scheme.
-            //                //
-            //                // Note: in a real world application, this step should be part of a setup script.
-            //                services.AddHostedService<Worker>();
-            //            },
-            //            "DevTKSS.MyManufacturerERP");
-        #endregion
-            // Add navigation support for toolkit controls such as TabBar and NavigationView
-            .UseToolkitNavigation()
-            .Configure(host => host
+          .UseToolkitNavigation()
+          .Configure(host => host
 #if DEBUG
-                // Switch to Development environment when running in DEBUG
-                .UseEnvironment(Environments.Development)
+             // Switch to Development environment when running in DEBUG
+             .UseEnvironment(Environments.Development)
 #endif
-                
-                .UseLogging(configure: (context, logBuilder) =>
-                {
-                    // Configure log levels for different categories of logging
-                    logBuilder
-                        .SetMinimumLevel(
-                            context.HostingEnvironment.IsDevelopment() ?
-                                LogLevel.Information :
-                                LogLevel.Warning)
 
-                        // Default filters for core Uno Platform namespaces
-                        .CoreLogLevel(LogLevel.Warning);
+             .UseLogging(configure: (context, logBuilder) =>
+             {
+                 // Configure log levels for different categories of logging
+                 logBuilder
+                     .SetMinimumLevel(
+                         context.HostingEnvironment.IsDevelopment() ?
+                             LogLevel.Information :
+                             LogLevel.Warning)
 
-                    // Uno Platform namespace filter groups
-                    // Uncomment individual methods to see more detailed logging
-                    //// Generic Xaml events
-                    //logBuilder.XamlLogLevel(LogLevel.Debug);
-                    //// Layout specific messages
-                    //logBuilder.XamlLayoutLogLevel(LogLevel.Debug);
-                    //// Storage messages
-                    //logBuilder.StorageLogLevel(LogLevel.Debug);
-                    //// Binding related messages
-                    //logBuilder.XamlBindingLogLevel(LogLevel.Debug);
-                    //// Binder memory references tracking
-                    //logBuilder.BinderMemoryReferenceLogLevel(LogLevel.Debug);
-                    //// DevServer and HotReload related
-                    //logBuilder.HotReloadCoreLogLevel(LogLevel.Information);
-                    //// Debug JS interop
-                    //logBuilder.WebAssemblyLogLevel(LogLevel.Debug);
+                     // Default filters for core Uno Platform namespaces
+                     .CoreLogLevel(LogLevel.Warning);
 
-                }, enableUnoLogging: true)
-                .UseSerilog(consoleLoggingEnabled: true, fileLoggingEnabled: true)
-                .UseConfiguration(configure: unoConfigBuilder =>
-                    unoConfigBuilder
-                            .EmbeddedSource<App>()
-                            .Section<AppConfig>()
-                            
-                            .Section<OAuthConfiguration>() // This is the section name for the Etsy API configuration
-                )
-                // Enable localization (see appsettings.json for supported languages)
-                .UseLocalization()
-                // Register Json serializers (ISerializer and ISerializer)
-                .UseSerialization((context, services) => services
-                    // Adding String TypeInfo <see href="https://github.com/unoplatform/uno/issues/20546"/>
-                    .AddContentSerializer(context)
-                    .AddJsonTypeInfo(EtsyJsonContext.Default.AuthorizationCodeResponse)
-                    .AddJsonTypeInfo(EtsyJsonContext.Default.TokenResponse)
-                    .AddJsonTypeInfo(EtsyJsonContext.Default.OAuthConfiguration)
-                    .AddJsonTypeInfo(EtsyJsonContext.Default.UserDetailsResponse)
-                    .AddJsonTypeInfo(EtsyJsonContext.Default.UserMeResponse)
-                    .AddJsonTypeInfo(EtsyJsonContext.Default.PingResponse)
-                )
-                .UseHttp((context, services) =>
-                {
+                 // Uno Platform namespace filter groups
+                 // Uncomment individual methods to see more detailed logging
+                 //// Generic Xaml events
+                 //logBuilder.XamlLogLevel(LogLevel.Debug);
+                 //// Layout specific messages
+                 //logBuilder.XamlLayoutLogLevel(LogLevel.Debug);
+                 //// Storage messages
+                 //logBuilder.StorageLogLevel(LogLevel.Debug);
+                 //// Binding related messages
+                 //logBuilder.XamlBindingLogLevel(LogLevel.Debug);
+                 //// Binder memory references tracking
+                 //logBuilder.BinderMemoryReferenceLogLevel(LogLevel.Debug);
+                 //// DevServer and HotReload related
+                 //logBuilder.HotReloadCoreLogLevel(LogLevel.Information);
+                 //// Debug JS interop
+                 //logBuilder.WebAssemblyLogLevel(LogLevel.Debug);
+
+             }, enableUnoLogging: true)
+             .UseSerilog(consoleLoggingEnabled: true, fileLoggingEnabled: true)
+             .UseConfiguration(configure: unoConfigBuilder =>
+                 unoConfigBuilder
+                    .EmbeddedSource<App>()
+                    .Section<AppConfig>()
+
+                    .EmbeddedSource<App>("Authentication")
+                        .Section<OAuthConfiguration>("Etsy")
+                        .Section<ApiKeyOptions>("Sevdesk")
+             )
+            // Enable localization (see appsettings.json for supported languages)
+            .UseLocalization()
+            // Register Json serializers (ISerializer and ISerializer)
+            .UseSerialization((context, services) => services
+                // Adding String TypeInfo <see href="https://github.com/unoplatform/uno/issues/20546"/>
+                .AddContentSerializer(context)
+                .AddJsonTypeInfo(EtsyJsonContext.Default.AuthorizationCodeResponse)
+                .AddJsonTypeInfo(EtsyJsonContext.Default.TokenResponse)
+                .AddJsonTypeInfo(EtsyJsonContext.Default.OAuthConfiguration)
+                .AddJsonTypeInfo(EtsyJsonContext.Default.UserDetailsResponse)
+                .AddJsonTypeInfo(EtsyJsonContext.Default.UserMeResponse)
+                .AddJsonTypeInfo(EtsyJsonContext.Default.PingResponse)
+            )
+            .UseHttp((context, services) =>
+            {
 #if DEBUG
-                    // DelegatingHandler will be automatically injected
-                    services.AddTransient<DelegatingHandler, DebugHttpHandler>();
+                // DelegatingHandler will be automatically injected
+                services.AddTransient<DelegatingHandler, DebugHttpHandler>();
 #endif
-                    services.AddRefitClientWithEndpoint<IEtsyUserEndpoints, OAuthConfiguration>(
-                       context,
-                       name: "EtsyClient",
-                       configure: (clientBuilder, options) => clientBuilder
-                       .ConfigureHttpClient(httpClient =>
-                       {
-                           httpClient.BaseAddress = new Uri(options?.Url ?? "https://openapi.etsy.com");
-                           httpClient.DefaultRequestHeaders.Add("client_id", options.ApiKey);
-                       }));
-                       //.AddRefitClient<IEtsyUserEndpoints>(context);
+                services.AddRefitClientWithEndpoint<IEtsyUserEndpoints, OAuthConfiguration>(
+                    context: context,
+                    name: "EtsyClient",
+                    configure: (clientBuilder, options) => clientBuilder
+                    .ConfigureHttpClient(httpClient =>
+                    {
+                        httpClient.BaseAddress = new Uri(options?.Url ?? "https://openapi.etsy.com");
+                        if (options?.ClientID is null)
+                        {
+                            throw new ArgumentNullException(nameof(options.ClientID), "API Key must be provided in the configuration.");
+                        }
+                        httpClient.DefaultRequestHeaders.Add("x-api-key", options.ClientID);
+                    })
+                )
+                .AddRefitClient<IEtsyUserEndpoints>(context);
+            })
+            .UseAuthentication(authBuilder =>
+                authBuilder.AddCustom(custom =>
 
-
-                    // services.AddKiotaClient<MyManufacturerERPApiClient>(context);
-                })
-                //.UseAuthentication(authBuilder =>
-
-                // //{
-                // //    // Configure authentication services
-                // //    // Refering to the docs: <see href="https://platform.uno/docs/articles/external/uno.extensions/doc/Learn/Authentication/HowTo-WebAuthentication.html#3-configure-the-provider"/>
-                // //    // The Auth Provider is named equal to the appsettings section name
-                // //    // BUG: Clicking on the "Login" button on the LoginPage opens a Browser (correct) but seems like the server never gets started
-                // //    // Setting the port in launchSettings.json to 5000 and server to 5001+5002 does fail to build
-                // //    // Setting the port of WebAssembly Target to 5001+5002 also, gets stuck at the SplashScreen
-                // //    authBuilder.AddWeb(name: "WebAuth")//,configure:webAuthBuilder =>
-                // //    {
-                // //        // Configure the PostLogin processor
-                // //        // <see href="https://platform.uno/docs/articles/external/uno.extensions/doc/Learn/Authentication/HowTo-WebAuthentication.html#4-process-post-login-tokens"/>
-                // //        // But looking at the Type VS2022 IntelliSense shows, the first parameter is no AuthService, then a <see cref="IDictionary<string, string>"/>
-                // //        // so I am not sure if this is correct, but it's what the Uno Docs saying
-                // //        webAuthBuilder.PostLogin(async (authService, tokens, ct) =>
-                // //        {
-                // //            // Process the Response here
-                // //            return tokens;
-                // //        });
-                // //    });
-
-                // // No idea how to use this for e.g. oAuth2 as the IAuthenticationProvider interface does not match.
-                // authBuilder.AddCustom(customAuth =>
-                //     customAuth.Login(
-                //         async (sp, dispatcher, credentials, cancellationToken) =>
-                //         {
-                //             var isValid = credentials.TryGetValue("Username", out var username) && username == "Bob";
-                //             return isValid ? credentials : default;
-                //         })
-                //))
-                .ConfigureServices((context, services) =>
+                custom
+                    .Login(async (sp, dispatcher, credentials, cancellationToken) => await ProcessCredentials(credentials))
+                    .Refresh(async (sp, tokenDictionary, cancellationToken) => await HandleRefresh(tokenDictionary)),
+                    name: "EtsyAuth"),
+            
+                configureAuthorization: builder =>
                 {
-                    // TODO: Register your services
+                    builder.AuthorizationHeader(scheme: "Bearer");
+                }
+            )
 
-                })
-                .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
-            );
+            .ConfigureServices((context, services) =>
+            {
+                // TODO: Register your sp
+
+                // TODO: Uncomment if the IWebAuthenticationBrokerProvider is again known from the Uno.AuthenticationBroker no idea why it is not known
+                // services.AddScoped<IWebAuthenticationBrokerProvider, SystemBrowserAuthBroker>();
+            })
+            .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
+        );
         MainWindow = builder.Window;
 
 #if DEBUG
@@ -246,7 +144,7 @@ public partial class App : Application
 #endif
         MainWindow.SetWindowIcon();
 
-        Host = await builder.NavigateAsync<Shell>();
+        Host = await builder.NavigateAsync<Shell>
         (initialNavigate: async (services, navigator) =>
         {
             var auth = services.GetRequiredService<IAuthenticationService>();
@@ -260,6 +158,44 @@ public partial class App : Application
                 await navigator.NavigateViewModelAsync<LoginModel>(this, qualifier: Qualifiers.Nested);
             }
         });
+    }
+
+    private async ValueTask<IDictionary<string, string>?> HandleRefresh(IDictionary<string, string> tokenDictionary)
+    {
+        // TODO: Write code to refresh tokens using the currently stored tokens
+        if ((tokenDictionary?.TryGetValue(TokenCacheExtensions.RefreshTokenKey, out var refreshToken) ?? false) &&
+            !refreshToken.IsNullOrEmpty() &&
+            (tokenDictionary?.TryGetValue("Expiry", out var expiry) ?? false) &&
+            DateTime.TryParse(expiry, out var tokenExpiry) &&
+            tokenExpiry > DateTime.Now)
+        {
+            // Return IDictionary containing any tokens used by service calls or in the app
+            tokenDictionary ??= new Dictionary<string, string>();
+            tokenDictionary[TokenCacheExtensions.AccessTokenKey] = "NewSampleToken";
+            tokenDictionary["Expiry"] = DateTime.Now.AddMinutes(5).ToString("g");
+            return tokenDictionary;
+        }
+
+        // Return null/default to fail the Refresh method
+        return default;
+    }
+
+    private async ValueTask<IDictionary<string, string>?> ProcessCredentials(IDictionary<string, string> credentials)
+    {
+        // TODO: Write code to process credentials that are passed into the LoginAsync method
+        if (credentials?.TryGetValue(nameof(LoginModel.Username), out var username) ?? false &&
+            !username.IsNullOrEmpty())
+        {
+            // Return IDictionary containing any tokens used by service calls or in the app
+            credentials ??= new Dictionary<string, string>();
+            credentials[TokenCacheExtensions.AccessTokenKey] = "SampleToken";
+            credentials[TokenCacheExtensions.RefreshTokenKey] = "RefreshToken";
+            credentials["Expiry"] = DateTime.Now.AddMinutes(5).ToString("g");
+            return credentials;
+        }
+
+        // Return null/default to fail the LoginAsync method
+        return default;
     }
 
     private static void RegisterRoutes(IViewRegistry views, IRouteRegistry routes)
@@ -283,3 +219,14 @@ public partial class App : Application
         );
     }
 }
+//(IServiceProvider services, ITokenCache tokens, IDictionary<string, string>? authenticationTokens, string? baseurl, string callbackUrl) =>
+//                    {
+//                        if (authenticationTokens is null)
+//                        {
+//                            throw new ArgumentNullException(nameof(authenticationTokens), "Authentication tokens cannot be null.");
+//                        }
+//                        string scopes = authBuilder.Get<OAuth2Configuration>("Etsy")?.Scopes;
+//scopes = HttpUtility.UrlEncode(scopes);
+//return new Uri(baseurl, $"?client_id={authenticationTokens["ClientID"]}&response_type=code&scope={scopes}&redirect_uri={services.LoginCallbackUri}");
+
+//                    });

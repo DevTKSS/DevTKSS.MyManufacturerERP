@@ -29,7 +29,7 @@
       LoggingSerilog;
       MVUX;
       Configuration;
-      <!--HttpKiota;-->
+      HttpKiota;
       HttpRefit;
       Serialization;
       Localization;
@@ -53,6 +53,20 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Temp.Extensibility.SystemAuthBrokerServer\Temp.Extensibility.DesktopAuthBroker.csproj"/>
+    <!--<ProjectReference Include="..\OpenIddict.Client.UnoIntegrations\OpenIddict.Client.UnoIntegrations.csproj" />-->
+  </ItemGroup>
+
+  <!--<ItemGroup>
+    <Using  Include="OpenIddict.UnoClient"/>
+    <Using Include="OpenIddict.Client" />
+    <Using  Include="OpenIddict.EntityFrameworkCore"/>
+    <Using Include="OpenIddict.Abstractions" />
+    <Using Include="OpenIddict.Core"/>
+    <Using Include="Microsoft.EntityFrameworkCore" />
+  </ItemGroup>-->
 </Project>
-<!---->

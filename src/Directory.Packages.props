@@ -7,17 +7,19 @@
   -->
   <ItemGroup>
     <PackageVersion Include="FluentValidation" Version="12.0.0" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication" Version="2.3.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.OAuth" Version="2.3.0" />
+    <PackageVersion Include="Yllibed.HttpServer" Version="1.0.0-dev.11" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
-    <PackageVersion Include="Microsoft.Kiota.Bundle" Version="1.19.0" />
-    <PackageVersion Include="Microsoft.Kiota.Abstractions" Version="1.19.0" />
   </ItemGroup>
   <ItemGroup Label="Auth Packages">
     <PackageVersion Include="Dotenv.Net" Version="4.0.0" />
     <PackageVersion Include="OpenIddict.Abstractions" Version="7.0.0" />
-    <PackageVersion Include="OpenIddict.Client" Version="7.0.0" />
+    <!--<PackageVersion Include="OpenIddict.Client" Version="7.0.0" />-->
     <!--<PackageVersion Include="OpenIddict.Client.SystemIntegration" Version="7.0.0" />-->
-    <PackageVersion Include="OpenIddict.Client.SystemNetHttp" Version="7.0.0" />
-    <PackageVersion Include="OpenIddict.Client.WebIntegration" Version="7.0.0" />
+    <!--<PackageVersion Include="OpenIddict.Client.SystemNetHttp" Version="7.0.0" />
+    <PackageVersion Include="OpenIddict.Client.WebIntegration" Version="7.0.0" />-->
     <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="7.0.0" />
     <PackageVersion Include="OpenIddict.Server.AspNetCore" Version="7.0.0" />
     <PackageVersion Include="OpenIddict.Validation.AspNetCore" Version="7.0.0" />
@@ -36,7 +38,6 @@
   <ItemGroup Label="CA Packages">
     <PackageVersion Include="Ardalis.GuardClauses" Version="5.0.0" />
     <PackageVersion Include="AutoMapper" Version="15.0.1" />
-    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.7" />
   </ItemGroup>
   <ItemGroup Label="EntityFramework">
@@ -55,8 +56,8 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.6.5" />
-    <PackageVersion Include="Scalar.AspNetCore.Microsoft" Version="2.6.5" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.6.7" />
+    <PackageVersion Include="Scalar.AspNetCore.Microsoft" Version="2.6.7" />
   </ItemGroup>
   <ItemGroup Label="General Test Packages">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
