@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Uno.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net9.0-desktop;net9.0-android;net9.0-ios;net9.0-browserwasm;net9.0-windows10.0.26100;net9.0</TargetFrameworks>
-
+    <TargetFrameworks>net9.0-desktop;net9.0-android;net9.0-ios;net9.0-browserwasm</TargetFrameworks><!--;net9.0;net9.0-windows10.0.26100-->
+    <UserSecretsId>0bec60db-3975-4de2-bc42-f4dc8937eb67</UserSecretsId>
     <OutputType>Exe</OutputType>
     <UnoSingleProject>true</UnoSingleProject>
     <!-- Display name -->
@@ -38,7 +38,7 @@
       ThemeService;
       SkiaRenderer;
     </UnoFeatures>
-    <UserSecretsId>0bec60db-3975-4de2-bc42-f4dc8937eb67</UserSecretsId>
+
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug' or '$(IsUiAutomationMappingEnabled)'=='True'">
@@ -54,19 +54,10 @@
   <ItemGroup>
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Temp.Extensibility.SystemAuthBrokerServer\Temp.Extensibility.DesktopAuthBroker.csproj"/>
-    <!--<ProjectReference Include="..\OpenIddict.Client.UnoIntegrations\OpenIddict.Client.UnoIntegrations.csproj" />-->
+    <ProjectReference Include="..\Temp.Extensibility.SystemAuthBrokerServer\Temp.Extensibility.DesktopAuthBroker.csproj" />
   </ItemGroup>
-
-  <!--<ItemGroup>
-    <Using  Include="OpenIddict.UnoClient"/>
-    <Using Include="OpenIddict.Client" />
-    <Using  Include="OpenIddict.EntityFrameworkCore"/>
-    <Using Include="OpenIddict.Abstractions" />
-    <Using Include="OpenIddict.Core"/>
-    <Using Include="Microsoft.EntityFrameworkCore" />
-  </ItemGroup>-->
 </Project>
