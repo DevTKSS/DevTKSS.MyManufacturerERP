@@ -1,9 +1,6 @@
 using System.Security.Cryptography;
-using System.Text;
-using System.Web;
-using DevTKSS.MyManufacturerERP.Infrastructure.Endpoints.Responses;
 
-namespace DevTKSS.MyManufacturerERP.Extensions;
+namespace DevTKSS.MyManufacturerERP.Infrastructure;
 
 /// <summary>
 /// Helper class for Etsy OAuth2 PKCE and token handling.
@@ -11,7 +8,7 @@ namespace DevTKSS.MyManufacturerERP.Extensions;
 public static class OAuth2Utilitys
 {
     /// <summary>
-    /// Generates a random state string for the OAuth2 flow.
+    /// Generates a random _state string for the OAuth2 flow.
     /// </summary>
     public static string GenerateState()
         => Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)).TrimEnd('=')
@@ -32,15 +29,4 @@ public static class OAuth2Utilitys
         return Convert.ToBase64String(challengeBytes).TrimEnd('=')
             .Replace('+', '-').Replace('/', '_');
     }
-
-    /// <summary>
-    /// Sets the current token state and calculates the token expiry.
-    /// </summary>
-    public static void SetTokenState(ref TokenResponse? currentToken, ref string? refreshToken, ref DateTimeOffset? tokenExpiry, TokenResponse token)
-    {
-        currentToken = token;
-        refreshToken = token.RefreshToken;
-        tokenExpiry = DateTimeOffset.UtcNow.AddSeconds(token.ExpiresIn - 60);
-    }
-
 }

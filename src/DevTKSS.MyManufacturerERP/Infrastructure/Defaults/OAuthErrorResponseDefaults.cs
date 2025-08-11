@@ -1,4 +1,4 @@
-namespace DevTKSS.MyManufacturerERP.Models.Defaults;
+namespace DevTKSS.MyManufacturerERP.Infrastructure.Defaults;
 /// <summary>
 /// OAuth Error Response standardized error codes. <see href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2.1">4.1.2.1 Error Response</see>
 /// </summary>

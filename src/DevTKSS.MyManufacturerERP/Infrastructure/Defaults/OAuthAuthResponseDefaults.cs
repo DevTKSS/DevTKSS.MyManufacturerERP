@@ -1,4 +1,4 @@
-namespace DevTKSS.MyManufacturerERP.Models.Defaults;
+namespace DevTKSS.MyManufacturerERP.Infrastructure.Defaults;
 
 /// <summary>
 /// oAuth Authorization Response standarized keys from <see href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2">4.1.2</see>
@@ -21,5 +21,6 @@ public class OAuthAuthResponseDefaults
     /// <summary>
     /// REQUIRED if the "state" parameter was present in the client
     /// authorization request.The exact value received from the client.
+    /// </summary>
     public const string StateKey = "state";
 }

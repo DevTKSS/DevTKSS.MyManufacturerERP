@@ -1,16 +1,10 @@
-using System.Buffers.Text;
-using System.Threading;
-using System.Web;
 using Serilog;
+using DevTKSS.MyManufacturerERP.Infrastructure.Defaults;
 // this is somehow not detected even while its the correct namespace
+#if !WINDOWS
 using IWebAuthenticationBrokerProvider = Uno.AuthenticationBroker.IWebAuthenticationBrokerProvider;
-using Uno.Extensions;
-using Uno.Extensions.Configuration.Internal;
-
-
-#if WINDOWS
-using Microsoft.Security.Authentication.OAuth;
 #endif
+using Temp.Extensibility.DesktopAuthBroker;
 namespace DevTKSS.MyManufacturerERP;
 public partial class App : Application
 {
@@ -21,6 +15,7 @@ public partial class App : Application
     public App()
     {
         this.InitializeComponent();
+
     }
 
     protected Window? MainWindow { get; private set; }
@@ -74,10 +69,8 @@ public partial class App : Application
                  unoConfigBuilder
                     .EmbeddedSource<App>()
                     .Section<AppConfig>()
-
-                    .EmbeddedSource<App>("Authentication")
-                        .Section<OAuthConfiguration>("Etsy")
-                        .Section<ApiKeyOptions>("Sevdesk")
+                    .Section<OAuthOptions>("EtsyOAuth")
+                    .Section<ApiKeyOptions>("SevdeskApiKeyClient")
              )
             // Enable localization (see appsettings.json for supported languages)
             .UseLocalization()
@@ -85,9 +78,9 @@ public partial class App : Application
             .UseSerialization((context, services) => services
                 // Adding String TypeInfo <see href="https://github.com/unoplatform/uno/issues/20546"/>
                 .AddContentSerializer(context)
-                .AddJsonTypeInfo(EtsyJsonContext.Default.AuthorizationCodeResponse)
-                .AddJsonTypeInfo(EtsyJsonContext.Default.TokenResponse)
-                .AddJsonTypeInfo(EtsyJsonContext.Default.OAuthConfiguration)
+                .AddJsonTypeInfo(OAuthFlowContext.Default.AccessGrantResponse)
+                .AddJsonTypeInfo(OAuthFlowContext.Default.TokenResponse)
+                .AddJsonTypeInfo(EtsyJsonContext.Default.OAuthOptions)
                 .AddJsonTypeInfo(EtsyJsonContext.Default.UserDetailsResponse)
                 .AddJsonTypeInfo(EtsyJsonContext.Default.UserMeResponse)
                 .AddJsonTypeInfo(EtsyJsonContext.Default.PingResponse)
@@ -98,16 +91,16 @@ public partial class App : Application
                 // DelegatingHandler will be automatically injected
                 services.AddTransient<DelegatingHandler, DebugHttpHandler>();
 #endif
-                services.AddRefitClientWithEndpoint<IEtsyUserEndpoints, OAuthConfiguration>(
+                services.AddRefitClientWithEndpoint<IEtsyUserEndpoints, OAuthOptions>(
                     context: context,
                     name: "EtsyClient",
                     configure: (clientBuilder, options) => clientBuilder
                     .ConfigureHttpClient(httpClient =>
                     {
-                        httpClient.BaseAddress = new Uri(options?.Url ?? "https://openapi.etsy.com");
+                        httpClient.BaseAddress = new Uri("https://openapi.etsy.com");
                         if (options?.ClientID is null)
                         {
-                            throw new ArgumentNullException(nameof(options.ClientID), "API Key must be provided in the configuration.");
+                            throw new ArgumentNullException(options?.ClientID,nameof(options.ClientID)/*, "API Key must be provided in the configuration."*/);
                         }
                         httpClient.DefaultRequestHeaders.Add("x-api-key", options.ClientID);
                     })
@@ -120,7 +113,7 @@ public partial class App : Application
                 custom
                     .Login(async (sp, dispatcher, credentials, cancellationToken) => await ProcessCredentials(credentials))
                     .Refresh(async (sp, tokenDictionary, cancellationToken) => await HandleRefresh(tokenDictionary)),
-                    name: "EtsyAuth"),
+                    name: "EtsyOAuth"),
             
                 configureAuthorization: builder =>
                 {
@@ -131,9 +124,9 @@ public partial class App : Application
             .ConfigureServices((context, services) =>
             {
                 // TODO: Register your sp
-
-                // TODO: Uncomment if the IWebAuthenticationBrokerProvider is again known from the Uno.AuthenticationBroker no idea why it is not known
-                // services.AddScoped<IWebAuthenticationBrokerProvider, SystemBrowserAuthBroker>();
+#if !WINDOWS
+                services.AddSingleton<IWebAuthenticationBrokerProvider, SystemBrowserAuthBroker>();
+#endif
             })
             .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
         );
@@ -163,7 +156,7 @@ public partial class App : Application
     private async ValueTask<IDictionary<string, string>?> HandleRefresh(IDictionary<string, string> tokenDictionary)
     {
         // TODO: Write code to refresh tokens using the currently stored tokens
-        if ((tokenDictionary?.TryGetValue(TokenCacheExtensions.RefreshTokenKey, out var refreshToken) ?? false) &&
+        if ((tokenDictionary?.TryGetValue(OAuthTokenRefreshDefaults.RefreshToken, out var refreshToken) ?? false) &&
             !refreshToken.IsNullOrEmpty() &&
             (tokenDictionary?.TryGetValue("Expiry", out var expiry) ?? false) &&
             DateTime.TryParse(expiry, out var tokenExpiry) &&
@@ -171,7 +164,7 @@ public partial class App : Application
         {
             // Return IDictionary containing any tokens used by service calls or in the app
             tokenDictionary ??= new Dictionary<string, string>();
-            tokenDictionary[TokenCacheExtensions.AccessTokenKey] = "NewSampleToken";
+            tokenDictionary[OAuthTokenRefreshDefaults.AccessTokenKey] = "NewSampleToken";
             tokenDictionary["Expiry"] = DateTime.Now.AddMinutes(5).ToString("g");
             return tokenDictionary;
         }
@@ -188,9 +181,9 @@ public partial class App : Application
         {
             // Return IDictionary containing any tokens used by service calls or in the app
             credentials ??= new Dictionary<string, string>();
-            credentials[TokenCacheExtensions.AccessTokenKey] = "SampleToken";
-            credentials[TokenCacheExtensions.RefreshTokenKey] = "RefreshToken";
-            credentials["Expiry"] = DateTime.Now.AddMinutes(5).ToString("g");
+            credentials[OAuthTokenRefreshDefaults.AccessTokenKey] = "SampleToken";
+            credentials[OAuthTokenRefreshDefaults.RefreshToken] = "RefreshToken";
+            credentials[OAuthTokenRefreshDefaults.ExpiresInKey] = DateTime.Now.AddMinutes(5).ToString("g");
             return credentials;
         }
 
@@ -225,7 +218,7 @@ public partial class App : Application
 //                        {
 //                            throw new ArgumentNullException(nameof(authenticationTokens), "Authentication tokens cannot be null.");
 //                        }
-//                        string scopes = authBuilder.Get<OAuth2Configuration>("Etsy")?.Scopes;
+//                        string scopes = authBuilder.Get<OAuthOptions>("Etsy")?.Scopes;
 //scopes = HttpUtility.UrlEncode(scopes);
 //return new Uri(baseurl, $"?client_id={authenticationTokens["ClientID"]}&response_type=code&scope={scopes}&redirect_uri={services.LoginCallbackUri}");
 

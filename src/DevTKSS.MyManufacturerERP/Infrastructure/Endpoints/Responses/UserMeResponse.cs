@@ -1,11 +1,9 @@
-using System.Text.Json.Serialization;
-
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Endpoints.Responses;
 
-public class UserMeResponse
+public record UserMeResponse
 {
     [JsonPropertyName("user_id")]
-    public long? UserId { get; set; }
+    public long UserId { get; set; }
     [JsonPropertyName("shop_id")]
-    public long? ShopId { get; set; }
+    public long ShopId { get; set; }
 }

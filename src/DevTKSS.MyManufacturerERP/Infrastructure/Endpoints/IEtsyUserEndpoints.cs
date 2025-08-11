@@ -1,16 +1,12 @@
-using DevTKSS.MyManufacturerERP.Infrastructure.Endpoints.Responses;
-using Refit;
-using System.Net.Mime;
-
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Endpoints;
 
-[Headers($"Content-Type: {MediaTypeNames.Application.Json}")]
+[Headers($"Content-Type: application/json")]
 public interface IEtsyUserEndpoints
 {
     // Get current authenticated user (minimal info, requires shops_r scope)
     [Get("/v3/application/users/me")]
     Task<UserMeResponse> GetMeAsync(
-        [Authorize(scheme:"Bearer")] string bearerToken,
+        [Authorize("Bearer")] string bearerToken,
         [Header("x-api-key")] string apiKey);
 
     // Get user details (requires email_r scope, user_id must be int64 >= 1)
