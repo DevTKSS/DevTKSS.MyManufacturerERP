@@ -65,7 +65,7 @@ namespace DevTKSS.MyManufacturerERP.Clients.Etsy.Models
 #else
         public string SecondLine { get; set; }
 #endif
-        /// <summary>The state field of the user&apos;s address.</summary>
+        /// <summary>The _state field of the user&apos;s address.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public string? State { get; set; }
@@ -117,7 +117,7 @@ namespace DevTKSS.MyManufacturerERP.Clients.Etsy.Models
                 { "iso_country_code", n => { IsoCountryCode = n.GetStringValue(); } },
                 { "name", n => { Name = n.GetStringValue(); } },
                 { "second_line", n => { SecondLine = n.GetStringValue(); } },
-                { "state", n => { State = n.GetStringValue(); } },
+                { "_state", n => { State = n.GetStringValue(); } },
                 { "user_address_id", n => { UserAddressId = n.GetLongValue(); } },
                 { "user_id", n => { UserId = n.GetLongValue(); } },
                 { "zip", n => { Zip = n.GetStringValue(); } },
@@ -137,7 +137,7 @@ namespace DevTKSS.MyManufacturerERP.Clients.Etsy.Models
             writer.WriteStringValue("iso_country_code", IsoCountryCode);
             writer.WriteStringValue("name", Name);
             writer.WriteStringValue("second_line", SecondLine);
-            writer.WriteStringValue("state", State);
+            writer.WriteStringValue("_state", State);
             writer.WriteLongValue("user_address_id", UserAddressId);
             writer.WriteLongValue("user_id", UserId);
             writer.WriteStringValue("zip", Zip);

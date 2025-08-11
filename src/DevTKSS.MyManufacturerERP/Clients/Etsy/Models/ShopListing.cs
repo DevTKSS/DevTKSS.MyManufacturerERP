@@ -131,7 +131,7 @@ namespace DevTKSS.MyManufacturerERP.Clients.Etsy.Models
         public bool? ShouldAutoRenew { get; set; }
         /// <summary>When _updating_ a listing, this value can be either `active` or `inactive`. Note: Setting a `draft` listing to `active` will also publish the listing on etsy.com and requires that the listing have an image set. Setting a `sold_out` listing to active will update the quantity to 1 and renew the listing on etsy.com.</summary>
         public global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.ShopListing_state? State { get; set; }
-        /// <summary>The date and time of the last state change of this listing.</summary>
+        /// <summary>The date and time of the last _state change of this listing.</summary>
         public int? StateTimestamp { get; set; }
         /// <summary>An array of style strings for this listing, each of which is free-form text string such as &quot;Formal&quot;, or &quot;Steampunk&quot;. When creating or updating a listing, the listing may have up to two styles. Valid style strings contain only letters, numbers, and whitespace characters. (regex: /[^\p{L}\p{Nd}\p{Zs}]/u) Default value is null.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -239,7 +239,7 @@ namespace DevTKSS.MyManufacturerERP.Clients.Etsy.Models
                 { "shop_id", n => { ShopId = n.GetLongValue(); } },
                 { "shop_section_id", n => { ShopSectionId = n.GetLongValue(); } },
                 { "should_auto_renew", n => { ShouldAutoRenew = n.GetBoolValue(); } },
-                { "state", n => { State = n.GetEnumValue<global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.ShopListing_state>(); } },
+                { "_state", n => { State = n.GetEnumValue<global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.ShopListing_state>(); } },
                 { "state_timestamp", n => { StateTimestamp = n.GetIntValue(); } },
                 { "style", n => { Style = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
                 { "tags", n => { Tags = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
@@ -298,7 +298,7 @@ namespace DevTKSS.MyManufacturerERP.Clients.Etsy.Models
             writer.WriteLongValue("shop_id", ShopId);
             writer.WriteLongValue("shop_section_id", ShopSectionId);
             writer.WriteBoolValue("should_auto_renew", ShouldAutoRenew);
-            writer.WriteEnumValue<global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.ShopListing_state>("state", State);
+            writer.WriteEnumValue<global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.ShopListing_state>("_state", State);
             writer.WriteIntValue("state_timestamp", StateTimestamp);
             writer.WriteCollectionOfPrimitiveValues<string>("style", Style);
             writer.WriteCollectionOfPrimitiveValues<string>("tags", Tags);

@@ -158,7 +158,7 @@ namespace DevTKSS.MyManufacturerERP.Clients.Etsy.V3.Application.Shops.Item.Listi
                 { "shipping_profile_id", n => { ShippingProfileId = n.GetLongValue(); } },
                 { "shop_section_id", n => { ShopSectionId = n.GetIntValue(); } },
                 { "should_auto_renew", n => { ShouldAutoRenew = n.GetBoolValue(); } },
-                { "state", n => { State = n.GetEnumValue<global::DevTKSS.MyManufacturerERP.Clients.Etsy.V3.Application.Shops.Item.Listings.Item.WithListing_PatchRequestBody_state>(); } },
+                { "_state", n => { State = n.GetEnumValue<global::DevTKSS.MyManufacturerERP.Clients.Etsy.V3.Application.Shops.Item.Listings.Item.WithListing_PatchRequestBody_state>(); } },
                 { "tags", n => { Tags = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
                 { "taxonomy_id", n => { TaxonomyId = n.GetLongValue(); } },
                 { "title", n => { Title = n.GetStringValue(); } },
@@ -195,7 +195,7 @@ namespace DevTKSS.MyManufacturerERP.Clients.Etsy.V3.Application.Shops.Item.Listi
             writer.WriteLongValue("shipping_profile_id", ShippingProfileId);
             writer.WriteIntValue("shop_section_id", ShopSectionId);
             writer.WriteBoolValue("should_auto_renew", ShouldAutoRenew);
-            writer.WriteEnumValue<global::DevTKSS.MyManufacturerERP.Clients.Etsy.V3.Application.Shops.Item.Listings.Item.WithListing_PatchRequestBody_state>("state", State);
+            writer.WriteEnumValue<global::DevTKSS.MyManufacturerERP.Clients.Etsy.V3.Application.Shops.Item.Listings.Item.WithListing_PatchRequestBody_state>("_state", State);
             writer.WriteCollectionOfPrimitiveValues<string>("tags", Tags);
             writer.WriteLongValue("taxonomy_id", TaxonomyId);
             writer.WriteStringValue("title", Title);

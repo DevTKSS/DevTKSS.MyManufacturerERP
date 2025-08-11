@@ -60,7 +60,7 @@ namespace DevTKSS.MyManufacturerERP.Clients.Etsy.V3.Application.Shops.Item.Listi
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public ListingsRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/v3/application/shops/{shop_id}/listings{?includes*,limit*,offset*,sort_on*,sort_order*,state*}", pathParameters)
+        public ListingsRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/v3/application/shops/{shop_id}/listings{?includes*,limit*,offset*,sort_on*,sort_order*,_state*}", pathParameters)
         {
         }
         /// <summary>
@@ -68,11 +68,11 @@ namespace DevTKSS.MyManufacturerERP.Clients.Etsy.V3.Application.Shops.Item.Listi
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public ListingsRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/v3/application/shops/{shop_id}/listings{?includes*,limit*,offset*,sort_on*,sort_order*,state*}", rawUrl)
+        public ListingsRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/v3/application/shops/{shop_id}/listings{?includes*,limit*,offset*,sort_on*,sort_order*,_state*}", rawUrl)
         {
         }
         /// <summary>
-        /// &lt;div class=&quot;wt-display-flex-xs wt-align-items-center wt-mt-xs-2 wt-mb-xs-3&quot;&gt;&lt;span class=&quot;wt-badge wt-badge--notificationPrimary wt-bg-slime-tint wt-mr-xs-2&quot;&gt;General Release&lt;/span&gt;&lt;a class=&quot;wt-text-link&quot; href=&quot;https://github.com/etsy/open-api/discussions&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Report bug&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;wt-display-flex-xs wt-align-items-center wt-mt-xs-2 wt-mb-xs-3&quot;&gt;&lt;p class=&quot;wt-text-body-01 banner-text&quot;&gt;This endpoint is ready for production use.&lt;/p&gt;&lt;/div&gt;Endpoint to list Listings that belong to a Shop. Listings can be filtered using the &apos;state&apos; param.
+        /// &lt;div class=&quot;wt-display-flex-xs wt-align-items-center wt-mt-xs-2 wt-mb-xs-3&quot;&gt;&lt;span class=&quot;wt-badge wt-badge--notificationPrimary wt-bg-slime-tint wt-mr-xs-2&quot;&gt;General Release&lt;/span&gt;&lt;a class=&quot;wt-text-link&quot; href=&quot;https://github.com/etsy/open-api/discussions&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Report bug&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;wt-display-flex-xs wt-align-items-center wt-mt-xs-2 wt-mb-xs-3&quot;&gt;&lt;p class=&quot;wt-text-body-01 banner-text&quot;&gt;This endpoint is ready for production use.&lt;/p&gt;&lt;/div&gt;Endpoint to list Listings that belong to a Shop. Listings can be filtered using the &apos;_state&apos; param.
         /// </summary>
         /// <returns>A <see cref="global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.ShopListingsWithAssociations"/></returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
@@ -134,7 +134,7 @@ namespace DevTKSS.MyManufacturerERP.Clients.Etsy.V3.Application.Shops.Item.Listi
             return await RequestAdapter.SendAsync<global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.ShopListing>(requestInfo, global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.ShopListing.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// &lt;div class=&quot;wt-display-flex-xs wt-align-items-center wt-mt-xs-2 wt-mb-xs-3&quot;&gt;&lt;span class=&quot;wt-badge wt-badge--notificationPrimary wt-bg-slime-tint wt-mr-xs-2&quot;&gt;General Release&lt;/span&gt;&lt;a class=&quot;wt-text-link&quot; href=&quot;https://github.com/etsy/open-api/discussions&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Report bug&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;wt-display-flex-xs wt-align-items-center wt-mt-xs-2 wt-mb-xs-3&quot;&gt;&lt;p class=&quot;wt-text-body-01 banner-text&quot;&gt;This endpoint is ready for production use.&lt;/p&gt;&lt;/div&gt;Endpoint to list Listings that belong to a Shop. Listings can be filtered using the &apos;state&apos; param.
+        /// &lt;div class=&quot;wt-display-flex-xs wt-align-items-center wt-mt-xs-2 wt-mb-xs-3&quot;&gt;&lt;span class=&quot;wt-badge wt-badge--notificationPrimary wt-bg-slime-tint wt-mr-xs-2&quot;&gt;General Release&lt;/span&gt;&lt;a class=&quot;wt-text-link&quot; href=&quot;https://github.com/etsy/open-api/discussions&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Report bug&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;wt-display-flex-xs wt-align-items-center wt-mt-xs-2 wt-mb-xs-3&quot;&gt;&lt;p class=&quot;wt-text-body-01 banner-text&quot;&gt;This endpoint is ready for production use.&lt;/p&gt;&lt;/div&gt;Endpoint to list Listings that belong to a Shop. Listings can be filtered using the &apos;_state&apos; param.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
@@ -184,7 +184,7 @@ namespace DevTKSS.MyManufacturerERP.Clients.Etsy.V3.Application.Shops.Item.Listi
             return new global::DevTKSS.MyManufacturerERP.Clients.Etsy.V3.Application.Shops.Item.Listings.ListingsRequestBuilder(rawUrl, RequestAdapter);
         }
         /// <summary>
-        /// &lt;div class=&quot;wt-display-flex-xs wt-align-items-center wt-mt-xs-2 wt-mb-xs-3&quot;&gt;&lt;span class=&quot;wt-badge wt-badge--notificationPrimary wt-bg-slime-tint wt-mr-xs-2&quot;&gt;General Release&lt;/span&gt;&lt;a class=&quot;wt-text-link&quot; href=&quot;https://github.com/etsy/open-api/discussions&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Report bug&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;wt-display-flex-xs wt-align-items-center wt-mt-xs-2 wt-mb-xs-3&quot;&gt;&lt;p class=&quot;wt-text-body-01 banner-text&quot;&gt;This endpoint is ready for production use.&lt;/p&gt;&lt;/div&gt;Endpoint to list Listings that belong to a Shop. Listings can be filtered using the &apos;state&apos; param.
+        /// &lt;div class=&quot;wt-display-flex-xs wt-align-items-center wt-mt-xs-2 wt-mb-xs-3&quot;&gt;&lt;span class=&quot;wt-badge wt-badge--notificationPrimary wt-bg-slime-tint wt-mr-xs-2&quot;&gt;General Release&lt;/span&gt;&lt;a class=&quot;wt-text-link&quot; href=&quot;https://github.com/etsy/open-api/discussions&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Report bug&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;wt-display-flex-xs wt-align-items-center wt-mt-xs-2 wt-mb-xs-3&quot;&gt;&lt;p class=&quot;wt-text-body-01 banner-text&quot;&gt;This endpoint is ready for production use.&lt;/p&gt;&lt;/div&gt;Endpoint to list Listings that belong to a Shop. Listings can be filtered using the &apos;_state&apos; param.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
         public partial class ListingsRequestBuilderGetQueryParameters 
@@ -248,7 +248,7 @@ namespace DevTKSS.MyManufacturerERP.Clients.Etsy.V3.Application.Shops.Item.Listi
             [Obsolete("This property is deprecated, use StateAsGetStateQueryParameterType instead")]
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-            [QueryParameter("state")]
+            [QueryParameter("_state")]
             public string? State { get; set; }
 #nullable restore
 #else
@@ -256,7 +256,7 @@ namespace DevTKSS.MyManufacturerERP.Clients.Etsy.V3.Application.Shops.Item.Listi
             public string State { get; set; }
 #endif
             /// <summary>When _updating_ a listing, this value can be either `active` or `inactive`. Note: Setting a `draft` listing to `active` will also publish the listing on etsy.com and requires that the listing have an image set. Setting a `sold_out` listing to active will update the quantity to 1 and renew the listing on etsy.com.</summary>
-            [QueryParameter("state")]
+            [QueryParameter("_state")]
             public global::DevTKSS.MyManufacturerERP.Clients.Etsy.V3.Application.Shops.Item.Listings.GetStateQueryParameterType? StateAsGetStateQueryParameterType { get; set; }
         }
         /// <summary>

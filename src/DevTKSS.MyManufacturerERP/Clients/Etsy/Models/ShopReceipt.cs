@@ -193,7 +193,7 @@ namespace DevTKSS.MyManufacturerERP.Clients.Etsy.Models
 #else
         public List<global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.ShopReceiptShipment> Shipments { get; set; }
 #endif
-        /// <summary>The state string for the recipient in the shipping address.</summary>
+        /// <summary>The _state string for the recipient in the shipping address.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public string? State { get; set; }
@@ -317,7 +317,7 @@ namespace DevTKSS.MyManufacturerERP.Clients.Etsy.Models
                 { "seller_email", n => { SellerEmail = n.GetStringValue(); } },
                 { "seller_user_id", n => { SellerUserId = n.GetLongValue(); } },
                 { "shipments", n => { Shipments = n.GetCollectionOfObjectValues<global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.ShopReceiptShipment>(global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.ShopReceiptShipment.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "state", n => { State = n.GetStringValue(); } },
+                { "_state", n => { State = n.GetStringValue(); } },
                 { "status", n => { Status = n.GetEnumValue<global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.ShopReceipt_status>(); } },
                 { "subtotal", n => { Subtotal = n.GetObjectValue<global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.Money>(global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.Money.CreateFromDiscriminatorValue); } },
                 { "total_price", n => { TotalPrice = n.GetObjectValue<global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.Money>(global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.Money.CreateFromDiscriminatorValue); } },
@@ -366,7 +366,7 @@ namespace DevTKSS.MyManufacturerERP.Clients.Etsy.Models
             writer.WriteStringValue("seller_email", SellerEmail);
             writer.WriteLongValue("seller_user_id", SellerUserId);
             writer.WriteCollectionOfObjectValues<global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.ShopReceiptShipment>("shipments", Shipments);
-            writer.WriteStringValue("state", State);
+            writer.WriteStringValue("_state", State);
             writer.WriteEnumValue<global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.ShopReceipt_status>("status", Status);
             writer.WriteObjectValue<global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.Money>("subtotal", Subtotal);
             writer.WriteObjectValue<global::DevTKSS.MyManufacturerERP.Clients.Etsy.Models.Money>("total_price", TotalPrice);

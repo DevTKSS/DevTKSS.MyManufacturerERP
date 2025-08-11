@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 using System;
 namespace DevTKSS.MyManufacturerERP.Clients.Etsy.Models
 {
-    /// <summary>The current state of a given video. Value is one of `active`, `inactive`, `deleted` or `flagged`.</summary>
+    /// <summary>The current _state of a given video. Value is one of `active`, `inactive`, `deleted` or `flagged`.</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     public enum ListingVideo_video_state
     {
