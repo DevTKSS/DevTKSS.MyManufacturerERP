@@ -3,10 +3,10 @@ global using System.Security.Claims;
 global using System.Net.Mime;
 global using System.Text;
 // Web slice namespaces
-global using DevTKSS.MyManufacturerERP.Web.Endpoints.Todo;
-global using DevTKSS.MyManufacturerERP.Web.Endpoints.Weather;
-global using DevTKSS.MyManufacturerERP.Web.Endpoints.Authentication;
-global using DevTKSS.MyManufacturerERP.Web.Server;
+global using DevTKSS.MyManufacturerERP.WebApi.Endpoints.Todo;
+global using DevTKSS.MyManufacturerERP.WebApi.Endpoints.Weather;
+global using DevTKSS.MyManufacturerERP.WebApi.Endpoints.Authentication;
+global using DevTKSS.MyManufacturerERP.WebApi.Server;
 // Domain slice namespaces
 global using DevTKSS.MyManufacturerERP.Domain.Entities;
 

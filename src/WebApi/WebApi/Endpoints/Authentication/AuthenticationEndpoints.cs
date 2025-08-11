@@ -15,16 +15,16 @@ public static class AuthenticationEndpoints
                 .AllowAnonymous();
 
         group.MapPost("/token", Token)
-            .RequireAuthorization()
-            .WithName("Token")
-            .WithSummary("Exchange authorization code for access token")
-            .WithDescription("Exchange an authorization code for an access token");
+                .RequireAuthorization()
+                .WithName("Token")
+                .WithSummary("Exchange authorization code for access token")
+                .WithDescription("Exchange an authorization code for an access token");
 
         group.MapGet("/userinfo", UserInfo)
-                    .RequireAuthorization()
-                    .WithName("UserInfo")
-                    .WithSummary("Get user information")
-                    .WithDescription("Retrieve user information based on the authenticated user's claims");
+                .RequireAuthorization()
+                .WithName("UserInfo")
+                .WithSummary("Get user information")
+                .WithDescription("Retrieve user information based on the authenticated user's claims");
 
         return group;
     }
@@ -57,7 +57,7 @@ public static class AuthenticationEndpoints
         var html = string.Format(template, redirect);
 
         return TypedResults.Content(html, MediaTypeNames.Text.Html, Encoding.UTF8, StatusCodes.Status200OK);
-            }
+    }
 
     private static async Task<Results<Ok, UnauthorizedHttpResult, BadRequest>> Token(HttpContext context)
     {

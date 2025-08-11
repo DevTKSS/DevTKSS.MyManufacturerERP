@@ -2,10 +2,7 @@
 // logger configured in `AddSerilog()` below, once configuration and dependency-injection have both been
 // set up successfully.
 
-using DevTKSS.MyManufacturerERP.WebApi.Endpoints.Authentication;
-using DevTKSS.MyManufacturerERP.WebApi.Endpoints.Todo;
-using DevTKSS.MyManufacturerERP.WebApi.Endpoints.Weather;
-using DevTKSS.MyManufacturerERP.WebApi.Server;
+
 
 Log.Logger = new LoggerConfiguration()
       .WriteTo.Console()
