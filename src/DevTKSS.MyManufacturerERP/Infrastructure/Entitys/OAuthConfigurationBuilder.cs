@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Entitys;
 
 public class OAuthConfigurationBuilder

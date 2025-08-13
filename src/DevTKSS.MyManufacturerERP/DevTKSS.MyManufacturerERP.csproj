@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Uno.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net9.0-desktop;net9.0-android;net9.0-ios;net9.0-browserwasm</TargetFrameworks><!--;net9.0;net9.0-windows10.0.26100-->
-    <UserSecretsId>0bec60db-3975-4de2-bc42-f4dc8937eb67</UserSecretsId>
+    <UserSecretsId>73d0e72f-3b9d-4ea9-bc0e-ca05efc5cd26</UserSecretsId>
     <OutputType>Exe</OutputType>
     <UnoSingleProject>true</UnoSingleProject>
     <!-- Display name -->
@@ -41,10 +41,10 @@
 
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)'=='Debug' or '$(IsUiAutomationMappingEnabled)'=='True'">
+  <!--<PropertyGroup Condition="'$(Configuration)'=='Debug' or '$(IsUiAutomationMappingEnabled)'=='True'">
     <IsUiAutomationMappingEnabled>True</IsUiAutomationMappingEnabled>
     <DefineConstants>$(DefineConstants);USE_UITESTS</DefineConstants>
-  </PropertyGroup>
+  </PropertyGroup>-->
 
   <ItemGroup>
     <UnoImage Include="Assets\Images\*.png" />
@@ -57,7 +57,7 @@
 
   </ItemGroup>
 
-  <ItemGroup>
+  <!--<ItemGroup>
     <ProjectReference Include="..\Temp.Extensibility.SystemAuthBrokerServer\Temp.Extensibility.DesktopAuthBroker.csproj" />
-  </ItemGroup>
+  </ItemGroup>-->
 </Project>

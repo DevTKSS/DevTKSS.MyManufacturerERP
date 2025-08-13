@@ -1,6 +1,4 @@
-using FluentValidation;
-
-namespace DevTKSS.MyManufacturerERP.Infrastructure.Entitys;
+namespace DevTKSS.MyManufacturerERP.Validation;
 
 public class OAuthOptionsValidator : AbstractValidator<OAuthOptions>
 {

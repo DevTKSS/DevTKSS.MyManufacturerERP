@@ -1,8 +1,7 @@
-using DevTKSS.MyManufacturerERP.Infrastructure.Defaults;
 
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Services;
 
-public sealed class EtsyOAuthAuthenticationService
+public sealed class EtsyOAuthAuthenticationDelegate 
 {
     private const string ProviderName = "EtsyOAuth";
 
@@ -11,7 +10,7 @@ public sealed class EtsyOAuthAuthenticationService
     private string? _state;
     private string? _codeVerifier;
 
-    public EtsyOAuthAuthenticationService(
+    public EtsyOAuthAuthenticationDelegate(
         IOptions<OAuthOptions> options,
         IEtsyOAuthEndpoints oAuthEndpoints)
     {

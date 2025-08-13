@@ -1,5 +1,3 @@
-
-
 namespace DevTKSS.MyManufacturerERP.Models;
 
 public class OAuthOptions : EndpointOptions
@@ -15,4 +13,14 @@ public class OAuthOptions : EndpointOptions
     public string? ClientID { get; init; }
     public string? RedirectUri { get; init; }
     public string[] Scopes { get; init; } = [];
+    public ValidationResult ValidateOptions()
+    {
+        var validator = new OAuthOptionsValidator();
+        var result = validator.Validate(this);
+        if (!result.IsValid)
+        {
+            throw new ValidationException(result.Errors);
+        }
+        return result;
+    }
 }

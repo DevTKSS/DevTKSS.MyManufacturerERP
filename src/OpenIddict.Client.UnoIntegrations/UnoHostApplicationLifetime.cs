@@ -1,6 +1,4 @@
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Hosting.Internal;
-using Microsoft.Extensions.Logging;
+
 
 namespace OpenIddict.Sandbox.UnoClient;
 //https://github.com/Ecierge/openiddict-core/blob/apple-cryptokit/sandbox/OpenIddict.Sandbox.Uno.Client/UnoHostApplicationLifetime.cs

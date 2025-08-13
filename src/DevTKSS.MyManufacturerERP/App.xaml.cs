@@ -1,10 +1,15 @@
 using Serilog;
 using DevTKSS.MyManufacturerERP.Infrastructure.Defaults;
+using DevTKSS.MyManufacturerERP.Infrastructure.Services;
+using Microsoft.Extensions.Diagnostics.Metrics;
+
+
 // this is somehow not detected even while its the correct namespace
-#if !WINDOWS
-using IWebAuthenticationBrokerProvider = Uno.AuthenticationBroker.IWebAuthenticationBrokerProvider;
-#endif
-using Temp.Extensibility.DesktopAuthBroker;
+//#if !WINDOWS
+//using IWebAuthenticationBrokerProvider = Uno.AuthenticationBroker.IWebAuthenticationBrokerProvider;
+//using Temp.Extensibility.DesktopAuthBroker;
+//#endif
+
 namespace DevTKSS.MyManufacturerERP;
 public partial class App : Application
 {
@@ -69,7 +74,7 @@ public partial class App : Application
                  unoConfigBuilder
                     .EmbeddedSource<App>()
                     .Section<AppConfig>()
-                    .Section<OAuthOptions>("EtsyOAuth")
+                    .Section<OAuthOptions>("EtsyOAuthOptions")
                     .Section<ApiKeyOptions>("SevdeskApiKeyClient")
              )
             // Enable localization (see appsettings.json for supported languages)
@@ -91,8 +96,9 @@ public partial class App : Application
                 // DelegatingHandler will be automatically injected
                 services.AddTransient<DelegatingHandler, DebugHttpHandler>();
 #endif
-                services.AddRefitClientWithEndpoint<IEtsyUserEndpoints, OAuthOptions>(
+                services.AddRefitClientWithEndpoint<IEtsyOAuthEndpoints, OAuthOptions>(
                     context: context,
+                    options: context.Configuration.GetSection("EtsyOAuthOptions").Get<OAuthOptions>(),
                     name: "EtsyClient",
                     configure: (clientBuilder, options) => clientBuilder
                     .ConfigureHttpClient(httpClient =>
@@ -108,13 +114,7 @@ public partial class App : Application
                 .AddRefitClient<IEtsyUserEndpoints>(context);
             })
             .UseAuthentication(authBuilder =>
-                authBuilder.AddCustom(custom =>
-
-                custom
-                    .Login(async (sp, dispatcher, credentials, cancellationToken) => await ProcessCredentials(credentials))
-                    .Refresh(async (sp, tokenDictionary, cancellationToken) => await HandleRefresh(tokenDictionary)),
-                    name: "EtsyOAuth"),
-            
+                authBuilder.AddWeb<EtsyOAuthAuthenticationDelegate>(name: "EtsyOAuth"),
                 configureAuthorization: builder =>
                 {
                     builder.AuthorizationHeader(scheme: "Bearer");
@@ -124,9 +124,10 @@ public partial class App : Application
             .ConfigureServices((context, services) =>
             {
                 // TODO: Register your sp
-#if !WINDOWS
-                services.AddSingleton<IWebAuthenticationBrokerProvider, SystemBrowserAuthBroker>();
-#endif
+//#if !WINDOWS
+//                services.AddSingleton<IWebAuthenticationBrokerProvider, SystemBrowserAuthBroker>();
+//#endif
+
             })
             .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
         );
@@ -156,16 +157,13 @@ public partial class App : Application
     private async ValueTask<IDictionary<string, string>?> HandleRefresh(IDictionary<string, string> tokenDictionary)
     {
         // TODO: Write code to refresh tokens using the currently stored tokens
-        if ((tokenDictionary?.TryGetValue(OAuthTokenRefreshDefaults.RefreshToken, out var refreshToken) ?? false) &&
-            !refreshToken.IsNullOrEmpty() &&
-            (tokenDictionary?.TryGetValue("Expiry", out var expiry) ?? false) &&
-            DateTime.TryParse(expiry, out var tokenExpiry) &&
-            tokenExpiry > DateTime.Now)
+        if ((tokenDictionary?.TryGetValue(OAuthTokenRefreshDefaults.RefreshToken, out var refreshToken) ?? false) && !refreshToken.IsNullOrEmpty()
+         && (tokenDictionary?.TryGetValue(OAuthTokenRefreshDefaults.ExpiresInKey, out var expiry) ?? false) && DateTime.TryParse(expiry, out var tokenExpiry) && tokenExpiry > DateTime.Now)
         {
             // Return IDictionary containing any tokens used by service calls or in the app
             tokenDictionary ??= new Dictionary<string, string>();
             tokenDictionary[OAuthTokenRefreshDefaults.AccessTokenKey] = "NewSampleToken";
-            tokenDictionary["Expiry"] = DateTime.Now.AddMinutes(5).ToString("g");
+            tokenDictionary[OAuthTokenRefreshDefaults.ExpiresInKey] = DateTime.Now.AddMinutes(5).ToString("g");
             return tokenDictionary;
         }
 
@@ -176,8 +174,7 @@ public partial class App : Application
     private async ValueTask<IDictionary<string, string>?> ProcessCredentials(IDictionary<string, string> credentials)
     {
         // TODO: Write code to process credentials that are passed into the LoginAsync method
-        if (credentials?.TryGetValue(nameof(LoginModel.Username), out var username) ?? false &&
-            !username.IsNullOrEmpty())
+        if (credentials?.TryGetValue(nameof(LoginModel.Username), out var username) ?? false && !username.IsNullOrEmpty())
         {
             // Return IDictionary containing any tokens used by service calls or in the app
             credentials ??= new Dictionary<string, string>();
