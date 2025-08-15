@@ -15,7 +15,6 @@
     <ApplicationPublisher>TKSS Development</ApplicationPublisher>
     <!-- Package Description -->
     <Description>DevTKSS.MyManufacturerERP powered by Uno Platform.</Description>
-
     <!--
       UnoFeatures let's you quickly add and manage implicit package references based on the features you want to use.
       https://aka.platform.uno/singleproject-features
@@ -37,6 +36,7 @@
       Navigation;
       ThemeService;
       SkiaRenderer;
+      WebView;
     </UnoFeatures>
 
   </PropertyGroup>
@@ -52,7 +52,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
 
   </ItemGroup>

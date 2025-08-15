@@ -5,7 +5,7 @@ namespace DevTKSS.MyManufacturerERP.Infrastructure.Defaults;
 public class OAuthTokenRefreshDefaults
 {
     public const string GrantTypeKey = "grant_type";
-    public const string GrantTypeValue = "authorization_code";
+    public const string GrantTypeAuthorizationCode = "authorization_code";
     public const string AccessTokenKey = "access_token";
     public const string TokenTypeKey = "token_type";
     public const string RefreshToken = "refresh_token";

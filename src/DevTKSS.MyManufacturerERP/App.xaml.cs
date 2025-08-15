@@ -128,6 +128,7 @@ public partial class App : Application
 //                services.AddSingleton<IWebAuthenticationBrokerProvider, SystemBrowserAuthBroker>();
 //#endif
 
+                services.AddSingleton<EtsyOAuthAuthenticationDelegate>();
             })
             .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
         );

@@ -1,26 +1,40 @@
-
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Services;
 
-public sealed class EtsyOAuthAuthenticationDelegate 
+internal sealed class EtsyOAuthAuthenticationDelegate 
 {
     private const string ProviderName = "EtsyOAuth";
 
-    private readonly IEtsyOAuthEndpoints _IAuthEndpoints;
+    private readonly IEtsyOAuthEndpoints _authEndpointsClient;
+    private readonly IEtsyUserEndpoints _userEndpointsClient;
+    private readonly ITasksManager _tasksManager;
     private readonly OAuthOptions _options; // Etsy "API Key string"
+    private readonly ITokenCache _tokenCache;
     private string? _state;
     private string? _codeVerifier;
+    private readonly ILogger _logger;
 
     public EtsyOAuthAuthenticationDelegate(
+        ILogger<EtsyOAuthAuthenticationDelegate> logger,
         IOptions<OAuthOptions> options,
-        IEtsyOAuthEndpoints oAuthEndpoints)
+        IEtsyOAuthEndpoints oAuthEndpoints,
+        IEtsyUserEndpoints userEndpoints,
+        IHelpers oAuthHelpers,
+        ITasksManager oAuthTasksManager,
+        ITokenCache tokenCache)
     {
         _options = options.Value ?? throw new ArgumentNullException(nameof(options));
-        ArgumentOutOfRangeException.ThrowIfLessThan(_options.Scopes.Length,1, nameof(_options.Scopes));
+        ArgumentOutOfRangeException.ThrowIfLessThan(_options.Scopes.Length, 1, nameof(_options.Scopes));
         ArgumentException.ThrowIfNullOrWhiteSpace(_options.ClientID, nameof(_options.ClientID));
-        _IAuthEndpoints = oAuthEndpoints;
+        _userEndpointsClient = userEndpoints;
+        _authEndpointsClient = oAuthEndpoints;
+        _tokenCache = tokenCache;
+        _logger = logger;
     }
 
-    public async Task<string> PrepareLoginStartUri(
+#region PrepareLoginStartUri and PrepareLoginCallbackUri for Uno.Extensions.Authentication.Web
+    // This method prepares the login start URI for the OAuth flow and is used or should be used by the Uno.Extensions.Authentication.Web package
+    // as it is unclear how to connect this to the Uno.Extensions.Authentication.Web WebAuthenticationProvider, I will have to replace it with own refit call instead.
+    internal async Task<string> PrepareLoginStartUri(
         IServiceProvider services,
         ITokenCache tokens,
         IDictionary<string, string>? credentials,
@@ -55,6 +69,9 @@ public sealed class EtsyOAuthAuthenticationDelegate
 
         return url.Uri.ToString();
     }
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously 
+    // This method is not awaiting anything as the loginCallbackUri does not hold any data at this point that could be extracted with the default keys Uno uses, which are not 'state' or 'code' then only 'access_token' and 'refresh_token'.
+    // implement this if oAuth on desktop with AuthorizationCode flow is supported, otherwise this is not needed.
     public async Task<string> PrepareLoginCallbackUri(
         IServiceProvider services,
         ITokenCache tokens,
@@ -64,7 +81,55 @@ public sealed class EtsyOAuthAuthenticationDelegate
     {
         return string.IsNullOrWhiteSpace(loginCallbackUri) ? _options.RedirectUri! : loginCallbackUri;
     }
-    public async Task<TokenResponse> ExchangeCodeAsync(
+
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously 
+#endregion
+
+    public async Task AuthenticateAsync(Uri preparedAuthorizationStartUri,CancellationToken cancellationToken = default)
+    {
+
+       var authGrantResponse = await _authEndpointsClient.SendAuthorizationCodeRequestAsync(
+            responseType: OAuthAuthRequestDefaults.ResponseValueCode,
+            redirectUri: _options.RedirectUri!,
+            scope: Uri.EscapeDataString(string.Join(' ', _options.Scopes)),
+            client_id: _options.ClientID!,
+            state: _state!,
+            codeChallenge: _codeVerifier!,
+            codeChallengeMethod: OAuthPkceDefaults.CodeChallengeMethodS256
+        );
+
+        if(!authGrantResponse.IsSuccessStatusCode)
+        {
+            switch (authGrantResponse.Content!.Error)
+            {
+                case OAuthErrorResponseDefaults.InvalidRequest:
+                    _logger.LogError("Invalid request: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
+                    break;
+                case OAuthErrorResponseDefaults.InvalidClient:
+                    _logger.LogError("Invalid client: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
+                    break;
+                case OAuthErrorResponseDefaults.InvalidGrant:
+                    _logger.LogError("Invalid grant: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
+                    break;
+                case OAuthErrorResponseDefaults.UnauthorizedClient:
+                    _logger.LogError("Unauthorized client: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
+                    break;
+                case OAuthErrorResponseDefaults.UnsupportedGrantType:
+                    _logger.LogError("Unsupported grant type: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
+                    break;
+                case OAuthErrorResponseDefaults.AccessDenied:
+                    _logger.LogError("Access denied: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
+                    break;
+                case OAuthErrorResponseDefaults.InvalidScope:
+                    _logger.LogError("Invalid scope: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
+                    break;
+                default:
+                    _logger.LogError("Unknown error: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
+                    break;
+            }
+        }
+    }
+    public async Task<bool> ExchangeTokenAsync(
         IServiceProvider services,
         ITokenCache tokens,
         IDictionary<string, string>? queryParameters,
@@ -73,36 +138,40 @@ public sealed class EtsyOAuthAuthenticationDelegate
         CancellationToken ct)
     {
         string? state = null;
-        string? code = null;
+        string? authCode = null;
+        // Assuming the queryParameters would be holding the query parameters from the callback URL
         queryParameters?.TryGetValue(OAuthAuthResponseDefaults.StateKey, out state);
-        queryParameters?.TryGetValue(OAuthAuthResponseDefaults.CodeKey, out code);
+        queryParameters?.TryGetValue(OAuthAuthResponseDefaults.CodeKey, out authCode);
         queryParameters?.TryGetValue(OAuthErrorResponseDefaults.ErrorKey, out var error);
         queryParameters?.TryGetValue(OAuthErrorResponseDefaults.ErrorDescriptionKey, out var errorDescription);
         queryParameters?.TryGetValue(OAuthErrorResponseDefaults.ErrorUriKey, out var errorUri);
 
         // Validate state and code
-        if (string.IsNullOrWhiteSpace(state) || state != _state || string.IsNullOrWhiteSpace(code))
+        if (string.IsNullOrWhiteSpace(state) || state != _state || string.IsNullOrWhiteSpace(authCode))
         {
-            throw new InvalidOperationException($"Invalid state or code. State: '{state}', Old State: '{_state}', Code: '{code}', Code Verifyer: {_codeVerifier}");
+            _logger.LogError("Invalid state or code. State: '{state}', Old State: '{oldState}', Code: '{authCode}', Code Verifyer: {codeVerifier}",
+                state, _state, authCode, _codeVerifier);
+            return false;
         }
-
-        var tokenExchangeResult = await _IAuthEndpoints.ExchangeCodeAsync(
-            grantType: OAuthTokenRefreshDefaults.GrantTypeValue,
-            clientId: _options.ClientID!,
-            redirectUri: _options.RedirectUri!,
-            code: code,
-            codeVerifier: _codeVerifier!
-        );
-
-        // Check for error in response
-        if (string.IsNullOrEmpty(tokenExchangeResult.AccessToken) || string.IsNullOrEmpty(tokenExchangeResult.RefreshToken))
+        
+        var tokenExchangeResult = await _authEndpointsClient.ExchangeCodeAsync(new AccessTokenRequest
         {
-            throw new InvalidOperationException($"Token exchange failed. Response missing access_token.");
-        }
+            GrantType = OAuthTokenRefreshDefaults.GrantTypeAuthorizationCode,
+            ClientId = _options.ClientID!,
+            RedirectUri = _options.RedirectUri!,
+            Code = authCode,
+            CodeVerifier = _codeVerifier!
+        });
 
-        await tokens.SaveTokensAsync(ProviderName, tokenExchangeResult.AccessToken,tokenExchangeResult.RefreshToken, ct);
+        await _tokenCache.SaveTokensAsync(ProviderName, tokenExchangeResult.AccessToken, tokenExchangeResult.RefreshToken, ct);
 
-        return tokenExchangeResult;
+        // Save additional tokens if needed
+        var additionalTokensDict = new Dictionary<string, string>();
+        additionalTokensDict.TryAdd(OAuthTokenRefreshDefaults.ExpiresInKey, tokenExchangeResult.ExpiresIn.ToString());
+
+        await _tokenCache.SaveAsync(ProviderName, additionalTokensDict, ct);
+
+        return true;
     }
 
     public async Task<TokenResponse> RefreshAsync(
@@ -116,7 +185,7 @@ public sealed class EtsyOAuthAuthenticationDelegate
         if (!credentials.TryGetValue("refresh_token", out var refreshToken) || string.IsNullOrEmpty(refreshToken))
             throw new InvalidOperationException("Missing refresh_token in credentials.");
 
-        var tokenResponse = await _IAuthEndpoints.RefreshTokenAsync(
+        var tokenResponse = await _authEndpointsClient.RefreshTokenAsync(
             grantType: OAuthTokenRefreshDefaults.RefreshToken,
             clientId: _options.ClientID!,
             refreshToken: refreshToken

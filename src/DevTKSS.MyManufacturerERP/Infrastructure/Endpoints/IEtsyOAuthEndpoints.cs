@@ -19,9 +19,10 @@ public interface IEtsyOAuthEndpoints
     /// cross-site request forgery as described in <see href="https://datatracker.ietf.org/doc/html/rfc6749#section-10.12"/>Section 10.12</param>.
     /// <param name="codeChallenge"></param>
     /// <param name="codeChallengeMethod"></param>
-    /// <returns></returns>
+    /// <returns>The <see cref="AccessGrantResponse"/></returns>
     [Get("/oauth/connect")]
-    Task<AccessGrantResponse> SendAuthorizationCodeRequestAsync(
+    [QueryUriFormat(UriFormat.UriEscaped)]
+    Task<ApiResponse<AccessGrantResponse>> SendAuthorizationCodeRequestAsync(
         [AliasAs(OAuthAuthRequestDefaults.ResponseTypeKey)]string responseType,
         [AliasAs(OAuthAuthRequestDefaults.RedirectUriKey)]string redirectUri,
         [AliasAs(OAuthAuthRequestDefaults.ScopeKey)]string scope,
@@ -31,19 +32,34 @@ public interface IEtsyOAuthEndpoints
         [AliasAs(OAuthPkceDefaults.CodeChallengeMethodS256)]string codeChallengeMethod
     );
     [Post("/oauth/token")]
+    [QueryUriFormat(UriFormat.UriEscaped)]
     Task<TokenResponse> ExchangeCodeAsync(
-        [AliasAs(OAuthTokenRefreshDefaults.GrantTypeKey)] string grantType,
-        [AliasAs(OAuthAuthRequestDefaults.ClientIdKey)] string clientId,
-        [AliasAs(OAuthAuthRequestDefaults.RedirectUriKey)] string redirectUri,
-        [AliasAs(OAuthAuthRequestDefaults.ResponseValueCode)] string code,
-        [AliasAs(OAuthPkceDefaults.CodeVerifierKey)] string codeVerifier
-    );
+        [Body(BodySerializationMethod.UrlEncoded)] AccessTokenRequest accessTokenRequest);
 
     [Post("/oauth/token")]
+    [QueryUriFormat(UriFormat.UriEscaped)]
     Task<TokenResponse> RefreshTokenAsync(
         [AliasAs(OAuthTokenRefreshDefaults.GrantTypeKey)] string grantType,
         [AliasAs(OAuthAuthRequestDefaults.ClientIdKey)] string clientId,
         [AliasAs(OAuthTokenRefreshDefaults.RefreshToken)] string refreshToken
     );
 
+}
+
+public class AccessTokenRequest
+{
+    [JsonPropertyName(OAuthTokenRefreshDefaults.GrantTypeKey)]
+    public string GrantType { get; set; } = OAuthTokenRefreshDefaults.GrantTypeAuthorizationCode;
+
+    [JsonPropertyName(OAuthAuthRequestDefaults.ClientIdKey)]
+    public string ClientId { get; set; } = string.Empty;
+
+    [JsonPropertyName(OAuthAuthRequestDefaults.RedirectUriKey)]
+    public string RedirectUri { get; set; } = string.Empty;
+
+    [JsonPropertyName(OAuthAuthRequestDefaults.ResponseValueCode)]
+    public string Code { get; set; } = string.Empty;
+
+    [JsonPropertyName(OAuthPkceDefaults.CodeVerifierKey)]
+    public string CodeVerifier { get; set; } = string.Empty;
 }

@@ -1,8 +1,8 @@
 using DevTKSS.MyManufacturerERP.Infrastructure.Endpoints.Responses;
 
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Endpoints;
-[Headers($"Content-Type: {MediaTypeNames.Application.Json}")]
 
+[Headers("Accept: application/json")]
 public interface IEtsyPingEndpoint
 {
     [Get("/v3/application/openapi-ping")]

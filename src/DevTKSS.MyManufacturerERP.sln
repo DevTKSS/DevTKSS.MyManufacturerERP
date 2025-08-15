@@ -37,19 +37,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "WebApi\Domain\Dom
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi", "WebApi\WebApi\WebApi.csproj", "{64BD1B3A-9E2F-2982-1233-9B15CD10350A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.WasmServer", "DevTKSS.MyManufacturerERP.WasmServer\DevTKSS.MyManufacturerERP.WasmServer.csproj", "{56F71209-EC13-1A65-20E7-05039CD34E67}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.AspNet.Security.OAuth.Etsy", "DevTKSS.AspNet.Security.OAuth.Etsy\DevTKSS.AspNet.Security.OAuth.Etsy.csproj", "{A0349742-EAC1-49E8-9251-CC687B68FF66}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIddict.Client.UnoIntegrations", "OpenIddict.Client.UnoIntegrations\OpenIddict.Client.UnoIntegrations.csproj", "{F182A818-196D-2ED2-DDB3-AAF33E7E8645}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Temp.Extensibility.DesktopAuthBroker", "Temp.Extensibility.SystemAuthBrokerServer\Temp.Extensibility.DesktopAuthBroker.csproj", "{4D4AB05E-A708-4927-9033-66CA521EA530}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.UITests", "Tests\DevTKSS.MyManufacturerERP.UITests\DevTKSS.MyManufacturerERP.UITests.csproj", "{5FF30EE8-75FF-4689-A8D4-3EC856A07262}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.xUnitTests", "Tests\DevTKSS.MyManufacturerERP.xUnitTests\DevTKSS.MyManufacturerERP.xUnitTests.csproj", "{9E76F440-A479-7386-83B3-544D5558115A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.Tests", "Tests\DevTKSS.MyManufacturerERP.Tests\DevTKSS.MyManufacturerERP.Tests.csproj", "{B2882421-9639-6ECD-8721-FDA8B194E19F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.WasmServer", "DevTKSS.MyManufacturerERP.WasmServer\DevTKSS.MyManufacturerERP.WasmServer.csproj", "{0CC286C8-A886-1674-0274-F36EBE5073E6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,22 +71,10 @@ Global
 		{64BD1B3A-9E2F-2982-1233-9B15CD10350A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{64BD1B3A-9E2F-2982-1233-9B15CD10350A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64BD1B3A-9E2F-2982-1233-9B15CD10350A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{56F71209-EC13-1A65-20E7-05039CD34E67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{56F71209-EC13-1A65-20E7-05039CD34E67}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{56F71209-EC13-1A65-20E7-05039CD34E67}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{56F71209-EC13-1A65-20E7-05039CD34E67}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A0349742-EAC1-49E8-9251-CC687B68FF66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A0349742-EAC1-49E8-9251-CC687B68FF66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A0349742-EAC1-49E8-9251-CC687B68FF66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A0349742-EAC1-49E8-9251-CC687B68FF66}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F182A818-196D-2ED2-DDB3-AAF33E7E8645}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F182A818-196D-2ED2-DDB3-AAF33E7E8645}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F182A818-196D-2ED2-DDB3-AAF33E7E8645}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F182A818-196D-2ED2-DDB3-AAF33E7E8645}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4D4AB05E-A708-4927-9033-66CA521EA530}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4D4AB05E-A708-4927-9033-66CA521EA530}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4D4AB05E-A708-4927-9033-66CA521EA530}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4D4AB05E-A708-4927-9033-66CA521EA530}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5FF30EE8-75FF-4689-A8D4-3EC856A07262}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5FF30EE8-75FF-4689-A8D4-3EC856A07262}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FF30EE8-75FF-4689-A8D4-3EC856A07262}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -103,6 +87,10 @@ Global
 		{B2882421-9639-6ECD-8721-FDA8B194E19F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2882421-9639-6ECD-8721-FDA8B194E19F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2882421-9639-6ECD-8721-FDA8B194E19F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CC286C8-A886-1674-0274-F36EBE5073E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CC286C8-A886-1674-0274-F36EBE5073E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CC286C8-A886-1674-0274-F36EBE5073E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CC286C8-A886-1674-0274-F36EBE5073E6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
