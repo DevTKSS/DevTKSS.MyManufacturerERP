@@ -79,9 +79,9 @@ public partial class App : Application
                         options.AddRegistration(new OpenIddictClientRegistration
                         {
 #if ANDROID
-                            Issuer = new Uri("https://10.0.2.2:44395/", UriKind.Absolute),
+                            Issuer = new Uri("https://10.0.2.2:5001/", UriKind.Absolute),
 #else
-                            Issuer = new Uri("https://localhost:44395/", UriKind.Absolute),
+                            Issuer = new Uri("https://localhost:5001/", UriKind.Absolute),
 #endif
                             ProviderName = "Local",
 
@@ -227,7 +227,7 @@ public partial class App : Application
                     .Refresh(async (authService, serviceProvider, tokenCache, tokens, cancellationToken) =>
                         await RefreshTokensAsync(authService, serviceProvider, tokenCache, tokens, cancellationToken))
 
-                    ,name: "EtsyOAuth"),
+                    ,name: "EtsyOAuth"), // not sure if its possible to integrate OpenIddict with Uno.Extensions.Web.WebAuthenticationProvider
                 configureAuthorization: builder =>
                 {
                     builder.AuthorizationHeader(scheme: "Bearer");
