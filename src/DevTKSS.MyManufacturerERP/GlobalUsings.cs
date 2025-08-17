@@ -21,6 +21,7 @@ global using FluentValidation;
 global using ValidationResult = FluentValidation.Results.ValidationResult;
 global using DevTKSS.MyManufacturerERP.Validation;
 global using ValidationException = FluentValidation.ValidationException;
+global using ILogger = Serilog.ILogger;
 #if !WINDOWS
 #endif
 global using Refit;

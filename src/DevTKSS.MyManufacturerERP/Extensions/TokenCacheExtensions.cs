@@ -32,4 +32,17 @@ public static class TokenCacheExtensions
         userId = null;
         return false;
     }
+    public static bool TryGetExpirationDate(this IDictionary<string, string> cache, out DateTime expiresIn)
+    {
+        if (cache.TryGetValue(OAuthTokenRefreshExtendedDefaults.ExpirationDateKey, out var expires))
+        {
+            if (DateTime.TryParse(expires, out var value))
+            {
+                expiresIn = value;
+                return true;
+            }
+        }
+        expiresIn = default;
+        return false;
+    }
 }

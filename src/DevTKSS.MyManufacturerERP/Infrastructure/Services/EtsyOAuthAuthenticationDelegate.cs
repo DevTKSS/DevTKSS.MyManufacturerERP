@@ -11,10 +11,8 @@ internal sealed class EtsyOAuthAuthenticationDelegate
     private readonly ITokenCache _tokenCache;
     private string? _state;
     private string? _codeVerifier;
-    private readonly ILogger _logger;
 
     public EtsyOAuthAuthenticationDelegate(
-        ILogger<EtsyOAuthAuthenticationDelegate> logger,
         IOptions<OAuthOptions> options,
         IEtsyOAuthEndpoints oAuthEndpoints,
         IEtsyUserEndpoints userEndpoints,
@@ -28,7 +26,6 @@ internal sealed class EtsyOAuthAuthenticationDelegate
         _userEndpointsClient = userEndpoints;
         _authEndpointsClient = oAuthEndpoints;
         _tokenCache = tokenCache;
-        _logger = logger;
     }
 
 #region PrepareLoginStartUri and PrepareLoginCallbackUri for Uno.Extensions.Authentication.Web
@@ -88,43 +85,44 @@ internal sealed class EtsyOAuthAuthenticationDelegate
     public async Task AuthenticateAsync(Uri preparedAuthorizationStartUri,CancellationToken cancellationToken = default)
     {
 
-       var authGrantResponse = await _authEndpointsClient.SendAuthorizationCodeRequestAsync(
-            responseType: OAuthAuthRequestDefaults.CodeKey,
-            redirectUri: _options.RedirectUri!,
-            scope: Uri.EscapeDataString(string.Join(' ', _options.Scopes)),
-            client_id: _options.ClientID!,
-            state: _state!,
-            codeChallenge: _codeVerifier!,
-            codeChallengeMethod: OAuthPkceDefaults.CodeChallengeMethodS256
-        );
+       var authGrantResponse = await _authEndpointsClient.SendAuthorizationCodeRequestAsync(new AuthorizationCodeRequest
+       {
+           ResponseType = OAuthAuthRequestDefaults.CodeKey,
+           RedirectUri = _options.RedirectUri!,
+           Scope = Uri.EscapeDataString(string.Join(' ', _options.Scopes)),
+           ClientId = _options.ClientID!,
+           State = _state!,
+           CodeChallenge = _codeVerifier!,
+           CodeChallengeMethod = OAuthPkceDefaults.CodeChallengeMethodS256
+       });
 
         if(!authGrantResponse.IsSuccessStatusCode)
         {
             switch (authGrantResponse.Content!.Error)
             {
                 case OAuthErrorResponseDefaults.InvalidRequest:
-                    _logger.LogError("Invalid request: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
+                    Log.Error("Invalid request: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
                     break;
                 case OAuthErrorResponseDefaults.InvalidClient:
-                    _logger.LogError("Invalid client: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
+                    Log.Error("Invalid client: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
                     break;
                 case OAuthErrorResponseDefaults.InvalidGrant:
-                    _logger.LogError("Invalid grant: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
+                    Log.Error("Invalid grant: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
                     break;
                 case OAuthErrorResponseDefaults.UnauthorizedClient:
-                    _logger.LogError("Unauthorized client: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
+                    Log.Error("Unauthorized client: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
                     break;
                 case OAuthErrorResponseDefaults.UnsupportedGrantType:
-                    _logger.LogError("Unsupported grant type: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
+                    Log.Error("Unsupported grant type: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
                     break;
                 case OAuthErrorResponseDefaults.AccessDenied:
-                    _logger.LogError("Access denied: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
+                    Log.Error("Access denied: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
                     break;
                 case OAuthErrorResponseDefaults.InvalidScope:
-                    _logger.LogError("Invalid scope: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
+                    Log.Error("Invalid scope: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
                     break;
                 default:
-                    _logger.LogError("Unknown error: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
+                    Log.Error("Unknown error: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
                     break;
             }
         }
@@ -152,7 +150,7 @@ internal sealed class EtsyOAuthAuthenticationDelegate
         // Validate state and code
         if (string.IsNullOrWhiteSpace(state) || state != _state || string.IsNullOrWhiteSpace(authCode))
         {
-            _logger.LogError("Invalid state or code. State: '{state}', Old State: '{oldState}', Code: '{authCode}', Code Verifyer: {codeVerifier}",
+            Log.Error("Invalid state or code. State: '{state}', Old State: '{oldState}', Code: '{authCode}', Code Verifyer: {codeVerifier}",
                 state, _state, authCode, _codeVerifier);
             return false;
         }

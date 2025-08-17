@@ -21,6 +21,49 @@ internal static class IDictionaryExtensions
         }
         return default(TValue);
     }
-
+    public static bool TryRemoveKeys<TKey, TValue>(this IDictionary<TKey, TValue>? dictionary, IEnumerable<TKey> keys)
+    {
+        if (dictionary == null || keys == null || !keys.Any())
+        {
+            return false;
+        }
+        bool removed = false;
+        foreach (var key in keys)
+        {
+            if (dictionary.Remove(key))
+            {
+                removed = true;
+            }
+        }
+        return removed;
+    }
+    public static bool TryRemove<TKey,TValue>(this IDictionary<TKey,TValue>? dictionary, TKey key)
+    {
+        if (dictionary == null || key == null)
+        {
+            return false;
+        }
+        if (dictionary.ContainsKey(key))
+        {
+            dictionary.Remove(key);
+            return true;
+        }
+        return false;
+    }
+    public static bool TryRemove<TKey, TValue>(this IDictionary<TKey, TValue>? dictionary, TKey key, out TValue? value)
+    {
+        if (dictionary == null || key == null)
+        {
+            value = default;
+            return false;
+        }
+        if (dictionary.TryGetValue(key, out value))
+        {
+            dictionary.Remove(key);
+            return true;
+        }
+        value = default;
+        return false;
+    }
 }
 

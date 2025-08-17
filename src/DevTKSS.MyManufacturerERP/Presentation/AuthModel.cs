@@ -17,18 +17,18 @@ namespace DevTKSS.MyManufacturerERP.Presentation;
 //}
 public partial record AuthModel(IDispatcher Dispatcher, INavigator Navigator, IAuthenticationService Authentication)
 {
-    public string Title { get; } = "Login";
+    public string Title { get; } = "Connect to your external Data";
 
     public IState<string> Username => State<string>.Value(this, () => string.Empty);
 
     public IState<string> Password => State<string>.Value(this, () => string.Empty);
 
-    public async ValueTask ConnectToEtsy(CancellationToken token)
+    public async ValueTask ConnectToEtsy(CancellationToken ct)
     {
         var username = await Username ?? string.Empty;
         var password = await Password ?? string.Empty;
 
-        var success = await Authentication.LoginAsync(Dispatcher, new Dictionary<string, string> { { nameof(Username), username }, { nameof(Password), password } });
+        var success = await Authentication.LoginAsync(Dispatcher, provider: "EtsyOAuth",cancellationToken: ct);
         if (success)
         {
             await Navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.ClearBackStack);

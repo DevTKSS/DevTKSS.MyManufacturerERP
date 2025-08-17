@@ -1,4 +1,3 @@
-
 // this is somehow not detected even while its the correct namespace
 //#if !WINDOWS
 //using IWebAuthenticationBrokerProvider = Uno.AuthenticationBroker.IWebAuthenticationBrokerProvider;
@@ -6,6 +5,7 @@
 //#endif
 
 using System.Text.RegularExpressions;
+using System.Web;
 
 namespace DevTKSS.MyManufacturerERP;
 public partial class App : Application
@@ -17,7 +17,6 @@ public partial class App : Application
     public App()
     {
         this.InitializeComponent();
-
     }
 
     protected Window? MainWindow { get; private set; }
@@ -174,15 +173,18 @@ public partial class App : Application
         });
     }
     #region Authentication Handlers
+    private string? _stateBackingField;
+    private string? _codeVerifierBackingField;
     internal async ValueTask<string> CreateLoginStartUri(
        IServiceProvider services,
        ITokenCache tokens,
-       IDictionary<string, string>? credentials,
+       IDictionary<string, string>? credentials, // if this is null, can we use it for storing state and code verifier?
        string? loginStartUri,
        CancellationToken cancellationToken)
     {
         var options = services.GetRequiredService<IOptions<OAuthOptions>>().Value;
-        ArgumentNullException.ThrowIfNull(credentials,nameof(credentials));
+        credentials ??= new Dictionary<string, string>();
+
         if (string.IsNullOrWhiteSpace(loginStartUri))
             loginStartUri = options.AuthorizationEndpoint!;
         
@@ -208,8 +210,12 @@ public partial class App : Application
 
         url.Query = sb.ToString();
 
-        credentials.AddOrReplace(OAuthAuthRequestDefaults.StateKey, state))
+        credentials.AddOrReplace(OAuthAuthRequestDefaults.StateKey, state);
         credentials.AddOrReplace(OAuthPkceDefaults.CodeVerifierKey, codeVerifier);
+
+        // in case the credentials is null better use backing fields
+        _stateBackingField = state;
+        _codeVerifierBackingField = codeVerifier;
 
         return url.Uri.ToString();
     }
@@ -222,23 +228,42 @@ public partial class App : Application
         IDictionary<string, string>? credentials,
         string redirectUri,
         IDictionary<string,string> tokens,
-        CancellationToken ct)
+        CancellationToken ct = default)
     {
-        const string ProviderName = "EtsyOAuth";
         var options = serviceProvider.GetRequiredService<IOptions<OAuthOptions>>().Value;
-
-        // TODO: Write code to process credentials that are passed into the LoginAsync method
-        if ((credentials?.TryGetState(out string? state) ?? false && !state.IsNullOrEmpty())
-            && (credentials?.TryGetCodeVerifier(out string? codeVerifyer) ?? false && !state.IsNullOrEmpty()))
+        if(credentials is null)
         {
+            Log.Error("Credentials are null, cannot process post login. Will try to use backing fields.");
+        }
 
-            // Assuming the redirectUri does hold the query parameters from the callback URL
-            var returnedState = redirectUri?.Get(OAuthAuthResponseDefaults.StateKey); // why is the Get not working while the uno extensions is using it the same?
-            var authorizationCode = redirectUri?.Get(OAuthAuthResponseDefaults.CodeKey);
-            var error = redirectUri?.Get(OAuthErrorResponseDefaults.ErrorKey);
-            var errorDescription = redirectUri?.Get(OAuthErrorResponseDefaults.ErrorDescriptionKey);
-            var errorUri = redirectUri?.Get(OAuthErrorResponseDefaults.ErrorUriKey);
+        // Try to get state and codeVerifier from credentials, otherwise use backing fields
+        string? state = null;
+        string? codeVerifyer = null;
+        if (credentials != null)
+        {
+            credentials.TryGetState(out state);
+            credentials.TryGetCodeVerifier(out codeVerifyer);
+        }
+        if (string.IsNullOrEmpty(state))
+            state = _stateBackingField;
+        if (string.IsNullOrEmpty(codeVerifyer))
+            codeVerifyer = _codeVerifierBackingField;
+        // TODO: Write code to process credentials that are passed into the LoginAsync method
+        if (!string.IsNullOrEmpty(state) && !string.IsNullOrEmpty(codeVerifyer))
+        {
+            // Copyed from Uno.Extensions.Web.WebAuthenticationProvider
+            var query = redirectUri.StartsWith(options.RedirectUri!)
+                ? AuthHttpUtility.ExtractArguments(redirectUri)  // authData is a fully qualified url, so need to extract query or fragment
+                : AuthHttpUtility.ParseQueryString(redirectUri.TrimStart('#').TrimStart('?')); // authData isn't full url, so just process as query or fragment
 
+            // The redirectUri does hold the full response of the AuthorizationBrokerProvider
+            // so its including all eventual query parameters that are not covered by the AccessToken or RefreshToken keys
+            // if https://github.com/unoplatform/uno.extensions/pull/2893 gets merged, you could also provide additional query keys via 'OtherTokenKeys' in the appsettings section for WebAuthenticationProvider 'WebConfiguration' normally aliased with 'Web'
+            var returnedState = query?.Get(OAuthAuthResponseDefaults.StateKey); // why is the Get not working while the uno extensions is using it the same?
+            var authorizationCode = query?.Get(OAuthAuthResponseDefaults.CodeKey);
+            var error = query?.Get(OAuthErrorResponseDefaults.ErrorKey);
+            var errorDescription = query?.Get(OAuthErrorResponseDefaults.ErrorDescriptionKey);
+            var errorUri = query?.Get(OAuthErrorResponseDefaults.ErrorUriKey);
 
             // Validate state and code
             if (string.IsNullOrWhiteSpace(state) || returnedState != state || string.IsNullOrWhiteSpace(authorizationCode))
@@ -269,24 +294,18 @@ public partial class App : Application
                 string userId = match.Groups[1].Value;
             }
 
-            await tokenCache.SaveTokensAsync(ProviderName, tokenExchangeResult.AccessToken, tokenExchangeResult.RefreshToken, ct);
-
+            var expirationTimeStamp = DateTime.Now.AddSeconds(tokenExchangeResult.ExpiresIn).ToString("g");
             // Save additional tokens if needed
-            var additionalTokensDict = new Dictionary<string, string>();
-            additionalTokensDict.TryAdd(OAuthTokenRefreshDefaults.ExpiresInKey, tokenExchangeResult.ExpiresIn.ToString());
+            tokens.AddOrReplace(OAuthTokenRefreshDefaults.AccessTokenKey, tokenExchangeResult.AccessToken!);
+            tokens.AddOrReplace(OAuthTokenRefreshDefaults.RefreshToken, tokenExchangeResult.RefreshToken!);
+            tokens.AddOrReplace(OAuthTokenRefreshExtendedDefaults.ExpirationDateKey, expirationTimeStamp);
 
-            await tokenCache.SaveAsync(ProviderName, additionalTokensDict, ct);
-
-
-            // Return IDictionary containing any tokens used by service calls or in the app // why not tokenCache?
-            credentials ??= new Dictionary<string, string>();
-            credentials.AddOrReplace(OAuthTokenRefreshDefaults.AccessTokenKey, tokenExchangeResult.AccessToken);
-            credentials.AddOrReplace(OAuthTokenRefreshDefaults.RefreshToken, tokenExchangeResult.RefreshToken);
-            credentials.AddOrReplace(OAuthTokenRefreshDefaults.ExpiresInKey,DateTime.Now.AddHours(1).ToString("g"));
             // remove the state and code verifier from credentials as they are no longer needed
-            credentials.Remove(OAuthAuthRequestDefaults.StateKey);
-            credentials.Remove(OAuthPkceDefaults.CodeVerifierKey);
-            return credentials;
+            if (!credentials.TryRemoveKeys([OAuthAuthRequestDefaults.StateKey, OAuthPkceDefaults.CodeVerifierKey]))
+            { 
+                Log.Warning("Failed to remove state and code verifier from credentials. Credentials was null? {Credentials}", credentials == null);
+            }
+            return tokens;
         }
 
         // Return null/default to fail the LoginAsync method
@@ -297,35 +316,38 @@ public partial class App : Application
         IEtsyOAuthEndpoints authEndpoints,
         IServiceProvider serviceProvider,
         ITokenCache tokenCache,
-        IDictionary<string, string> tokens,
-        CancellationToken ct)
+        IDictionary<string, string>? tokens,
+        CancellationToken ct = default)
     {
-        const string ProviderName = "EtsyOAuth";
         var options = serviceProvider.GetRequiredService<IOptions<OAuthOptions>>().Value;
+        if(tokens is null)
+        {
+            Log.Error("Tokens are null, cannot refresh tokens.");
+            return default;
+        }
 
         // TODO: Write code to refresh tokens using the currently stored tokens
-        if ((tokens?.TryGetValue(OAuthTokenRefreshDefaults.RefreshToken, out var refreshToken) ?? false) && !refreshToken.IsNullOrEmpty()
-         && (tokens?.TryGetValue(OAuthTokenRefreshDefaults.ExpiresInKey, out var expiry) ?? false) && DateTime.TryParse(expiry, out var tokenExpiry) && tokenExpiry > DateTime.Now)
+        if ((tokens?.TryGetRefreshToken(out var refreshToken) ?? false) && !refreshToken.IsNullOrWhiteSpace()
+         && (tokens?.TryGetExpirationDate(out var tokenExpiry) ?? false) && tokenExpiry > DateTime.Now)
         {
 
             var tokenResponse = await authEndpoints.RefreshTokenAsync(new RefreshTokenRequest
             {
                 GrantType = OAuthTokenRefreshDefaults.RefreshToken,
                 ClientId = options.ClientID!,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken!
             });
 
             if (string.IsNullOrEmpty(tokenResponse.AccessToken) || string.IsNullOrEmpty(tokenResponse.RefreshToken))
-                throw new InvalidOperationException("Refresh response missing access_token or refresh_token.");
-            
-            // why not use tokenCache like that?
-            await tokenCache.SaveTokensAsync(ProviderName, tokenResponse.AccessToken, tokenResponse.RefreshToken, ct);
+            {
+                Log.Error("Refresh response missing access_token or refresh_token.");
+                return default;
+            }
 
             // Return IDictionary containing any tokens used by service calls or in the app
-            tokens ??= new Dictionary<string, string>();
-            tokens[OAuthTokenRefreshDefaults.AccessTokenKey] = tokenResponse.AccessToken;
-            tokens[OAuthTokenRefreshDefaults.RefreshToken] = tokenResponse.RefreshToken;
-            tokens[OAuthTokenRefreshDefaults.ExpiresInKey] = DateTime.Now.AddMinutes(5).ToString("g");
+            tokens.AddOrReplace(OAuthTokenRefreshDefaults.AccessTokenKey, tokenResponse.AccessToken);
+            tokens.AddOrReplace(OAuthTokenRefreshDefaults.RefreshToken, tokenResponse.RefreshToken);
+            tokens.AddOrReplace(OAuthTokenRefreshDefaults.ExpiresInKey, DateTime.Now.AddMinutes(5).ToString("g"));
             return tokens;
         }
 
@@ -350,7 +372,7 @@ public partial class App : Application
                     
                     new ("Main", View: views.FindByViewModel<MainModel>(), IsDefault:true),
                     new ("Second", View: views.FindByViewModel<SecondModel>()),
-                    new ("EtsyAuth", View: views.FindByViewModel<AuthModel>()),
+                    new ("Auth", View: views.FindByViewModel<AuthModel>()),
                 ]
             )
         );
