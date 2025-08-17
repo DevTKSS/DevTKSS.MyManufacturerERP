@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
@@ -33,18 +33,22 @@
         Description="DevTKSS.MyManufacturerERP"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\styled_logo.png"
-        Square44x44Logo="Assets\styled_logo.png"/>
+        Square44x44Logo="Assets\styled_logo.png">
+        <uap:DefaultTile/>
+      </uap:VisualElements>
       <Extensions>
-      <uap:Extension Category="windows.protocol">
-        <uap:Protocol Name="ms-testoauthcsharp-launch">
-          <uap:DisplayName>Win32 TestApp Sample URI Scheme</uap:DisplayName>
-        </uap:Protocol>
-      </uap:Extension>
-    </Extensions>
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="https" DesiredView="useLess">
+            <uap:Logo>Assets\Images\styled_logo.png</uap:Logo>
+            <uap:DisplayName>MyManufacturerERP</uap:DisplayName>
+          </uap:Protocol>
+        </uap:Extension>
+      </Extensions>
     </Application>
   </Applications>
 
   <Capabilities>
     <rescap:Capability Name="runFullTrust" />
+    <Capability Name="internetClient"/>
   </Capabilities>
 </Package>

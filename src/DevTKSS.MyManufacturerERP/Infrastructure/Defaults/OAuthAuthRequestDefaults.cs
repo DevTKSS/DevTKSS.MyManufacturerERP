@@ -7,9 +7,9 @@ public class OAuthAuthRequestDefaults
 {
     public const string ResponseTypeKey = "response_type";
     /// <summary>
-    /// REQUIRED.  Value MUST be set to "code".
+    /// REQUIRED. Value the Response Type MUST be set to "code".
     /// </summary>
-    public const string ResponseValueCode = "code";
+    public const string CodeKey = "code";
     /// <summary>
     /// REQUIRED.The client identifier as described in Section 2.2.
     /// </summary>

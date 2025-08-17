@@ -1,6 +1,6 @@
 namespace DevTKSS.MyManufacturerERP.Presentation;
 // Uncomment as soon as WebAuthentication is working in Uno on desktop target
-//public partial record LoginModel(IDispatcher Dispatcher, INavigator Navigator, IAuthenticationService Authentication)
+//public partial record AuthModel(IDispatcher Dispatcher, INavigator Navigator, IAuthenticationService Authentication)
 //{
 //    public string Title { get; } = "Login";
 
@@ -15,7 +15,7 @@ namespace DevTKSS.MyManufacturerERP.Presentation;
 //    }
 
 //}
-public partial record LoginModel(IDispatcher Dispatcher, INavigator Navigator, IAuthenticationService Authentication)
+public partial record AuthModel(IDispatcher Dispatcher, INavigator Navigator, IAuthenticationService Authentication)
 {
     public string Title { get; } = "Login";
 
@@ -23,7 +23,7 @@ public partial record LoginModel(IDispatcher Dispatcher, INavigator Navigator, I
 
     public IState<string> Password => State<string>.Value(this, () => string.Empty);
 
-    public async ValueTask Login(CancellationToken token)
+    public async ValueTask ConnectToEtsy(CancellationToken token)
     {
         var username = await Username ?? string.Empty;
         var password = await Password ?? string.Empty;

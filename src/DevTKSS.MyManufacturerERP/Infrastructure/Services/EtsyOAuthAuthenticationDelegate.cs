@@ -57,7 +57,7 @@ internal sealed class EtsyOAuthAuthenticationDelegate
             if (sb.Length > 0) sb.Append('&');
             sb.Append(Uri.EscapeDataString(k)).Append('=').Append(Uri.EscapeDataString(v ?? string.Empty));
         }
-        add(OAuthAuthRequestDefaults.ResponseTypeKey, OAuthAuthRequestDefaults.ResponseValueCode);
+        add(OAuthAuthRequestDefaults.ResponseTypeKey, OAuthAuthRequestDefaults.CodeKey);
         add(OAuthAuthRequestDefaults.ClientIdKey, _options.ClientID);
         add(OAuthAuthRequestDefaults.RedirectUriKey, _options.RedirectUri);
         add(OAuthAuthRequestDefaults.ScopeKey, scope);
@@ -89,7 +89,7 @@ internal sealed class EtsyOAuthAuthenticationDelegate
     {
 
        var authGrantResponse = await _authEndpointsClient.SendAuthorizationCodeRequestAsync(
-            responseType: OAuthAuthRequestDefaults.ResponseValueCode,
+            responseType: OAuthAuthRequestDefaults.CodeKey,
             redirectUri: _options.RedirectUri!,
             scope: Uri.EscapeDataString(string.Join(' ', _options.Scopes)),
             client_id: _options.ClientID!,
@@ -129,22 +129,25 @@ internal sealed class EtsyOAuthAuthenticationDelegate
             }
         }
     }
+    // can be called by the PostLogin Delegate from the signature, but how to connect this service method to it?
+    // This method is called after the user has authenticated and the authorization code has been received.
     public async Task<bool> ExchangeTokenAsync(
-        IServiceProvider services,
-        ITokenCache tokens,
-        IDictionary<string, string>? queryParameters,
-        string? accessGrantResponse, // This could have the query parameters from the callback URL or could be removed if the queryParameters parameter is containing them instead, but for error handling it is useful to have the full response
-        string? tokenEndpoint, // Will not use this as I use refit client but others could need it when using HttpClient or similar
+        IEtsyOAuthEndpoints authEndpoints,
+        IServiceProvider serviceProvider,
+        ITokenCache tokenCache,
+        IDictionary<string, string> credentials,
+        string redirectUri,
+        IDictionary<string, string> tokens,
         CancellationToken ct)
     {
         string? state = null;
         string? authCode = null;
         // Assuming the queryParameters would be holding the query parameters from the callback URL
-        queryParameters?.TryGetValue(OAuthAuthResponseDefaults.StateKey, out state);
-        queryParameters?.TryGetValue(OAuthAuthResponseDefaults.CodeKey, out authCode);
-        queryParameters?.TryGetValue(OAuthErrorResponseDefaults.ErrorKey, out var error);
-        queryParameters?.TryGetValue(OAuthErrorResponseDefaults.ErrorDescriptionKey, out var errorDescription);
-        queryParameters?.TryGetValue(OAuthErrorResponseDefaults.ErrorUriKey, out var errorUri);
+        credentials?.TryGetValue(OAuthAuthResponseDefaults.StateKey, out state);
+        credentials?.TryGetValue(OAuthAuthResponseDefaults.CodeKey, out authCode);
+        credentials?.TryGetValue(OAuthErrorResponseDefaults.ErrorKey, out var error);
+        credentials?.TryGetValue(OAuthErrorResponseDefaults.ErrorDescriptionKey, out var errorDescription);
+        credentials?.TryGetValue(OAuthErrorResponseDefaults.ErrorUriKey, out var errorUri);
 
         // Validate state and code
         if (string.IsNullOrWhiteSpace(state) || state != _state || string.IsNullOrWhiteSpace(authCode))
@@ -154,9 +157,9 @@ internal sealed class EtsyOAuthAuthenticationDelegate
             return false;
         }
         
-        var tokenExchangeResult = await _authEndpointsClient.ExchangeCodeAsync(new AccessTokenRequest
+        var tokenExchangeResult = await authEndpoints.ExchangeCodeAsync(new AccessTokenRequest
         {
-            GrantType = OAuthTokenRefreshDefaults.GrantTypeAuthorizationCode,
+            GrantType = OAuthTokenRefreshDefaults.AuthorizationCode,
             ClientId = _options.ClientID!,
             RedirectUri = _options.RedirectUri!,
             Code = authCode,
@@ -185,11 +188,12 @@ internal sealed class EtsyOAuthAuthenticationDelegate
         if (!credentials.TryGetValue("refresh_token", out var refreshToken) || string.IsNullOrEmpty(refreshToken))
             throw new InvalidOperationException("Missing refresh_token in credentials.");
 
-        var tokenResponse = await _authEndpointsClient.RefreshTokenAsync(
-            grantType: OAuthTokenRefreshDefaults.RefreshToken,
-            clientId: _options.ClientID!,
-            refreshToken: refreshToken
-        );
+        var tokenResponse = await _authEndpointsClient.RefreshTokenAsync(new RefreshTokenRequest
+        {
+            GrantType = OAuthTokenRefreshDefaults.RefreshToken,
+            ClientId = _options.ClientID!,
+            RefreshToken = refreshToken
+        });
 
         if (string.IsNullOrEmpty(tokenResponse.AccessToken) || string.IsNullOrEmpty(tokenResponse.RefreshToken))
             throw new InvalidOperationException("Refresh response missing access_token or refresh_token.");

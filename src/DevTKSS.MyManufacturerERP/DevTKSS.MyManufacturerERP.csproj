@@ -56,6 +56,12 @@
 
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Presentation\AuthPage.xaml.cs">
+      <DependentUpon>AuthPage.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
   <!--<ItemGroup>
     <ProjectReference Include="..\Temp.Extensibility.SystemAuthBrokerServer\Temp.Extensibility.DesktopAuthBroker.csproj" />
   </ItemGroup>-->

@@ -1,4 +1,4 @@
-<Page x:Class="DevTKSS.MyManufacturerERP.Presentation.LoginPage"
+<Page x:Class="DevTKSS.MyManufacturerERP.Presentation.AuthPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:local="using:DevTKSS.MyManufacturerERP.Presentation"
@@ -19,18 +19,12 @@
     <utu:NavigationBar Content="{Binding Title}" />
 
     <StackPanel Grid.Row="1"
-          HorizontalAlignment="Center"
-          VerticalAlignment="Center"
-          Width="200"
-          Spacing="16">
-      <TextBox Text="{Binding Username, Mode=TwoWay}"
-             PlaceholderText="Username"
-             HorizontalAlignment="Stretch" />
-      <PasswordBox Password="{Binding Password, Mode=TwoWay}"
-                 PlaceholderText="Password"
-                 HorizontalAlignment="Stretch" />
-      <Button Content="Login"
-          Command="{Binding Login}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Width="200"
+                Spacing="16">
+      <Button Content="Connect your Etsy Data"
+          Command="{Binding ConnectToEtsy}"
           HorizontalAlignment="Stretch" />
     </StackPanel>
   </Grid>

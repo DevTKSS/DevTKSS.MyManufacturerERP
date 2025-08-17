@@ -15,7 +15,7 @@ public class ShellModel
 
     private async void LoggedOut(object? sender, EventArgs e)
     {
-        await _navigator.NavigateViewModelAsync<LoginModel>(this, qualifier: Qualifiers.ClearBackStack);
+        await _navigator.NavigateViewModelAsync<AuthModel>(this, qualifier: Qualifiers.ClearBackStack);
     }
 
     private readonly IAuthenticationService _authentication;

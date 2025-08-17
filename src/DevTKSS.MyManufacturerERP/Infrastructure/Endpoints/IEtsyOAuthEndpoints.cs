@@ -7,49 +7,60 @@ public interface IEtsyOAuthEndpoints
     /// <summary>
     /// Authorization ResponseValueCode Request as per OAuth 2.0 specification. <see href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.1">4.1.1 Authorization Request</see>
     /// </summary>
-    /// <param name="responseType">REQUIRED.  Value MUST be set to "code".</param>
-    /// <param name="client_id">REQUIRED.  The client identifier as described in <see href="https://datatracker.ietf.org/doc/html/rfc6749#section-2.2"/>Section 2.2</param>.
-    /// <param name="redirectUri">OPTIONAL.  As described in <see href="https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.2"/>Section 3.1.2</param>.
-    /// <param name="scope">OPTIONAL.  The scope of the access request as described by <see href="https://datatracker.ietf.org/doc/html/rfc6749#section-3.3"/>Section 3.3.</param>
-    /// <param name="state">
-    /// RECOMMENDED.  An opaque value used by the client to maintain 
-    /// _state between the request and callback.The authorization
-    /// server includes this value when redirecting the user-agent back
-    /// to the client.The parameter SHOULD be used for preventing
-    /// cross-site request forgery as described in <see href="https://datatracker.ietf.org/doc/html/rfc6749#section-10.12"/>Section 10.12</param>.
-    /// <param name="codeChallenge"></param>
-    /// <param name="codeChallengeMethod"></param>
     /// <returns>The <see cref="AccessGrantResponse"/></returns>
     [Get("/oauth/connect")]
     [QueryUriFormat(UriFormat.UriEscaped)]
-    Task<ApiResponse<AccessGrantResponse>> SendAuthorizationCodeRequestAsync(
-        [AliasAs(OAuthAuthRequestDefaults.ResponseTypeKey)]string responseType,
-        [AliasAs(OAuthAuthRequestDefaults.RedirectUriKey)]string redirectUri,
-        [AliasAs(OAuthAuthRequestDefaults.ScopeKey)]string scope,
-        [AliasAs(OAuthAuthRequestDefaults.ClientIdKey)]string client_id,
-        [AliasAs(OAuthAuthRequestDefaults.StateKey)]string state,
-        [AliasAs(OAuthPkceDefaults.CodeChallengeKey)]string codeChallenge,
-        [AliasAs(OAuthPkceDefaults.CodeChallengeMethodS256)]string codeChallengeMethod
-    );
+    Task<ApiResponse<AccessGrantResponse>> SendAuthorizationCodeRequestAsync(AuthorizationCodeRequest authorizationCodeRequest);
     [Post("/oauth/token")]
     [QueryUriFormat(UriFormat.UriEscaped)]
-    Task<TokenResponse> ExchangeCodeAsync(
-        [Body(BodySerializationMethod.UrlEncoded)] AccessTokenRequest accessTokenRequest);
+    Task<TokenResponse> ExchangeCodeAsync([Body(BodySerializationMethod.UrlEncoded)] AccessTokenRequest accessTokenRequest);
 
     [Post("/oauth/token")]
     [QueryUriFormat(UriFormat.UriEscaped)]
-    Task<TokenResponse> RefreshTokenAsync(
-        [AliasAs(OAuthTokenRefreshDefaults.GrantTypeKey)] string grantType,
-        [AliasAs(OAuthAuthRequestDefaults.ClientIdKey)] string clientId,
-        [AliasAs(OAuthTokenRefreshDefaults.RefreshToken)] string refreshToken
-    );
+    Task<TokenResponse> RefreshTokenAsync([Body(BodySerializationMethod.UrlEncoded)]RefreshTokenRequest refreshTokenRequest);
 
 }
-
-public class AccessTokenRequest
+/// <summary>
+/// Authorization ResponseValueCode Request as per OAuth 2.0 specification. <see href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.1">4.1.1 Authorization Request</see>
+/// </summary>
+public record AuthorizationCodeRequest
+{
+    /// <summary>
+    /// REQUIRED.  Value MUST be set to "code".
+    /// </summary>
+    [JsonPropertyName(OAuthAuthRequestDefaults.ResponseTypeKey)]
+    public string ResponseType { get; set; } = OAuthAuthRequestDefaults.CodeKey;
+    /// <summary>
+    /// REQUIRED.  The client identifier as described in <see href="https://datatracker.ietf.org/doc/html/rfc6749#section-2.2"/>Section 2.2
+    /// </summary>
+    [JsonPropertyName(OAuthAuthRequestDefaults.ClientIdKey)]
+    public string ClientId { get; set; } = string.Empty;
+    /// <summary>
+    /// OPTIONAL.  As described in <see href="https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.2"/>Section 3.1.2.
+    /// </summary>
+    [JsonPropertyName(OAuthAuthRequestDefaults.RedirectUriKey)]
+    public string RedirectUri { get; set; } = string.Empty;
+    /// <summary>
+    /// OPTIONAL.  The scope of the access request as described by <see href="https://datatracker.ietf.org/doc/html/rfc6749#section-3.3"/>Section 3.3.
+    /// </summary>
+    [JsonPropertyName(OAuthAuthRequestDefaults.ScopeKey)]
+    public string Scope { get; set; } = string.Empty;
+    /// <summary>
+    /// RECOMMENDED.  An opaque value used by the client to maintain state between the request and callback.
+    /// The authorization server includes this value when redirecting the user-agent back to the client.The parameter SHOULD be used for preventing
+    /// cross-site request forgery as described in <see href="https://datatracker.ietf.org/doc/html/rfc6749#section-10.12"/>Section 10.12
+    /// </summary>
+    [JsonPropertyName(OAuthAuthRequestDefaults.StateKey)]
+    public string State { get; set; } = string.Empty;
+    [JsonPropertyName(OAuthPkceDefaults.CodeChallengeKey)]
+    public string CodeChallenge { get; set; } = string.Empty;
+    [JsonPropertyName(OAuthPkceDefaults.CodeChallengeMethodS256)]
+    public string CodeChallengeMethod { get; set; } = OAuthPkceDefaults.CodeChallengeMethodS256;
+}
+public record AccessTokenRequest
 {
     [JsonPropertyName(OAuthTokenRefreshDefaults.GrantTypeKey)]
-    public string GrantType { get; set; } = OAuthTokenRefreshDefaults.GrantTypeAuthorizationCode;
+    public string GrantType { get; set; } = OAuthTokenRefreshDefaults.RefreshToken;
 
     [JsonPropertyName(OAuthAuthRequestDefaults.ClientIdKey)]
     public string ClientId { get; set; } = string.Empty;
@@ -57,9 +68,18 @@ public class AccessTokenRequest
     [JsonPropertyName(OAuthAuthRequestDefaults.RedirectUriKey)]
     public string RedirectUri { get; set; } = string.Empty;
 
-    [JsonPropertyName(OAuthAuthRequestDefaults.ResponseValueCode)]
+    [JsonPropertyName(OAuthAuthRequestDefaults.CodeKey)]
     public string Code { get; set; } = string.Empty;
 
     [JsonPropertyName(OAuthPkceDefaults.CodeVerifierKey)]
     public string CodeVerifier { get; set; } = string.Empty;
+}
+public record RefreshTokenRequest
+{
+    [JsonPropertyName(OAuthTokenRefreshDefaults.GrantTypeKey)]
+    public string GrantType { get; set; } = OAuthTokenRefreshDefaults.AuthorizationCode;
+    [JsonPropertyName(OAuthAuthRequestDefaults.ClientIdKey)]
+    public string ClientId { get; set; } = string.Empty;
+    [JsonPropertyName(OAuthTokenRefreshDefaults.RefreshToken)]
+    public string RefreshToken { get; set; } = string.Empty;
 }

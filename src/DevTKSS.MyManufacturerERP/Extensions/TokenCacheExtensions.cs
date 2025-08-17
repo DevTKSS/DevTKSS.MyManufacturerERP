@@ -1,10 +1,7 @@
-using DevTKSS.MyManufacturerERP.Infrastructure.Defaults;
-
 namespace DevTKSS.MyManufacturerERP.Extensions;
 
 public static class TokenCacheExtensions
 {
-   
     public static bool TryGetAccessToken(this IDictionary<string, string> cache, out string? accessToken)
     {
         if (cache.TryGetValue(OAuthTokenRefreshDefaults.AccessTokenKey, out var token))

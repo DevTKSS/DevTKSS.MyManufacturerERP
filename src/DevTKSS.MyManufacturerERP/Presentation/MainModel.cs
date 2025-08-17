@@ -7,14 +7,11 @@ public partial record MainModel
     public MainModel(
         IStringLocalizer localizer,
         IOptions<AppConfig> appInfo,
-        IAuthenticationService authentication,
+        IAuthenticationService authenticationService,
         INavigator navigator)
     {
         _navigator = navigator;
-        _authentication = authentication;
-        Title = "Main";
-        Title += $" - {localizer["ApplicationName"]}";
-        Title += $" - {appInfo?.Value?.Environment}";
+        _authenticationService = authenticationService;
     }
 
     public string? Title { get; }
@@ -27,10 +24,10 @@ public partial record MainModel
         await _navigator.NavigateViewModelAsync<SecondModel>(this, data: new Entity(name!));
     }
 
-    public async ValueTask Logout(CancellationToken token)
+    public async ValueTask ConnectToEtsy(CancellationToken token)
     {
-        await _authentication.LogoutAsync(token);
+        await _authenticationService.LogoutAsync(token);
     }
 
-    private IAuthenticationService _authentication;
+    private IAuthenticationService _authenticationService;
 }
