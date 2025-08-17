@@ -1,0 +1,10 @@
+{
+  "solution": {
+    "path": "DevTKSS.MyManufacturerERP.sln",
+    "projects": [
+      "DevTKSS.AspNet.Security.OAuth.Etsy\\DevTKSS.AspNet.Security.OAuth.Etsy.csproj",
+      "DevTKSS.MyManufacturerERP\\DevTKSS.MyManufacturerERP.csproj",
+      "OpenIddict.Client.UnoIntegrations\\OpenIddict.Client.UnoIntegrations.csproj"
+    ]
+  }
+}
