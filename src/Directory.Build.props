@@ -10,7 +10,8 @@
       PRI257: Ignore default language (en) not being one of the included resources (eg en-us, en-uk)
       CA1416: Ignore platform compatibility warnings for ios
       WMC0001: Ignore false warning about Unknown Type 'Color' in Xaml
+      CS1061: 'Window' does not contain a definition for 'SetWindowIcon' and no accessible extension method 'SetWindowIcon' accepting a first argument of type 'Window' could be found (are you missing a using directive or an assembly reference?) -> False warning caused by a regression that should be fixed at the next release.
     -->
-    <NoWarn>$(NoWarn);NU1507;NETSDK1201;PRI257,CA1416;WMC0001</NoWarn>
+    <NoWarn>$(NoWarn);NU1507;NETSDK1201;PRI257,CA1416;WMC0001;CS1061</NoWarn>
   </PropertyGroup>
 </Project>

@@ -38,7 +38,6 @@
       SkiaRenderer;
       WebView;
     </UnoFeatures>
-
   </PropertyGroup>
 
   <!--<PropertyGroup Condition="'$(Configuration)'=='Debug' or '$(IsUiAutomationMappingEnabled)'=='True'">
@@ -53,15 +52,15 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
-
   </ItemGroup>
-
+  
   <ItemGroup>
-    <Compile Update="Presentation\AuthPage.xaml.cs">
-      <DependentUpon>AuthPage.xaml</DependentUpon>
-    </Compile>
+    <PackageReference Include="OpenIddict.Client.SystemIntegration" />
+    <PackageReference Include="OpenIddict.Client.SystemNetHttp" />
+    <PackageReference Include="OpenIddict.Client.WebIntegration" />
+    <PackageReference Include="OpenIddict.EntityFrameworkCore" />
+    <ProjectReference Include="..\OpenIddict.Client.UnoIntegrations\OpenIddict.Client.UnoIntegrations.csproj" />
   </ItemGroup>
-
   <!--<ItemGroup>
     <ProjectReference Include="..\Temp.Extensibility.SystemAuthBrokerServer\Temp.Extensibility.DesktopAuthBroker.csproj" />
   </ItemGroup>-->
