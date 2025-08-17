@@ -14,13 +14,13 @@ public static class AuthenticationEndpoints
                 .WithDescription("Authorize a user and return an HTML page with the authorization code")
                 .AllowAnonymous();
 
-        group.MapPost("/token", Token)
+        group.MapPost("/token", (Delegate) Token)
                 .RequireAuthorization()
                 .WithName("Token")
                 .WithSummary("Exchange authorization code for access token")
                 .WithDescription("Exchange an authorization code for an access token");
 
-        group.MapGet("/userinfo", UserInfo)
+        group.MapGet("/userinfo", (Delegate)UserInfo)
                 .RequireAuthorization()
                 .WithName("UserInfo")
                 .WithSummary("Get user information")
@@ -29,7 +29,7 @@ public static class AuthenticationEndpoints
         return group;
     }
 
-    private static async Task<Results<ContentHttpResult, BadRequest>> Authorize(HttpContext context)
+    private static IResult Authorize(HttpContext context)
     {
         var request = context.GetOpenIddictServerRequest();
         if (request is null)
@@ -42,21 +42,7 @@ public static class AuthenticationEndpoints
         var principal = new ClaimsPrincipal(identity);
         principal.SetScopes(Scopes.OpenId, Scopes.Profile, Scopes.Email);
 
-        await context.SignInAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme, principal);
-
-        context.Response.Clear();
-
-        var template = await File.ReadAllTextAsync("page.html");
-        var code = Uri.EscapeDataString(context.GetOpenIddictServerResponse()!.Code!);
-        var state = Uri.EscapeDataString(context.GetOpenIddictServerResponse()!.State!);
-        var redirect = new UriBuilder(request.RedirectUri!)
-        {
-            Query = $"code={code}&state={state}"
-        }.Uri.ToString();
-
-        var html = string.Format(template, redirect);
-
-        return TypedResults.Content(html, MediaTypeNames.Text.Html, Encoding.UTF8, StatusCodes.Status200OK);
+        return Results.SignIn(principal, new AuthenticationProperties(), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
     }
 
     private static async Task<Results<Ok, UnauthorizedHttpResult, BadRequest>> Token(HttpContext context)
