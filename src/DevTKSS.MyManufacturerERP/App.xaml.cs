@@ -4,6 +4,7 @@
 //using Temp.Extensibility.DesktopAuthBroker;
 //#endif
 
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Web;
 
@@ -146,7 +147,7 @@ public partial class App : Application
 //#endif
                 services.AddSingleton<IHelpers, Helpers>();
                 services.AddSingleton<ITasksManager, TasksManager>();
-                services.AddSingleton<EtsyOAuthAuthenticationDelegate>();
+                services.AddSingleton<EtsyOAuthAuthenticationProvider>();
             })
             .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
         );
@@ -355,6 +356,9 @@ public partial class App : Application
         return default;
     }
 
+    [GeneratedRegex(@"^(\d+)\.", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.NonBacktracking)]
+    private static partial Regex DoesContainUserId();
+
     #endregion
     private static void RegisterRoutes(IViewRegistry views, IRouteRegistry routes)
     {
@@ -378,6 +382,4 @@ public partial class App : Application
         );
     }
 
-    [GeneratedRegex(@"^(\d+)\.")]
-    private static partial Regex DoesContainUserId();
 }
