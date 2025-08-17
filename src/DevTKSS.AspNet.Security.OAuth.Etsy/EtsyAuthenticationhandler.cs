@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
+using System.Net.Mime;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace DevTKSS.AspNet.Security.OAuth.Etsy;
+// Not sure if OpenIdConnect requires a asp net core provider like this to be showed in the client hostbuilder?
 public partial class EtsyAuthenticationhandler : OAuthHandler<EtsyAuthenticationOptions>
 {
     public EtsyAuthenticationhandler(
@@ -22,10 +24,15 @@ public partial class EtsyAuthenticationhandler : OAuthHandler<EtsyAuthentication
         [NotNull] AuthenticationProperties properties,
         [NotNull] OAuthTokenResponse tokens)
     {
+
+        // Not sure where the actual Authorization Request for the Authorization Code + Code Exchange is done, as this is not part of the samples I found
+
         using var request = new HttpRequestMessage(HttpMethod.Get, Options.UserInformationEndpoint);
-        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(MediaTypeNames.Application.Json));
         request.Headers.Authorization = new AuthenticationHeaderValue(EtsyAuthenticationDefaults.AuthorizationHeaderScheme, tokens.AccessToken);
         
+        // Not sure if the User Endpoint aka Me endpoint must be set up differently, as this needs the api_key header + oAuth2 scope 'shops_r' in Authorization header
+        // https://developers.etsy.com/documentation/reference#operation/getMe
         using var response = await Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, Context.RequestAborted);
         if (!response.IsSuccessStatusCode)
         {
