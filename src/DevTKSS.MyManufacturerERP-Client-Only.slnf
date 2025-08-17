@@ -1,0 +1,8 @@
+{
+  "solution": {
+    "path": "DevTKSS.MyManufacturerERP.sln",
+    "projects": [
+      "DevTKSS.MyManufacturerERP\\DevTKSS.MyManufacturerERP.csproj"
+    ]
+  }
+}
