@@ -38,26 +38,26 @@
   <ItemGroup Label="CA Packages">
     <PackageVersion Include="Ardalis.GuardClauses" Version="5.0.0" />
     <PackageVersion Include="AutoMapper" Version="15.0.1" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.7" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
   </ItemGroup>
   <ItemGroup Label="EntityFramework">
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.7" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.8" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.8" />
+    <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.8" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.8" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.8" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.8" />
   </ItemGroup>
   <ItemGroup Label="OpenApi Packages">
-    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="9.0.7">
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
+    <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="9.0.8">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.6.7" />
-    <PackageVersion Include="Scalar.AspNetCore.Microsoft" Version="2.6.7" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.6.9" />
+    <PackageVersion Include="Scalar.AspNetCore.Microsoft" Version="2.6.9" />
   </ItemGroup>
   <ItemGroup Label="General Test Packages">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
