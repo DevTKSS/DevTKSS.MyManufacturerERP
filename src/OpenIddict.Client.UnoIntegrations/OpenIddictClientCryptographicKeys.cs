@@ -1,19 +1,4 @@
 namespace OpenIddict.Sandbox.UnoClient;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.IdentityModel.Tokens;
-using Uno;
-
-#if IOS || MACCATALYST
-using Apple.CryptoKit;
-using Foundation;
-#endif
 // https://github.com/Ecierge/openiddict-core/blob/apple-cryptokit/sandbox/OpenIddict.Sandbox.Uno.Client/OpenIddictClientCryptographicKeys.cs
 internal static class OpenIddictClientCryptographicKeys
 {

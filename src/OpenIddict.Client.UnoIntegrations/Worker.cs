@@ -1,9 +1,3 @@
-using System.Diagnostics;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Win32;
-
 namespace OpenIddict.Sandbox.UnoClient;
 // https://github.com/Ecierge/openiddict-core/blob/apple-cryptokit/sandbox/OpenIddict.Sandbox.Uno.Client/Worker.cs
 public class Worker : IHostedService

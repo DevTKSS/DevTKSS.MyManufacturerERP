@@ -1,5 +1,3 @@
-
-
 namespace OpenIddict.Sandbox.UnoClient;
 //https://github.com/Ecierge/openiddict-core/blob/apple-cryptokit/sandbox/OpenIddict.Sandbox.Uno.Client/UnoHostApplicationLifetime.cs
 public class UnoHostApplicationLifetime : ApplicationLifetime, IHostApplicationLifetime

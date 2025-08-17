@@ -3,11 +3,6 @@
  * See https://github.com/openiddict/openiddict-core for more information concerning
  * the license and the contributors participating to this project.
  */
-
-using Microsoft.Extensions.Hosting;
-using Windows.UI.ViewManagement.Core;
-using OpenIddict.Sandbox.UnoClient;
-
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
