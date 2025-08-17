@@ -15,11 +15,11 @@ public static class AuthenticationEndpoints
                 .AllowAnonymous();
 
         group.MapPost("/token", (Delegate) Token)
-                .RequireAuthorization()
+                .AllowAnonymous()
                 .WithName("Token")
-                .WithSummary("Exchange authorization code for access token")
-                .WithDescription("Exchange an authorization code for an access token");
-
+                .WithSummary("Exchange authorization code or refresh token for access token")
+                .WithDescription("Exchange an authorization code or a refresh token for an access token");
+        
         group.MapGet("/userinfo", (Delegate)UserInfo)
                 .RequireAuthorization()
                 .WithName("UserInfo")
@@ -53,9 +53,20 @@ public static class AuthenticationEndpoints
 
         if (request.IsAuthorizationCodeGrantType())
         {
-            // Normally you retrieve the principal associated with the code.
-            // For simplicity, here you recreate it – in production, check that the code has not
-            // already been consumed and perform all necessary validations.
+            // Handle authorization code grant
+            var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+            identity.AddClaim(Claims.Subject, "dummy_user_id");
+            identity.AddClaim(Claims.Name, "Test User");
+
+            var principal = new ClaimsPrincipal(identity);
+            principal.SetScopes(request.GetScopes());
+
+            await context.SignInAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme, principal);
+            return TypedResults.Ok();
+        }
+        else if (request.IsRefreshTokenGrantType())
+        {
+            // Handle refresh token grant
             var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
             identity.AddClaim(Claims.Subject, "dummy_user_id");
             identity.AddClaim(Claims.Name, "Test User");
