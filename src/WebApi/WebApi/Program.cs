@@ -2,7 +2,7 @@
 // logger configured in `AddSerilog()` below, once configuration and dependency-injection have both been
 // set up successfully.
 
-
+using DevTKSS.MyManufacturerERP.WebApi.Server;
 
 Log.Logger = new LoggerConfiguration()
       .WriteTo.Console()
@@ -12,7 +12,7 @@ Log.Information("Starting up!");
 try
 {
     var builder = WebApplication.CreateBuilder(args);
-
+    
     // Configure the application to use Serilog for logging
     builder.Host.UseSerilog((context, services, lc) => lc
          .ReadFrom.Configuration(context.Configuration)
@@ -32,11 +32,6 @@ try
     //    options.SerializerOptions.TypeInfoResolver = JsonTypeInfoResolver.Combine(
     //        TodoItemContext.Default));
 
-    builder.Services.AddHttpsRedirection(x =>
-    {
-        x.HttpsPort = 5000;
-    });
-
     builder.Services.Configure<RouteOptions>(options =>
             // Configure the RouteOptions to use lowercase URLs
             options.LowercaseUrls = true);
@@ -48,16 +43,11 @@ try
     });
 
     #region Add DbContext Services
-    builder.Services.AddDbContext<ApplicationDbContext>(x =>
+    builder.Services.AddDbContext<DbContext>(x =>
     {
         x.UseInMemoryDatabase("AuthDb");
-        x.UseOpenIddict();
     });
 
-    //builder.Services.AddDbContext<AuthDbContext>(options =>
-    //    {
-    //        options.UseInMemoryDatabase("AuthDb");
-    //    });
     builder.Services.AddDbContext<TodoDb>(options =>
         {
             options.UseInMemoryDatabase("TodoList");
@@ -112,59 +102,33 @@ try
     //builder.Services.AddAuthorization();
 
     #endregion
-    builder.Services
-        .AddOpenIddict()
-        .AddCore(x =>
-        {
-            // Register the Entity Framework Core stores and models.
-            x.UseEntityFrameworkCore()
-                .UseDbContext<ApplicationDbContext>();
-        })
-        .AddServer(x =>
-        {
-            x.SetAuthorizationEndpointUris("/connect/authorize")
-             .SetTokenEndpointUris("/connect/token");
 
-            x.RegisterScopes(Scopes.OpenId, Scopes.Profile, Scopes.Email);
-
-            x.AllowAuthorizationCodeFlow()
-             .RequireProofKeyForCodeExchange();
-
-            x.AddEphemeralEncryptionKey()
-             .AddEphemeralSigningKey()
-             .DisableAccessTokenEncryption();
-
-            x.UseAspNetCore()
-             .EnableAuthorizationEndpointPassthrough()
-             .EnableTokenEndpointPassthrough();
-        })
-        .AddValidation(options =>
-        {
-            // If the server and the APIs are in the same project, you can use UseLocalServer
-            options.UseLocalServer();
-            options.UseAspNetCore();
-        });
-
-    builder.Services.AddHostedService<ClientSeeder>();
-
-    builder.Services.AddAuthentication(options =>
-    {
-        // set the default scheme for token validation
-        options.DefaultAuthenticateScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
-    }).AddCookie(); // if you also want to keep cookie support
-    builder.Services.AddAuthorization();
+    builder.Services.AddAuthentication()
+                    .AddCookie(); // if you also want to keep cookie support
 
     var app = builder.Build();
 
-    app.UseHttpsRedirection();
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseHttpsRedirection();
+    }
+    else
+    { 
+        app.UseHsts();
+    }    
+    
     app.UseSerilogRequestLogging();
+
+    app.UseDeveloperExceptionPage();
+
+    app.UseForwardedHeaders();
+
     app.UseRouting();
-    //app.UseCors();
-    //app.UseCookiePolicy();
-    //app.UseAntiforgery();
+    app.UseCors();
+
     app.UseAuthentication();
     app.UseAuthorization();
+
 
 
     // Configure the HTTP request pipeline.
@@ -187,10 +151,6 @@ try
         .WithDisplayName("Api Reference")
         .WithDescription("Redirects to the Scalar API Reference documentation.");
 
-    //// Identity endpoints with OpenAPI and tags
-    //app.MapIdentityApi<User>()
-    //    .WithTags("Identity")
-    //    .WithOpenApi();
     app.MapGet("/error", () => "An unexpected Error occured!")
         .AllowAnonymous()
         .WithName("Error")
@@ -198,109 +158,9 @@ try
 
     app.MapTodoEnpoints();
     app.MapWeatherEndpoints();
-    app.MapAuthenticationEndpoints(); // TODO: Implement this endpoint by fixing the lintings in /Endpoints/Authentication
-    // <see href="https://github.com/dotnet/AspNetCore.Docs/issues/35835#issuecomment-3128169445" />
-    // If done, remove the following mappings and use the refactored method here instead.
-    //app.MapGet("/connect/authorize", async context =>
-    //{
-    //    var request = context.GetOpenIddictServerRequest() ?? throw new InvalidOperationException("Invalid request");
+    app.MapAuthenticationEndpoints();
 
-    //    var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme, Claims.Name, Claims.Role);
-    //    identity.AddClaim(Claims.Subject, "dummy_user_id");
-    //    identity.AddClaim(Claims.Name, "Test User");
 
-    //    var principal = new ClaimsPrincipal(identity);
-    //    principal.SetScopes(Scopes.OpenId, Scopes.Profile, Scopes.Email);
-
-    //    await context.SignInAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme, principal);
-
-    //    context.Response.Clear();
-
-    //    var template = await File.ReadAllTextAsync("page.html");
-    //    var code = Uri.EscapeDataString(context.GetOpenIddictServerResponse()!.Code!);
-    //    var state = Uri.EscapeDataString(context.GetOpenIddictServerResponse()!.State!);
-    //    var redirect = new UriBuilder(request.RedirectUri!)
-    //    {
-    //        Query = $"code={code}&state={state}"
-    //    }.Uri.ToString();
-
-    //    var html = string.Format(template, redirect);
-
-    //    context.Response.ContentType = "text/html; charset=utf-8";
-    //    await context.Response.WriteAsync(html);
-    //});
-
-    //app.MapPost("/connect/token", async context =>
-    //{
-    //    var request = context.GetOpenIddictServerRequest() ??
-    //                  throw new InvalidOperationException("Invalid request.");
-
-    //    if (request.IsAuthorizationCodeGrantType())
-    //    {
-    //        // Normally you retrieve the principal associated with the code.
-    //        // For simplicity, here you recreate it – in production, check that the code has not
-    //        // already been consumed and perform all necessary validations.
-    //        var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-    //        identity.AddClaim(Claims.Subject, "dummy_user_id");
-    //        identity.AddClaim(Claims.Name, "Test User");
-
-    //        var principal = new ClaimsPrincipal(identity);
-    //        principal.SetScopes(request.GetScopes());
-
-    //        await context.SignInAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme, principal);
-    //    }
-    //    else
-    //    {
-    //        // If the grant type is not recognized, trigger a Challenge or
-    //        // return an error.
-    //        await context.ChallengeAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-    //    }
-    //});
-
-    //app.MapGet("/connect/userinfo", async context =>
-    //{
-    //    // Check that the request is authenticated
-    //    var user = context.User;
-
-    //    if (user?.Identity is null || !user.Identity.IsAuthenticated)
-    //    {
-    //        context.Response.StatusCode = 401;
-    //        await context.Response.WriteAsync("Unauthorized.");
-    //        return;
-    //    }
-
-    //    // Create the object to return. You can include more claims if necessary.
-    //    var userInfo = new
-    //    {
-    //        sub = user.FindFirst(Claims.Subject)?.Value,
-    //        name = user.FindFirst(Claims.Name)?.Value,
-    //        email = user.FindFirst(Claims.Email)?.Value
-    //    };
-
-    //    // Return the JSON with the user's information
-    //    await context.Response.WriteAsJsonAsync(userInfo);
-    //});
-
-    #region Endpoint reference
-    //var summaries = new[]
-    //{
-    //    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    //};
-
-    //app.MapGet("/weatherforecast", () =>
-    //{
-    //    var forecast = Enumerable.Range(1, 5).Select(index =>
-    //        new WeatherForecast
-    //        (
-    //            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-    //            Random.Shared.Next(-20, 55),
-    //            summaries[Random.Shared.Next(summaries.Length)]
-    //        ))
-    //        .ToArray();
-    //    return forecast;
-    //})
-    //.WithName("GetWeatherForecast");
-    #endregion
     app.Run();
 }
 catch (Exception ex)
@@ -318,7 +178,3 @@ finally
     Log.CloseAndFlush();
 }
 
-//internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-//{
-//    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-//}

@@ -1,7 +1,8 @@
-using Microsoft.EntityFrameworkCore;
+using DevTKSS.Application.Common.Interfaces;
+
 namespace DevTKSS.MyManufacturerERP.WebApi.Endpoints.Todo;
 
-public class TodoDb : DbContext
+public class TodoDb : DbContext, IApplicationDbContext
 {
     public TodoDb(DbContextOptions<TodoDb> options)
         : base(options)
@@ -9,4 +10,5 @@ public class TodoDb : DbContext
     }
     public DbSet<TodoItem> TodoItems => Set<TodoItem>();
 
+    public DbSet<TodoList> TodoLists => Set<TodoList>();
 }

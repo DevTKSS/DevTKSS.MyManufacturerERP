@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <RootNamespace>DevTKSS.MyManufacturerERP.WebApi</RootNamespace>
@@ -15,10 +15,6 @@
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
-    <PackageReference Include="OpenIddict.AspNetCore" />
-    <PackageReference Include="OpenIddict.EntityFrameworkCore" />
-    <PackageReference Include="OpenIddict.Server.AspNetCore" />
-    <PackageReference Include="OpenIddict.Validation.AspNetCore" />
   </ItemGroup>
   <ItemGroup Label="EntityFramework">
     <PackageReference Include="Microsoft.EntityFrameworkCore" />

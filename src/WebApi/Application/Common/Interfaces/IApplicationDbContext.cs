@@ -1,4 +1,4 @@
-﻿using DevTKSS.Domain.Entities;
+using DevTKSS.MyManufacturerERP.Domain.Entities;
 
 namespace DevTKSS.Application.Common.Interfaces;
 
