@@ -17,7 +17,8 @@
       <RowDefinition />
     </Grid.RowDefinitions>
     <utu:NavigationBar Content="{Binding Title}" />
-
+    <!-- Here should maybe become the WebView2 Control a place https://learn.microsoft.com/de-de/microsoft-edge/webview2/concepts/basic-authentication?tabs=csharp -->
+    <!-- Planning on how I want to set up the navigation. e.g. Nested content or another page... put the button on its side would be not pretty. -->
     <StackPanel Grid.Row="1"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
