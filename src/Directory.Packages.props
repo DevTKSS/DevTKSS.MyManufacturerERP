@@ -10,6 +10,7 @@
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication" Version="2.3.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.OAuth" Version="2.3.0" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.8" />
     <PackageVersion Include="Yllibed.HttpServer" Version="1.0.0-dev.11" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
   </ItemGroup>

@@ -1,11 +1,11 @@
-namespace DevTKSS.MyManufacturerERP.Infrastructure.Services;
+namespace DevTKSS.Extensions.OAuth;
 
-internal interface IHelpers
+public interface IBrowserProvider
 {
     void OpenBrowser(Uri uri);
 }
 
-internal class Helpers : IHelpers
+public class BrowserProvider : IBrowserProvider
 {
     /// <summary>
     /// Helper method to open the browser through the url.dll.

@@ -1,4 +1,4 @@
-namespace DevTKSS.MyManufacturerERP.Infrastructure.Defaults;
+namespace DevTKSS.Extensions.OAuth.Defaults;
 /// <summary>
 /// oAuth Token Request standarized keys from <see href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3">4.1.3 Access Token Request</see>
 /// </summary>

@@ -10,6 +10,8 @@ using Temp.Extensibility.DesktopAuthBroker;
 using Uno.AuthenticationBroker;
 using Uno.Foundation.Extensibility;
 using Windows.Security.Authentication.Web;
+using Yllibed.HttpServer;
+using Yllibed.HttpServer.Handlers;
 
 [assembly:
     ApiExtension(typeof(IWebAuthenticationBrokerProvider),typeof(SystemBrowserAuthBroker))]
@@ -17,44 +19,18 @@ using Windows.Security.Authentication.Web;
 namespace Temp.Extensibility.DesktopAuthBroker;
 public sealed class SystemBrowserAuthBroker : IWebAuthenticationBrokerProvider
 {
-    private readonly IHttpListenerServer _server;
-    private Uri _serverRootUri;
-    private string? _relativeCallbackUri;
-    private readonly ILogger<SystemBrowserAuthBroker> _logger;
+    private Server? _server;
 
-    public SystemBrowserAuthBroker(
-        ILogger<SystemBrowserAuthBroker> logger,
-        IHttpListenerServer server,
-        IOptions<ServerOptions> serverOptions)
-    {
-        _logger = logger;
-        _server = server;
-        ArgumentNullException.ThrowIfNull(serverOptions.Value.RootUri, nameof(serverOptions.Value.RootUri));
-        _serverRootUri = new Uri(serverOptions.Value.RootUri,UriKind.Absolute);
-    }
+    private Uri? _serverRootUri;
+
     public Uri GetCurrentApplicationCallbackUri()
     {
-        EnsureServerStarted();
-        return new Uri(_serverRootUri, _relativeCallbackUri);
+        return new Uri(EnsureServerStarted().RootUri, "/etsy-auth-callback");
     }
-    public void SetCurrentApplicationCallbackUri(string callbackUri)
-    {
-        if (callbackUri != null  && Uri.TryCreate(callbackUri, UriKind.Relative, out var checkedUri))
-        {
-            _relativeCallbackUri = checkedUri!.PathAndQuery;
-        }
-       throw new ArgumentNullException(nameof(callbackUri));
-    }
+
     public async Task<WebAuthenticationResult> AuthenticateAsync(WebAuthenticationOptions options, Uri requestUri,
         Uri callbackUri, CancellationToken ct)
     {
-        if(_logger.IsEnabled(LogLevel.Debug))
-        {
-            _logger.LogDebug("Authenticating started with requestUri: {RequestUri}, callbackUri: {CallbackUri}, options: {Options}",
-                requestUri,
-                callbackUri,
-                options);
-        }
         if (options.HasFlag(WebAuthenticationOptions.SilentMode))
         {
             throw new NotSupportedException("SilentMode is not supported by this broker.");
@@ -75,18 +51,24 @@ public sealed class SystemBrowserAuthBroker : IWebAuthenticationBrokerProvider
             throw new NotSupportedException("UseCorporateNetwork is not supported by this broker.");
         }
 
-        EnsureServerStarted();
+        var (server, _) = EnsureServerStarted();
         var authCallbackHandler = new AuthCallbackHandler(callbackUri);
-        using (_server.RegisterHandler(authCallbackHandler))
+        using (server.RegisterHandler(authCallbackHandler))
         {
             OpenBrowser(requestUri);
             return await authCallbackHandler.WaitForCallbackAsync();
         }
     }
 
-    private void EnsureServerStarted()
+    private (Server Server, Uri RootUri) EnsureServerStarted()
     {
-        _server.Start();
+        if (_server is null || _serverRootUri is null)
+        {
+            _server = new Server(5001);
+            (_serverRootUri, _) = _server.Start();
+        }
+
+        return (_server, _serverRootUri);
     }
 
     public static void OpenBrowser(Uri uri)
@@ -98,17 +80,11 @@ public sealed class SystemBrowserAuthBroker : IWebAuthenticationBrokerProvider
         }
         catch
         {
-            //  hack because of this: https://github.com/dotnet/corefx/issues/10361
+            // hack because of this: https://github.com/dotnet/corefx/issues/10361
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 url = url.Replace("&", "^&");
-                ProcessStartInfo psi = new ProcessStartInfo
-                {
-                    FileName = url,
-                    CreateNoWindow = true,
-                    UseShellExecute = true
-                };
-                Process.Start(psi);
+                Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
@@ -126,38 +102,25 @@ public sealed class SystemBrowserAuthBroker : IWebAuthenticationBrokerProvider
         }
     }
 
-    private sealed class AuthCallbackHandler : IHttpListenerHandler
+
+    private sealed class AuthCallbackHandler(Uri callbackUri) : IHttpHandler
     {
-        private readonly Uri _callbackUri;
         private readonly TaskCompletionSource<WebAuthenticationResult> _tcs = new();
 
-        public AuthCallbackHandler(Uri callbackUri)
+        public Task HandleRequest(CancellationToken ct, IHttpServerRequest request, string relativePath)
         {
-            _callbackUri = callbackUri;
-        }
-
-        public async Task HandleRequest(HttpListenerContext context)
-        {
-            if (context.Request.Url != null
-                && context.Request.Url.AbsolutePath.StartsWith(_callbackUri.AbsolutePath, StringComparison.OrdinalIgnoreCase))
+            if (request.Url.AbsolutePath.StartsWith(callbackUri.AbsolutePath, StringComparison.OrdinalIgnoreCase))
             {
                 var result = new WebAuthenticationResult(
-                    context.Request.Url.OriginalString,
+                    request.Url.OriginalString,
                     200,
                     WebAuthenticationStatus.Success);
 
                 _tcs.TrySetResult(result);
-                var buffer = Encoding.UTF8.GetBytes("Auth completed - you can close this browser now.");
-                context.Response.ContentType = "text/plain";
-                await context.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-                context.Response.Close();
+                request.SetResponse("text/plain", "Auth completed - you can close this browser now.");
             }
-            else
-            {
-                // If the request is not for the callback URI, we ignore it.
-                context.Response.StatusCode = 404;
-                context.Response.Close();
-            }
+
+            return Task.CompletedTask;
         }
 
         public Task<WebAuthenticationResult> WaitForCallbackAsync()

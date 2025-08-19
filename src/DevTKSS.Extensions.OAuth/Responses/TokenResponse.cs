@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Endpoints.Responses;
 
 public record TokenResponse

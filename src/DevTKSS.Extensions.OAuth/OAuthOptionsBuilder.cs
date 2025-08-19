@@ -1,6 +1,6 @@
-namespace DevTKSS.MyManufacturerERP.Infrastructure.Entitys;
+namespace DevTKSS.Extensions.OAuth;
 
-public class OAuthConfigurationBuilder
+public class OAuthOptionsBuilder
 {
     private string? _authorizationEndpoint;
     private string? _tokenEndpoint;
@@ -8,7 +8,7 @@ public class OAuthConfigurationBuilder
     private string? _clientID;
     private string? _redirectUri;
     private string[] _scopes;
-    private OAuthConfigurationBuilder(OAuthOptions? options)
+    private OAuthOptionsBuilder(OAuthOptions? options)
     {
         _authorizationEndpoint = options?.AuthorizationEndpoint;
         _tokenEndpoint = options?.TokenEndpoint;
@@ -17,35 +17,35 @@ public class OAuthConfigurationBuilder
         _redirectUri = options?.RedirectUri;
         _scopes = options?.Scopes ?? [];
     }
-    public static OAuthConfigurationBuilder Create(OAuthOptions? options = null)
+    public static OAuthOptionsBuilder Create(OAuthOptions? options = null)
     => new (options);
     
-    public OAuthConfigurationBuilder WithAuthorizationEndpoint(string endpoint)
+    public OAuthOptionsBuilder WithAuthorizationEndpoint(string endpoint)
     {
         _authorizationEndpoint = endpoint;
         return this;
     }
-    public OAuthConfigurationBuilder WithUserInfoEndpoint(string endpoint)
+    public OAuthOptionsBuilder WithUserInfoEndpoint(string endpoint)
     {
         _userInfoEndpoint = endpoint;
         return this;
     }
-    public OAuthConfigurationBuilder WithTokenEndpoint(string endpoint)
+    public OAuthOptionsBuilder WithTokenEndpoint(string endpoint)
     {
         _tokenEndpoint = endpoint;
         return this;
     }
-    public OAuthConfigurationBuilder WithClientID(string clientId)
+    public OAuthOptionsBuilder WithClientID(string clientId)
     {
         _clientID = clientId;
         return this;
     }
-    public OAuthConfigurationBuilder WithRedirectUri(string redirectUri)
+    public OAuthOptionsBuilder WithRedirectUri(string redirectUri)
     {
         _redirectUri = redirectUri;
         return this;
     }
-    public OAuthConfigurationBuilder WithScopes(string[] scopes)
+    public OAuthOptionsBuilder WithScopes(string[] scopes)
     {
         _scopes = scopes;
         return this;

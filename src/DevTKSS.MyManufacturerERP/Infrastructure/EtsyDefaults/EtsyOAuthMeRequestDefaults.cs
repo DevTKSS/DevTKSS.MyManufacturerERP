@@ -1,4 +1,4 @@
-namespace DevTKSS.MyManufacturerERP.Infrastructure.Defaults;
+namespace DevTKSS.MyManufacturerERP.Infrastructure.EtsyDefaults;
 
 public class EtsyOAuthMeRequestDefaults
 {

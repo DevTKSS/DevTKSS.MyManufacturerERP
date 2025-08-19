@@ -1,4 +1,5 @@
-using DevTKSS.MyManufacturerERP.Infrastructure.Defaults;
+using DevTKSS.Extensions.OAuth.Defaults;
+using DevTKSS.Extensions.OAuth.Responses;
 
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Endpoints;
 [Headers($"Content-Type: application/json")]

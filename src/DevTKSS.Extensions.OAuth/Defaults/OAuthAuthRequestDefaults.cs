@@ -1,4 +1,4 @@
-namespace DevTKSS.MyManufacturerERP.Infrastructure.Defaults;
+namespace DevTKSS.Extensions.OAuth.Defaults;
 
 /// <summary>
 /// oAuth ResponseValueCode Grant standarized keys <see href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.1"/>

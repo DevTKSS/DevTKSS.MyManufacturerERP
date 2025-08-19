@@ -1,11 +1,16 @@
 using System.Text.RegularExpressions;
 using System.Web;
+using Newtonsoft.Json.Serialization;
+using System.Text.Json;
+using Refit;
+using DevTKSS.Extensions.OAuth;
+using DevTKSS.Extensions.OAuth.Defaults;
 
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Services;
 
 internal sealed partial record EtsyOAuthAuthenticationProvider 
 {
-    [GeneratedRegex(@"^(\d+)\.")]
+    [GeneratedRegex(@"^(\\d+)\\.")]
     private static partial Regex DoesContainUserId();
 
     private const string ProviderName = "EtsyOAuth";
@@ -22,7 +27,6 @@ internal sealed partial record EtsyOAuthAuthenticationProvider
         IOptions<OAuthOptions> options,
         IEtsyOAuthEndpoints oAuthEndpoints,
         IEtsyUserEndpoints userEndpoints,
-        IHelpers oAuthHelpers,
         ITasksManager oAuthTasksManager,
         ITokenCache tokenCache)
     {
@@ -34,49 +38,64 @@ internal sealed partial record EtsyOAuthAuthenticationProvider
         _tokenCache = tokenCache;
     }
 
-    public async Task AuthenticateAsync(Uri preparedAuthorizationStartUri,CancellationToken cancellationToken = default)
+    public async Task AuthenticateAsync(Uri preparedAuthorizationStartUri, CancellationToken cancellationToken = default)
     {
-
-       var authGrantResponse = await _authEndpointsClient.SendAuthorizationCodeRequestAsync(new AuthorizationCodeRequest
-       {
-           ResponseType = OAuthAuthRequestDefaults.CodeKey,
-           RedirectUri = _options.RedirectUri!,
-           Scope = Uri.EscapeDataString(string.Join(' ', _options.Scopes)),
-           ClientId = _options.ClientID!,
-           State = _state!,
-           CodeChallenge = _codeVerifier!,
-           CodeChallengeMethod = OAuthPkceDefaults.CodeChallengeMethodS256
-       });
-
-        if(!authGrantResponse.IsSuccessStatusCode)
+        string? error = null;
+        string? errorDesc = null;
+        try
         {
-            switch (authGrantResponse.Content!.Error)
+            var authGrantResponse = await _authEndpointsClient.SendAuthorizationCodeRequestAsync(new AuthorizationCodeRequest
             {
-                case OAuthErrorResponseDefaults.InvalidRequest:
-                    Log.Error("Invalid request: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
-                    break;
-                case OAuthErrorResponseDefaults.InvalidClient:
-                    Log.Error("Invalid client: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
-                    break;
-                case OAuthErrorResponseDefaults.InvalidGrant:
-                    Log.Error("Invalid grant: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
-                    break;
-                case OAuthErrorResponseDefaults.UnauthorizedClient:
-                    Log.Error("Unauthorized client: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
-                    break;
-                case OAuthErrorResponseDefaults.UnsupportedGrantType:
-                    Log.Error("Unsupported grant type: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
-                    break;
-                case OAuthErrorResponseDefaults.AccessDenied:
-                    Log.Error("Access denied: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
-                    break;
-                case OAuthErrorResponseDefaults.InvalidScope:
-                    Log.Error("Invalid scope: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
-                    break;
-                default:
-                    Log.Error("Unknown error: {ErrorDescription}", authGrantResponse.Content.ErrorDescription);
-                    break;
+                ResponseType = OAuthAuthRequestDefaults.CodeKey,
+                RedirectUri = _options.RedirectUri!,
+                Scope = Uri.EscapeDataString(string.Join(' ', _options.Scopes)),
+                ClientId = _options.ClientID!,
+                State = _state!,
+                CodeChallenge = _codeVerifier!,
+                CodeChallengeMethod = OAuthPkceDefaults.CodeChallengeMethodS256
+            });
+
+            if (!authGrantResponse.IsSuccessStatusCode)
+            {
+                errorDesc = $"HTTP {authGrantResponse.StatusCode}";
+                error = "Non-success status code";
+                throw new InvalidOperationException($"OAuth authorization failed. Error: {error}, Description: {errorDesc}");
             }
+        }
+        catch (ApiException apiEx)
+        {
+            errorDesc = apiEx.Content;
+            error = apiEx.StatusCode.ToString();
+            // Try to parse as JSON for error_description
+            if (!string.IsNullOrWhiteSpace(apiEx.Content))
+            {
+                try
+                {
+                    using var doc = JsonDocument.Parse(apiEx.Content);
+                    if (doc.RootElement.TryGetProperty("error", out var errProp))
+                    {
+                        error = errProp.GetString();
+                    }
+                    if (doc.RootElement.TryGetProperty("error_description", out var descProp))
+                    {
+                        errorDesc = descProp.GetString();
+                    }
+                }
+                catch
+                {
+                    // Fallback: treat as plain text
+                    errorDesc = apiEx.Content;
+                }
+            }
+            var message = $"OAuth authorization failed. Error: {error ?? "Unknown"}, Description: {errorDesc ?? "No description"}";
+            Log.Error(message);
+            throw new InvalidOperationException(message, apiEx);
+        }
+        catch (Exception ex)
+        {
+            var message = $"OAuth authorization failed. Error: {error ?? ex.GetType().Name}, Description: {errorDesc ?? ex.Message}";
+            Log.Error(message);
+            throw new InvalidOperationException(message, ex);
         }
     }
     internal async ValueTask<string> CreateLoginStartUri(

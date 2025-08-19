@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
+using System.Text.Encodings.Web;
 
-namespace DevTKSS.MyManufacturerERP.Infrastructure;
+namespace DevTKSS.Extensions.OAuth;
 
 /// <summary>
 /// Helper class for Etsy OAuth2 PKCE and token handling.
@@ -17,7 +18,8 @@ public static class OAuth2Utilitys
     /// <summary>
     /// Generates a random code verifier for PKCE.
     /// </summary>
-    public static string GenerateCodeVerifier() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)).TrimEnd('=')
+    public static string GenerateCodeVerifier()
+        => Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)).TrimEnd('=')
         .Replace('+', '-').Replace('/', '_');
 
     /// <summary>
@@ -25,7 +27,7 @@ public static class OAuth2Utilitys
     /// </summary>
     public static string GenerateCodeChallenge(string codeVerifier)
     {
-        var challengeBytes = SHA256.HashData(Encoding.ASCII.GetBytes(codeVerifier));
+        var challengeBytes = SHA256.HashData(System.Text.Encoding.ASCII.GetBytes(codeVerifier));
         return Convert.ToBase64String(challengeBytes).TrimEnd('=')
             .Replace('+', '-').Replace('/', '_');
     }

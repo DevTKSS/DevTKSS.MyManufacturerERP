@@ -7,6 +7,9 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Web;
+using Temp.Extensibility.DesktopAuthBroker;
+using DevTKSS.Extensions.OAuth;
+using DevTKSS.Extensions.OAuth.Defaults;
 
 namespace DevTKSS.MyManufacturerERP;
 public partial class App : Application
@@ -145,9 +148,20 @@ public partial class App : Application
 //#if !WINDOWS
 //                services.AddSingleton<IWebAuthenticationBrokerProvider, SystemBrowserAuthBroker>();
 //#endif
-                services.AddSingleton<IHelpers, Helpers>();
+                // Configure ServerOptions for HttpListenerServer
+                services.Configure<ServerOptions>(options =>
+                {
+                    options.Port = 0; // Random port
+                    options.RootUri = "http://localhost";
+                    options.RelativeCallbackUri = "/oauth-callback";
+                });
+                
+                services.AddSingleton<HttpListenerServer>();
                 services.AddSingleton<ITasksManager, TasksManager>();
                 services.AddSingleton<EtsyOAuthAuthenticationProvider>();
+                
+                // Register our custom OAuth service as the main authentication service
+                services.AddSingleton<IAuthenticationService, OAuthService>();
             })
             .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
         );
@@ -179,7 +193,7 @@ public partial class App : Application
     internal async ValueTask<string> CreateLoginStartUri(
        IServiceProvider services,
        ITokenCache tokens,
-       IDictionary<string, string>? credentials, // if this is null, can we use it for storing state and code verifier?
+       IDictionary<string, string>? credentials; // if this is null, can we use it for storing state and code verifier?
        string? loginStartUri,
        CancellationToken cancellationToken)
     {

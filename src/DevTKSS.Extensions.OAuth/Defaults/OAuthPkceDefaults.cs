@@ -1,4 +1,4 @@
-namespace DevTKSS.MyManufacturerERP.Infrastructure.Defaults;
+namespace DevTKSS.Extensions.OAuth.Defaults;
 
 public class OAuthPkceDefaults
 {
