@@ -1,38 +1,26 @@
 namespace DevTKSS.MyManufacturerERP.Presentation;
-// Uncomment as soon as WebAuthentication is working in Uno on desktop target
-//public partial record AuthModel(IDispatcher Dispatcher, INavigator Navigator, IAuthenticationService Authentication)
-//{
-//    public string Title { get; } = "Login";
 
-
-//    public async ValueTask Login(CancellationToken token)
-//    {
-//        var success = await Authentication.LoginAsync(Dispatcher);
-//        if (success)
-//        {
-//            await Navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.ClearBackStack);
-//        }
-//    }
-
-//}
-public partial record AuthModel(IDispatcher Dispatcher, INavigator Navigator, IAuthenticationService Authentication)
+public partial record AuthModel
 {
-    public string Title { get; } = "Connect to your external Data";
+    private readonly IDispatcher _dispatcher;
+    private readonly INavigator _navigator;
+    private readonly IAuthenticationService _authenticationService;
 
-    public IState<string> Username => State<string>.Value(this, () => string.Empty);
-
-    public IState<string> Password => State<string>.Value(this, () => string.Empty);
-
-    public async ValueTask ConnectToEtsy(CancellationToken ct)
+    public AuthModel(IDispatcher Dispatcher, INavigator Navigator, IAuthenticationService Authentication)
     {
-        var username = await Username ?? string.Empty;
-        var password = await Password ?? string.Empty;
+        _dispatcher = Dispatcher;
+        _navigator = Navigator;
+        _authenticationService = Authentication;
+    }
+    public string Title { get; } = "Login";
+    public IState<Uri> CurrentUri { get; } = State<Uri>.Value(this,() => new Uri("https://example.com/login"));
 
-        var success = await Authentication.LoginAsync(Dispatcher, provider: "EtsyOAuth",cancellationToken: ct);
+    public async ValueTask Login(CancellationToken token)
+    {
+        var success = await Authentication.LoginAsync(Dispatcher);
         if (success)
         {
             await Navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.ClearBackStack);
         }
     }
-
 }
