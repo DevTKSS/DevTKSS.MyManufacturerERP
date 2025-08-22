@@ -1,6 +1,4 @@
-using DevTKSS.Extensions.OAuth.Defaults;
-
-namespace DevTKSS.MyManufacturerERP.Extensions;
+namespace DevTKSS.Extensions.OAuth.Dictionarys;
 
 public static class TokenCacheExtensions
 {

@@ -1,4 +1,4 @@
-namespace DevTKSS.MyManufacturerERP.Infrastructure.Endpoints.Responses;
+namespace DevTKSS.Extensions.OAuth.Responses;
 
 public record TokenResponse
 {

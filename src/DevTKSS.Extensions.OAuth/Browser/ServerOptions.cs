@@ -1,4 +1,4 @@
-namespace Temp.Extensibility.DesktopAuthBroker;
+namespace DevTKSS.Extensions.OAuth.Browser;
 public record ServerOptions
 {
     public int Port { get; init; } = 0;

@@ -1,6 +1,9 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using Temp.Extensibility.DesktopAuthBroker;
+using DevTKSS.Extensions.OAuth.Browser;
+using DevTKSS.Extensions.OAuth.Dictionarys;
+using DevTKSS.Extensions.OAuth.Options;
+using DevTKSS.Extensions.OAuth.Responses;
 using Windows.Security.Authentication.Web;
 
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Services;

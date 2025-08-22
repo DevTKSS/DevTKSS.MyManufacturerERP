@@ -159,11 +159,6 @@ try
         .WithName("Forbidden")
         .WithOpenApi();
 
-    //app.MapGet("/", () => "Welcome to MyManufacturerERP API!")
-    //    .WithName("Welcome")
-    //    .AllowAnonymous()
-    //    .WithOpenApi();
-
     app.MapFallbackToFile("index.html");
     app.MapFallback(() => "/scalar/v1"); // Fallback to the Scalar API Reference
    

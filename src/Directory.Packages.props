@@ -13,18 +13,8 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.8" />
     <PackageVersion Include="Yllibed.HttpServer" Version="1.0.0-dev.11" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
+    <!--<PackageVersion Include="Xamarin.AndroidX.Browser" Version="1.8.0.11" />-->
   </ItemGroup>
-  <!--<ItemGroup Label="Auth Packages">
-    <PackageVersion Include="OpenIddict.Abstractions" Version="7.0.0" />
-    <PackageVersion Include="OpenIddict.Client" Version="7.0.0" />
-    <PackageVersion Include="OpenIddict.Client.SystemIntegration" Version="7.0.0" />
-    <PackageVersion Include="OpenIddict.Client.SystemNetHttp" Version="7.0.0" />
-    <PackageVersion Include="OpenIddict.Client.WebIntegration" Version="7.0.0" />
-    <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="7.0.0" />
-    <PackageVersion Include="OpenIddict.Server.AspNetCore" Version="7.0.0" />
-    <PackageVersion Include="OpenIddict.Validation.AspNetCore" Version="7.0.0" />
-    <PackageVersion Include="OpenIddict.AspNetCore" Version="7.0.0" />
-  </ItemGroup>-->
   <ItemGroup>
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.3.0" />
   </ItemGroup>

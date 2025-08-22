@@ -1,4 +1,4 @@
-namespace DevTKSS.MyManufacturerERP.Validation;
+namespace DevTKSS.Extensions.OAuth.Validation;
 
 public class OAuthOptionsValidator : AbstractValidator<OAuthOptions>
 {

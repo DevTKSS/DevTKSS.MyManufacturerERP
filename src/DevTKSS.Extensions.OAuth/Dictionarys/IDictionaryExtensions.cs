@@ -1,6 +1,6 @@
-namespace DevTKSS.MyManufacturerERP.Extensions;
+namespace DevTKSS.Extensions.OAuth.Dictionarys;
 
-internal static class IDictionaryExtensions
+public static class IDictionaryExtensions
 {
     /// <summary>
     /// Adds or replaces the element to the <see cref="IDictionary"/> instance.
@@ -19,7 +19,7 @@ internal static class IDictionaryExtensions
             dictionary[key] = value;
             return oldValue;
         }
-        return default(TValue);
+        return default;
     }
     public static bool TryRemoveKeys<TKey, TValue>(this IDictionary<TKey, TValue>? dictionary, IEnumerable<TKey> keys)
     {

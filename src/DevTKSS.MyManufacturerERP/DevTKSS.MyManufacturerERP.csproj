@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Uno.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net9.0-desktop;net9.0-android;net9.0-ios;net9.0-browserwasm</TargetFrameworks><!--;net9.0;net9.0-windows10.0.26100-->
+    <TargetFrameworks>net9.0-desktop;net9.0-android;net9.0-ios;net9.0-browserwasm;net9.0</TargetFrameworks><!--;net9.0-windows10.0.26100-->
     <UserSecretsId>73d0e72f-3b9d-4ea9-bc0e-ca05efc5cd26</UserSecretsId>
     <OutputType>Exe</OutputType>
     <UnoSingleProject>true</UnoSingleProject>
@@ -41,10 +41,10 @@
 
   </PropertyGroup>
 
-  <!--<PropertyGroup Condition="'$(Configuration)'=='Debug' or '$(IsUiAutomationMappingEnabled)'=='True'">
+  <PropertyGroup Condition="'$(Configuration)'=='Debug' or '$(IsUiAutomationMappingEnabled)'=='True'">
     <IsUiAutomationMappingEnabled>True</IsUiAutomationMappingEnabled>
     <DefineConstants>$(DefineConstants);USE_UITESTS</DefineConstants>
-  </PropertyGroup>-->
+  </PropertyGroup>
 
   <ItemGroup>
     <UnoImage Include="Assets\Images\*.png" />
@@ -53,21 +53,12 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
-
   </ItemGroup>
-
+  <!--<ItemGroup Condition="$(TargetFramework.Contains('-android'))">
+    <PackageReference Include="Xamarin.AndroidX.Browser" />
+  </ItemGroup>-->
   <ItemGroup>
     <ProjectReference Include="..\DevTKSS.Extensions.OAuth\DevTKSS.Extensions.OAuth.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Presentation\AuthPage.xaml.cs">
-      <DependentUpon>AuthPage.xaml</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Extensions\" />
   </ItemGroup>
 
   <!--<ItemGroup>

@@ -1,10 +1,6 @@
 #if DESKTOP || HAS_UNO_SKIA
 using System.Diagnostics;
-using System.Net;
 using System.Runtime.InteropServices;
-using System.Text;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 // Import the namespace its defined (the one below) to make it available in the attribute which needs to be above the namespace declaration.
 using Temp.Extensibility.DesktopAuthBroker;
 using Uno.AuthenticationBroker;
@@ -14,7 +10,7 @@ using Yllibed.HttpServer;
 using Yllibed.HttpServer.Handlers;
 
 [assembly:
-    ApiExtension(typeof(IWebAuthenticationBrokerProvider),typeof(SystemBrowserAuthBroker))]
+    ApiExtension(typeof(IWebAuthenticationBrokerProvider), typeof(SystemBrowserAuthBroker))]
 
 namespace Temp.Extensibility.DesktopAuthBroker;
 public sealed class SystemBrowserAuthBroker : IWebAuthenticationBrokerProvider
@@ -35,7 +31,8 @@ public sealed class SystemBrowserAuthBroker : IWebAuthenticationBrokerProvider
         {
             throw new NotSupportedException("SilentMode is not supported by this broker.");
         }
-
+#pragma warning disable IDE0079 // Remove unnecessary suppression of the warning.
+#pragma warning disable Uno0001 // WebAuthenticationOptions.UseTitle is not supported to be used in Uno Platform. We know about this, thats why we throw those exceptions in there.
         if (options.HasFlag(WebAuthenticationOptions.UseTitle))
         {
             throw new NotSupportedException("UseTitle is not supported by this broker.");
@@ -50,7 +47,8 @@ public sealed class SystemBrowserAuthBroker : IWebAuthenticationBrokerProvider
         {
             throw new NotSupportedException("UseCorporateNetwork is not supported by this broker.");
         }
-
+#pragma warning restore Uno0001 // WebAuthenticationOptions.UseTitle is not supported to be used in Uno Platform.
+#pragma warning restore IDE0079 // Remove unnecessary suppression of the warning.
         var (server, _) = EnsureServerStarted();
         var authCallbackHandler = new AuthCallbackHandler(callbackUri);
         using (server.RegisterHandler(authCallbackHandler))

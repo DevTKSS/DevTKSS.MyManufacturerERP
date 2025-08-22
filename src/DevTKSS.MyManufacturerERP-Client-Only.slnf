@@ -2,7 +2,11 @@
   "solution": {
     "path": "DevTKSS.MyManufacturerERP.sln",
     "projects": [
-      "DevTKSS.MyManufacturerERP\\DevTKSS.MyManufacturerERP.csproj"
+      "DevTKSS.Extensions.OAuth\\DevTKSS.Extensions.OAuth.csproj",
+      "DevTKSS.MyManufacturerERP\\DevTKSS.MyManufacturerERP.csproj",
+      "Tests\\DevTKSS.MyManufacturerERP.Tests\\DevTKSS.MyManufacturerERP.Tests.csproj",
+      "Tests\\DevTKSS.MyManufacturerERP.UITests\\DevTKSS.MyManufacturerERP.UITests.csproj",
+      "Tests\\DevTKSS.MyManufacturerERP.xUnitTests\\DevTKSS.MyManufacturerERP.xUnitTests.csproj"
     ]
   }
 }

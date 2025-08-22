@@ -1,4 +1,4 @@
-namespace DevTKSS.MyManufacturerERP.Models;
+namespace DevTKSS.Extensions.OAuth.Options;
 
 public class OAuthOptions : EndpointOptions
 {

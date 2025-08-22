@@ -3,10 +3,10 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using DevTKSS.Extensions.OAuth.Defaults;
-using DevTKSS.MyManufacturerERP.Models;
+using DevTKSS.Extensions.OAuth.Options;
 using Windows.Security.Authentication.Web;
 
-namespace Temp.Extensibility.DesktopAuthBroker;
+namespace DevTKSS.Extensions.OAuth.Browser;
 
 public class HttpListenerServer
 {

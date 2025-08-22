@@ -7,7 +7,7 @@
   </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Shouldly"/>
+        <PackageReference Include="Shouldly" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.runner.visualstudio">
@@ -15,7 +15,8 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DevTKSS.MyManufacturerERP\DevTKSS.MyManufacturerERP.csproj" />
-  </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\DevTKSS.MyManufacturerERP\DevTKSS.MyManufacturerERP.csproj" />
+    </ItemGroup>
 </Project>

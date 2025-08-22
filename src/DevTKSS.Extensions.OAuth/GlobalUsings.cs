@@ -1,8 +1,12 @@
-global using System.Text.Json.Serialization;
 global using System.Net;
 global using System.Net.Sockets;
 global using System.Text;
-global using DevTKSS.Extensions.OAuth;
+global using System.Text.Json.Serialization;
+global using FluentValidation;
+global using DevTKSS.Extensions.OAuth.Validation;
+global using FluentValidation.Validators;
+global using DevTKSS.Extensions.OAuth.Defaults;
+global using FluentValidation.Results;
 global using Microsoft.Extensions.Options;
 global using Windows.Security.Authentication.Web;
-global using FluentValidation.Results;
+global using DevTKSS.Extensions.OAuth.Options;
