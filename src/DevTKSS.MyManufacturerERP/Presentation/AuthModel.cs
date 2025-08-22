@@ -17,10 +17,10 @@ public partial record AuthModel
 
     public async ValueTask Login(CancellationToken token)
     {
-        var success = await Authentication.LoginAsync(Dispatcher);
+        var success = await _authenticationService.LoginAsync(_dispatcher);
         if (success)
         {
-            await Navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.ClearBackStack);
+            await _navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.ClearBackStack);
         }
     }
 }
