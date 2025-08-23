@@ -1,24 +1,32 @@
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Text.Json;
-using DevTKSS.Extensions.OAuth.Defaults;
-using DevTKSS.Extensions.OAuth.Options;
-using Windows.Security.Authentication.Web;
+
 
 namespace DevTKSS.Extensions.OAuth.Browser;
 
-public class HttpListenerServer
+public class HttpListenerService : IHttpListenerService
 {
     private readonly ServerOptions _options;
     private readonly OAuthOptions _oAuthOptions;
-
-    public HttpListenerServer(
+    private readonly ILogger<HttpListenerService> _logger;
+    private readonly IBrowserProvider _browserProvider;
+    public HttpListenerService(
+        ILogger<HttpListenerService> logger,
+        IBrowserProvider browserProvider,
         IOptions<ServerOptions> serverOptions,
-        IOptions<OAuthOptions> oAuthOptions)
+        IOptions<OAuthOptions> oAuthOptions
+        )
     {
+        _logger = logger;
+        _browserProvider = browserProvider;
         _options = serverOptions.Value;
         _oAuthOptions = oAuthOptions.Value;
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(_options.RootUri, nameof(_options.RootUri));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(_options.CallbackUri, nameof(_options.CallbackUri));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(_oAuthOptions.ClientID, nameof(_oAuthOptions.ClientID));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(_oAuthOptions.AuthorizationEndpoint, nameof(_oAuthOptions.AuthorizationEndpoint));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(_oAuthOptions.TokenEndpoint, nameof(_oAuthOptions.TokenEndpoint));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(_oAuthOptions.UserInfoEndpoint, nameof(_oAuthOptions.UserInfoEndpoint));
+        if (_oAuthOptions.Scopes == null || _oAuthOptions.Scopes.Length == 0)
+            throw new ArgumentNullException(nameof(_oAuthOptions.Scopes), "At least one scope must be specified.");
     }
 
     public Uri GetCurrentApplicationCallbackUri()
@@ -27,7 +35,7 @@ public class HttpListenerServer
         listener.Start();
         var resultingPort = ((IPEndPoint)listener.LocalEndpoint).Port;
         listener.Stop();
-        return new Uri($"{_options.RootUri}:{resultingPort}{_options.RelativeCallbackUri}");
+        return new Uri($"{_options.RootUri}:{resultingPort}/{_options.CallbackUri}");
     }
 
     public async Task<WebAuthenticationResult> AuthenticateAsync(WebAuthenticationOptions options, Uri requestUri, Uri callbackUri, CancellationToken ct)
@@ -63,11 +71,7 @@ public class HttpListenerServer
                     codeChallengeMethod);
 
                 // Opens request in the browser.
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = authorizationRequest,
-                    UseShellExecute = true
-                });
+                _browserProvider.OpenBrowser(new Uri(authorizationRequest));
 
                 // Waits for the OAuth authorization response.
                 var context = await http.GetContextAsync();
@@ -82,37 +86,32 @@ public class HttpListenerServer
                 responseOutput.Close();
 
                 // Checks for errors.
-                if (context.Request.QueryString.Get("error") != null)
+                if (context.Request.QueryString.Get(OAuthErrorResponseDefaults.ErrorKey) is string error)
                 {
-                    var error = context.Request.QueryString.Get("error");
                     output($"OAuth authorization error: {error}");
                     return new WebAuthenticationResult(string.Empty, 400, WebAuthenticationStatus.ErrorHttp);
                 }
 
-                if (context.Request.QueryString.Get(OAuthAuthRequestDefaults.CodeKey) == null
-                    || context.Request.QueryString.Get(OAuthAuthRequestDefaults.StateKey) == null)
+                if (context.Request.QueryString.Get(OAuthAuthRequestDefaults.CodeKey) is not string code
+                    || context.Request.QueryString.Get(OAuthAuthRequestDefaults.StateKey) is not string incomingState)
                 {
                     output("Malformed authorization response. " + context.Request.QueryString);
                     return new WebAuthenticationResult(string.Empty, 400, WebAuthenticationStatus.ErrorHttp);
                 }
 
-                // extracts the code
-                var code = context.Request.QueryString.Get(OAuthAuthRequestDefaults.CodeKey);
-                var incoming_state = context.Request.QueryString.Get(OAuthAuthRequestDefaults.StateKey);
-
                 // Compares the received state to the expected value, to ensure that
                 // this app made the request which resulted in authorization.
-                if (incoming_state != state)
+                if (incomingState != state)
                 {
-                    output($"Received request with invalid state ({incoming_state})");
+                    output($"Received request with invalid state ({incomingState})");
                     return new WebAuthenticationResult(string.Empty, 400, WebAuthenticationStatus.ErrorHttp);
                 }
 
                 output("Authorization code: " + code);
 
-                // Return successful result with the callback URL containing the code
-                var callbackUrl = $"{redirectURI}?code={code}&state={state}";
-                return new WebAuthenticationResult(callbackUrl, 200, WebAuthenticationStatus.Success);
+                // Call the PerformCodeExchangeAsync to exchange the code for tokens
+
+                return await PerformCodeExchangeAsync(code, codeVerifier, redirectURI);
             }
             finally
             {
@@ -126,88 +125,52 @@ public class HttpListenerServer
         }
     }
 
-    async void PerformCodeExchange(string code, string codeVerifier, string redirectURI)
+    private async Task<WebAuthenticationResult> PerformCodeExchangeAsync(string code, string codeVerifier, string redirectURI)
     {
         output("Exchanging code for tokens...");
 
-        // builds the request
-        string tokenRequestURI = _oAuthOptions.TokenEndpoint ?? "https://openapi.etsy.com/v3/public/oauth/token";
+        string tokenRequestURI = _oAuthOptions.TokenEndpoint!;
         string tokenRequestBody = string.Format("code={0}&redirect_uri={1}&client_id={2}&code_verifier={3}&scope={4}&grant_type=authorization_code",
             code,
             Uri.EscapeDataString(redirectURI),
             _oAuthOptions.ClientID,
             codeVerifier,
             Uri.EscapeDataString(string.Join(' ', _oAuthOptions.Scopes))
-            );
+        );
 
-        // sends the request
         using var httpClient = new HttpClient();
-        var content = new StringContent(tokenRequestBody, Encoding.UTF8, "application/x-www-form-urlencoded");
+        var content = new StringContent(tokenRequestBody, Encoding.UTF8, System.Net.Mime.MediaTypeNames.Application.Json);
 
         try
         {
-            // gets the response
             var tokenResponse = await httpClient.PostAsync(tokenRequestURI, content);
+            var responseUri = tokenResponse.RequestMessage?.RequestUri?.ToString() ?? string.Empty;
             tokenResponse.EnsureSuccessStatusCode();
 
-            // reads response body
             string responseText = await tokenResponse.Content.ReadAsStringAsync();
             output(responseText);
 
-            // converts to dictionary
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            var tokenEndpointDecoded = JsonSerializer.Deserialize<Dictionary<string, object>>(responseText, options);
-
-            if (tokenEndpointDecoded != null && tokenEndpointDecoded.TryGetValue("access_token", out var accessTokenObj))
-            {
-                string access_token = accessTokenObj.ToString() ?? string.Empty;
-                UserInfoCallAsync(access_token);
-            }
+            // Return the response URI as responseData
+            return new WebAuthenticationResult(responseUri, 200, WebAuthenticationStatus.Success);
+            
         }
         catch (HttpRequestException ex)
         {
             output($"HTTP error during token exchange: {ex.Message}");
+            return new WebAuthenticationResult(string.Empty, 400, WebAuthenticationStatus.ErrorHttp);
         }
         catch (Exception ex)
         {
             output($"Error during token exchange: {ex.Message}");
+            return new WebAuthenticationResult(string.Empty, 500, WebAuthenticationStatus.ErrorHttp);
         }
     }
 
-    public async void UserInfoCallAsync(string access_token, CancellationToken ct = default)
+    private void output(string output)
     {
-        output("Making API Call to Userinfo...");
-
-        // builds the request
-        string userinfoRequestURI = _oAuthOptions.UserInfoEndpoint ?? "https://openapi.etsy.com/v3/application/users/me";
-
-        // sends the request
-        using var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", access_token);
-
-        try
+        if (_logger.IsEnabled(LogLevel.Trace))
         {
-            // gets the response
-            HttpResponseMessage userinfoResponse = await httpClient.GetAsync(userinfoRequestURI, ct);
-            userinfoResponse.EnsureSuccessStatusCode();
-
-            // reads response body
-            string userinfoResponseText = await userinfoResponse.Content.ReadAsStringAsync(ct);
-            output(userinfoResponseText);
+            _logger.LogTrace($"[OAuth] {output}");
         }
-        catch (HttpRequestException ex)
-        {
-            output($"Error making userinfo request: {ex.Message}");
-        }
-    }
-
-    /// <summary>
-    /// Appends the given string to the on-screen log, and the debug console.
-    /// </summary>
-    /// <param name="output">string to be appended</param>
-    public void output(string output)
-    {
-        // Use Console.WriteLine instead of textBoxOutput which doesn't exist
-        Console.WriteLine($"[OAuth] {output}");
     }
 }

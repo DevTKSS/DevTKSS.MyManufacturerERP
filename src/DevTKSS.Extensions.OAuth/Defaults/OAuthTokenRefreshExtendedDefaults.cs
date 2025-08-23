@@ -3,5 +3,5 @@ namespace DevTKSS.Extensions.OAuth.Defaults;
 public class OAuthTokenRefreshExtendedDefaults : OAuthTokenRefreshDefaults
 {
     public const string UserIdKey = "user_id";
-    public const string ExpirationDateKey = "expiration_date";
+    public const string ExpirationDateTokenKey = "expiration_date";
 }

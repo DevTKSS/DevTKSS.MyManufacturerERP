@@ -2,8 +2,8 @@ namespace DevTKSS.MyManufacturerERP.Presentation;
 
 public partial record MainModel
 {
-    private INavigator _navigator;
-
+    private readonly INavigator _navigator;
+    private readonly IAuthenticationService _authenticationService;
     public MainModel(
         IStringLocalizer localizer,
         IOptions<AppConfig> appInfo,
@@ -14,20 +14,14 @@ public partial record MainModel
         _authenticationService = authenticationService;
     }
 
-    public string? Title { get; }
-
-    public IState<string> Name => State<string>.Value(this, () => string.Empty);
-
-    public async Task GoToSecond()
+    public async Task GoToWebView()
     {
-        var name = await Name;
-        await _navigator.NavigateViewModelAsync<SecondModel>(this, data: new Entity(name!));
+        await _navigator.NavigateViewModelAsync<WebViewBrowserModel>(this, data: "https://www.google.com/");
     }
 
-    public async ValueTask ConnectToEtsy(CancellationToken token)
+    public async ValueTask LogoutFromEtsy(CancellationToken token)
     {
         await _authenticationService.LogoutAsync(token);
     }
 
-    private IAuthenticationService _authenticationService;
 }

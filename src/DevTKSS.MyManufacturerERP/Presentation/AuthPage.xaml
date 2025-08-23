@@ -24,8 +24,6 @@
                 VerticalAlignment="Center"
                 Width="200"
                 Spacing="16">
-      <WebView2 x:Name="MyWebView"
-                Source="{Binding CurrentUri, Mode=OneWay}" />
       <Button Content="Connect your Etsy Data"
           Command="{Binding ConnectToEtsy}"
           HorizontalAlignment="Stretch" />

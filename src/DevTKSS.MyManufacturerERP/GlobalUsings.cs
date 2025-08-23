@@ -19,8 +19,14 @@ global using Serilog;
 global using System.Text.RegularExpressions;
 global using System.Web;
 global using ILogger = Serilog.ILogger;
-#if !WINDOWS
-#endif
+global using System.Collections.Specialized;
+global using System.Text.Json;
+global using DevTKSS.Extensions.OAuth.Browser;
+global using DevTKSS.Extensions.OAuth.Dictionarys;
+global using DevTKSS.Extensions.OAuth.Options;
+global using DevTKSS.Extensions.OAuth.Responses;
+global using DevTKSS.MyManufacturerERP.Infrastructure.EtsyDefaults;
+global using Windows.Security.Authentication.Web;
 global using Refit;
 [assembly: Uno.Extensions.Reactive.Config.BindableGenerationTool(3)]
 

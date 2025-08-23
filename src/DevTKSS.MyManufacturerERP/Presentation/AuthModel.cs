@@ -6,16 +6,19 @@ public partial record AuthModel
     private readonly INavigator _navigator;
     private readonly IAuthenticationService _authenticationService;
 
-    public AuthModel(IDispatcher Dispatcher, INavigator Navigator, IAuthenticationService Authentication)
+    public AuthModel(
+        IDispatcher Dispatcher, 
+        INavigator Navigator, 
+        IAuthenticationService Authentication)
     {
         _dispatcher = Dispatcher;
         _navigator = Navigator;
         _authenticationService = Authentication;
     }
     public string Title { get; } = "Login";
-    public IState<Uri> CurrentUri { get; } = State<Uri>.Value(this,() => new Uri("https://example.com/login"));
+    public IState<string> CurrentUri => State<string>.Value(this,() => "https://example.com/login" );
 
-    public async ValueTask Login(CancellationToken token)
+    public async ValueTask ConnectToEtsy(CancellationToken token = default)
     {
         var success = await _authenticationService.LoginAsync(_dispatcher);
         if (success)
@@ -23,4 +26,5 @@ public partial record AuthModel
             await _navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.ClearBackStack);
         }
     }
+ 
 }

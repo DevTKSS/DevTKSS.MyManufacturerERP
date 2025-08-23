@@ -34,9 +34,9 @@ public static class TokenCacheExtensions
     }
     public static bool TryGetExpirationDate(this IDictionary<string, string> cache, out DateTime expiresIn)
     {
-        if (cache.TryGetValue(OAuthTokenRefreshExtendedDefaults.ExpirationDateKey, out var expires))
+        if (cache.TryGetValue(OAuthTokenRefreshExtendedDefaults.ExpirationDateTokenKey, out var expirationDate))
         {
-            if (DateTime.TryParse(expires, out var value))
+            if (DateTime.TryParse(expirationDate, out var value))
             {
                 expiresIn = value;
                 return true;

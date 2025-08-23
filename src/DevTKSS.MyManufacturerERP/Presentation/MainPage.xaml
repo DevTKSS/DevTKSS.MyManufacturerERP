@@ -17,16 +17,13 @@
       <utu:NavigationBar Content="{Binding Title}" />
 
       <StackPanel Grid.Row="1"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Spacing="16">
-        <TextBox Text="{Binding Name, Mode=TwoWay}"
-            PlaceholderText="Enter your name:" />
-        <Button Content="Go to Second Page"
-            AutomationProperties.AutomationId="SecondPageButton"
-            Command="{Binding GoToSecond}" />
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  Spacing="16">
+        <Button Content="Go to WebView2"
+                Command="{Binding GoToWebView}" />
         <Button Content="Logout"
-            Command="{Binding Logout}" />
+                Command="{Binding LogoutFromEtsy}" />
       </StackPanel>
     </Grid>
   </ScrollViewer>

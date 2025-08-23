@@ -60,6 +60,16 @@
   <ItemGroup>
     <ProjectReference Include="..\DevTKSS.Extensions.OAuth\DevTKSS.Extensions.OAuth.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Page Update="Presentation\WebViewBrowserPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Presentation\WebViewBrowserWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
 
   <!--<ItemGroup>
     <ProjectReference Include="..\Temp.Extensibility.SystemAuthBrokerServer\Temp.Extensibility.DesktopAuthBroker.csproj" />

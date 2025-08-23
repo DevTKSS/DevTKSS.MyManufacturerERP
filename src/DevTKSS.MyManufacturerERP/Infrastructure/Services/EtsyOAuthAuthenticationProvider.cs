@@ -1,12 +1,7 @@
-using System.Text.RegularExpressions;
-using System.Web;
-using Newtonsoft.Json.Serialization;
 using System.Text.Json;
-using Refit;
-using DevTKSS.Extensions.OAuth.Defaults;
-using DevTKSS.Extensions.OAuth.Responses;
-using DevTKSS.Extensions.OAuth.Options;
 using DevTKSS.Extensions.OAuth.Dictionarys;
+using DevTKSS.Extensions.OAuth.Options;
+using DevTKSS.Extensions.OAuth.Responses;
 
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Services;
 
@@ -18,29 +13,21 @@ internal sealed partial record EtsyOAuthAuthenticationProvider
     private const string ProviderName = "EtsyOAuth";
 
     private readonly IEtsyOAuthEndpoints _authEndpointsClient;
-    private readonly IEtsyUserEndpoints _userEndpointsClient;
-    private readonly ITasksManager _tasksManager;
     private readonly OAuthOptions _options; // Etsy "API Key string"
-    private readonly ITokenCache _tokenCache;
     private string? _state;
     private string? _codeVerifier;
 
     public EtsyOAuthAuthenticationProvider(
         IOptions<OAuthOptions> options,
-        IEtsyOAuthEndpoints oAuthEndpoints,
-        IEtsyUserEndpoints userEndpoints,
-        ITasksManager oAuthTasksManager,
-        ITokenCache tokenCache)
+        IEtsyOAuthEndpoints oAuthEndpoints)
     {
         _options = options.Value ?? throw new ArgumentNullException(nameof(options));
         ArgumentOutOfRangeException.ThrowIfLessThan(_options.Scopes.Length, 1, nameof(_options.Scopes));
         ArgumentException.ThrowIfNullOrWhiteSpace(_options.ClientID, nameof(_options.ClientID));
-        _userEndpointsClient = userEndpoints;
         _authEndpointsClient = oAuthEndpoints;
-        _tokenCache = tokenCache;
     }
 
-    public async Task AuthenticateAsync(Uri preparedAuthorizationStartUri, CancellationToken cancellationToken = default)
+    internal async Task AuthenticateAsync(Uri preparedAuthorizationStartUri, CancellationToken cancellationToken = default)
     {
         string? error = null;
         string? errorDesc = null;
@@ -146,7 +133,7 @@ internal sealed partial record EtsyOAuthAuthenticationProvider
     }
 
     // No idea how to instead integrate this to a seperate service but even then no idea how to open that damn browser
-    private async ValueTask<IDictionary<string, string>?> ProcessPostLoginAsync(
+    internal async ValueTask<IDictionary<string, string>?> ProcessPostLoginAsync(
         IEtsyOAuthEndpoints authEndpoints,
         IServiceProvider serviceProvider,
         ITokenCache tokenCache,
@@ -223,7 +210,7 @@ internal sealed partial record EtsyOAuthAuthenticationProvider
             // Save additional tokens if needed
             tokens.AddOrReplace(OAuthTokenRefreshDefaults.AccessTokenKey, tokenExchangeResult.AccessToken!);
             tokens.AddOrReplace(OAuthTokenRefreshDefaults.RefreshToken, tokenExchangeResult.RefreshToken!);
-            tokens.AddOrReplace(OAuthTokenRefreshExtendedDefaults.ExpirationDateKey, expirationTimeStamp);
+            tokens.AddOrReplace(OAuthTokenRefreshExtendedDefaults.ExpirationDateTokenKey, expirationTimeStamp);
 
             // remove the state and code verifier from credentials as they are no longer needed
             if (!credentials.TryRemoveKeys([OAuthAuthRequestDefaults.StateKey, OAuthPkceDefaults.CodeVerifierKey]))
@@ -237,7 +224,7 @@ internal sealed partial record EtsyOAuthAuthenticationProvider
         return default;
     }
 
-    private async ValueTask<IDictionary<string, string>?> RefreshTokensAsync(
+    internal async ValueTask<IDictionary<string, string>?> RefreshTokensAsync(
         IEtsyOAuthEndpoints authEndpoints,
         IServiceProvider serviceProvider,
         ITokenCache tokenCache,
@@ -272,7 +259,7 @@ internal sealed partial record EtsyOAuthAuthenticationProvider
             // Return IDictionary containing any tokens used by service calls or in the app
             tokens.AddOrReplace(OAuthTokenRefreshDefaults.AccessTokenKey, tokenResponse.AccessToken);
             tokens.AddOrReplace(OAuthTokenRefreshDefaults.RefreshToken, tokenResponse.RefreshToken);
-            tokens.AddOrReplace(OAuthTokenRefreshDefaults.ExpiresInKey, DateTime.Now.AddMinutes(5).ToString("g"));
+            tokens.AddOrReplace(OAuthTokenRefreshDefaults.ExpiresInKey, DateTime.Now.AddMinutes(tokenResponse.ExpiresIn).ToString("g"));
             return tokens;
         }
 

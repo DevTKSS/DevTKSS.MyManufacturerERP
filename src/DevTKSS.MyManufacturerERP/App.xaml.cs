@@ -3,6 +3,7 @@
 //using IWebAuthenticationBrokerProvider = Uno.AuthenticationBroker.IWebAuthenticationBrokerProvider;
 //using Temp.Extensibility.DesktopAuthBroker;
 //#endif
+using DevTKSS.Extensions.OAuth.Browser;
 using DevTKSS.Extensions.OAuth.Dictionarys;
 using DevTKSS.Extensions.OAuth.Options;
 using DevTKSS.Extensions.OAuth.Responses;
@@ -19,7 +20,7 @@ public partial class App : Application
         this.InitializeComponent();
     }
 
-    protected Window? MainWindow { get; private set; }
+    public Window? MainWindow { get; private set; }
     protected IHost? Host { get; private set; }
 
     protected async override void OnLaunched(LaunchActivatedEventArgs args)
@@ -109,35 +110,6 @@ public partial class App : Application
                 )
                 .AddRefitClient<IEtsyUserEndpoints>(context);
             })
-            .UseAuthentication(authBuilder =>
-            // reference used: https://github.com/unoplatform/uno.extensions/blob/main/testing/TestHarness/TestHarness/Ext/Authentication/Web/WebAuthenticationHostInit.cs
-                authBuilder.AddWeb<IEtsyOAuthEndpoints>(configureWeb =>
-                configureWeb
-                    .LoginStartUri("https://openapi.etsy.com/v3/public/oauth/connect")
-                    .AccessTokenKey(OAuthTokenRefreshDefaults.AccessTokenKey)
-                    .RefreshTokenKey(OAuthTokenRefreshDefaults.RefreshToken)
-                    .PrefersEphemeralWebBrowserSession(true)
-                    .LoginCallbackUri("https://localhost:5001/etsy-auth-callback")
-                    .PrepareLoginCallbackUri(
-                        async(service,serviceProvider,tokencache,loginCallbackUri,ct)
-                        => loginCallbackUri!)
-
-                    .PrepareLoginStartUri(async (sp, tokens, credentials, loginStartUri, ct)
-                        => await CreateLoginStartUri(sp, tokens, credentials, loginStartUri, ct))
-                
-                    .PostLogin(async(authService, serviceProvider,tokenCache, credentials, redirectUri, tokens,cancellationToken)
-                        => await ProcessPostLoginAsync(authService, serviceProvider,tokenCache,credentials,redirectUri,tokens, cancellationToken))
-                    
-                    .Refresh(async (authService, serviceProvider, tokenCache, tokens, cancellationToken) =>
-                        await RefreshTokensAsync(authService, serviceProvider, tokenCache, tokens, cancellationToken))
-
-                    ,name: "EtsyOAuth"),
-                configureAuthorization: builder =>
-                {
-                    builder.AuthorizationHeader(scheme: "Bearer");
-                }
-            )
-
             .ConfigureServices((context, services) =>
             {
                 // TODO: Register your sp
@@ -145,12 +117,48 @@ public partial class App : Application
 //                services.AddSingleton<IWebAuthenticationBrokerProvider, SystemBrowserAuthBroker>();
 //#endif
                 services.AddSingleton<IBrowserProvider, BrowserProvider>();
-                services.AddSingleton<ITasksManager, TasksManager>();
-                services.AddSingleton<EtsyOAuthAuthenticationProvider>();
-                
+                services.AddSingleton<IHttpListenerService, HttpListenerService>();
+                                
                 // Register our custom OAuth service as the main authentication service
-                services.AddSingleton<IAuthenticationService, OAuthService>();
+                services.AddSingleton<IOAuthService,OAuthService>();
             })
+            .UseAuthentication(authBuilder =>
+            authBuilder.AddCustom<OAuthService>(custom =>
+
+            #region Web Auth configuration
+            // reference used: https://github.com/unoplatform/uno.extensions/blob/main/testing/TestHarness/TestHarness/Ext/Authentication/Web/WebAuthenticationHostInit.cs
+            //authBuilder.AddWeb<IEtsyOAuthEndpoints>(configureWeb =>
+            //configureWeb
+            //    .AccessTokenKey(OAuthTokenRefreshDefaults.AccessTokenKey)
+            //    .RefreshTokenKey(OAuthTokenRefreshDefaults.RefreshToken)
+            //    .PrepareLoginCallbackUri(
+            //        async(service,serviceProvider,tokencache,loginCallbackUri,ct)
+            //        => loginCallbackUri!)
+
+            //    .PrepareLoginStartUri(async (sp, tokens, credentials, loginStartUri, ct)
+            //        => await CreateLoginStartUri(sp, tokens, credentials, loginStartUri, ct))
+
+            //    .PostLogin(async(authService, serviceProvider,tokenCache, credentials, redirectUri, tokens,cancellationToken)
+            //        => await ProcessPostLoginAsync(authService, serviceProvider,tokenCache,credentials,redirectUri,tokens, cancellationToken))
+
+            //    .Refresh(async (authService, serviceProvider, tokenCache, tokens, cancellationToken) =>
+            //        await RefreshTokensAsync(authService, serviceProvider, tokenCache, tokens, cancellationToken))
+
+            //    ,name: "EtsyOAuth"),
+            //},
+            //    configureAuthorization: builder =>
+            //    {
+            //        builder.AuthorizationHeader(scheme: "Bearer");
+            //    }
+            #endregion
+            {
+                custom.Login(async (service, serviceProvider, dispatcher, tokenCache, tokens, ct)
+                    => await service.LoginAsync(serviceProvider, dispatcher, tokenCache, tokens, ct));
+                custom.Refresh(async (service, serviceProvider, tokenCache, tokens, ct)
+                    => await service.RefreshAsync(serviceProvider, tokens, ct));
+                custom.Logout(async (service, serviceProvider,dispatcher, tokenCache, tokens, ct)
+                    => await service.LogoutAsync(dispatcher,tokens, ct));
+            }, name: OAuthService.ProviderName ))
             .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
         );
         MainWindow = builder.Window;
@@ -158,7 +166,7 @@ public partial class App : Application
 #if DEBUG
         MainWindow.UseStudio();
 #endif
-        MainWindow.SetWindowIcon();
+    //    MainWindow.SetWindowIcon();
 
         Host = await builder.NavigateAsync<Shell>
         (initialNavigate: async (services, navigator) =>
@@ -301,7 +309,7 @@ public partial class App : Application
             // Save additional tokens if needed
             tokens.AddOrReplace(OAuthTokenRefreshDefaults.AccessTokenKey, tokenExchangeResult.AccessToken!);
             tokens.AddOrReplace(OAuthTokenRefreshDefaults.RefreshToken, tokenExchangeResult.RefreshToken!);
-            tokens.AddOrReplace(OAuthTokenRefreshExtendedDefaults.ExpirationDateKey, expirationTimeStamp);
+            tokens.AddOrReplace(OAuthTokenRefreshExtendedDefaults.ExpirationDateTokenKey, expirationTimeStamp);
 
             // remove the state and code verifier from credentials as they are no longer needed
             if (!credentials.TryRemoveKeys([OAuthAuthRequestDefaults.StateKey, OAuthPkceDefaults.CodeVerifierKey]))
@@ -368,7 +376,8 @@ public partial class App : Application
             new ViewMap(ViewModel: typeof(ShellModel)),
             new ViewMap<AuthPage, AuthModel>(),
             new ViewMap<MainPage, MainModel>(),
-            new DataViewMap<SecondPage, SecondModel, Entity>()
+            new DataViewMap<SecondPage, SecondModel, Entity>(),
+            new ViewMap<WebViewBrowserPage, WebViewBrowserModel>()
         );
 
         routes.Register(
@@ -379,6 +388,7 @@ public partial class App : Application
                     new ("Main", View: views.FindByViewModel<MainModel>(), IsDefault:true),
                     new ("Second", View: views.FindByViewModel<SecondModel>()),
                     new ("Auth", View: views.FindByViewModel<AuthModel>()),
+                    new ("WebViewRouter", View: views.FindByViewModel<WebViewBrowserModel>())
                 ]
             )
         );
