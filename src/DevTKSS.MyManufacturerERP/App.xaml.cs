@@ -3,10 +3,9 @@
 //using IWebAuthenticationBrokerProvider = Uno.AuthenticationBroker.IWebAuthenticationBrokerProvider;
 //using Temp.Extensibility.DesktopAuthBroker;
 //#endif
-using DevTKSS.Extensions.OAuth.Browser;
-using DevTKSS.Extensions.OAuth.Dictionarys;
-using DevTKSS.Extensions.OAuth.Options;
-using DevTKSS.Extensions.OAuth.Responses;
+using DevTKSS.Extensions.OAuth.Validation;
+using FluentValidation;
+using Microsoft.Extensions.Configuration;
 
 namespace DevTKSS.MyManufacturerERP;
 public partial class App : Application
@@ -35,14 +34,20 @@ public partial class App : Application
              // Switch to Development environment when running in DEBUG
              .UseEnvironment(Environments.Development)
 #endif
-
+             .UseConfiguration(configure: unoConfigBuilder =>
+                 unoConfigBuilder
+                    .EmbeddedSource<App>()
+                    .Section<AppConfig>()
+                    .Section<OAuthOptions>()
+                    .Section<ApiKeyOptions>("SevdeskApiKeyClient")
+             )
              .UseLogging(configure: (context, logBuilder) =>
              {
                  // Configure log levels for different categories of logging
                  logBuilder
                      .SetMinimumLevel(
                          context.HostingEnvironment.IsDevelopment() ?
-                             LogLevel.Information :
+                             LogLevel.Trace :
                              LogLevel.Warning)
 
                      // Default filters for core Uno Platform namespaces
@@ -67,26 +72,37 @@ public partial class App : Application
 
              }, enableUnoLogging: true)
              .UseSerilog(consoleLoggingEnabled: true, fileLoggingEnabled: true)
-             .UseConfiguration(configure: unoConfigBuilder =>
-                 unoConfigBuilder
-                    .EmbeddedSource<App>()
-                    .Section<AppConfig>()
-                    .Section<OAuthOptions>("EtsyOAuthOptions")
-                    .Section<ApiKeyOptions>("SevdeskApiKeyClient")
-             )
+            
             // Enable localization (see appsettings.json for supported languages)
             .UseLocalization()
             // Register Json serializers (ISerializer and ISerializer)
-            .UseSerialization((context, services) => services
-                // Adding String TypeInfo <see href="https://github.com/unoplatform/uno/issues/20546"/>
-                .AddContentSerializer(context)
-                .AddJsonTypeInfo(OAuthFlowContext.Default.AccessGrantResponse)
-                .AddJsonTypeInfo(OAuthFlowContext.Default.TokenResponse)
-                .AddJsonTypeInfo(EtsyJsonContext.Default.OAuthOptions)
-                .AddJsonTypeInfo(EtsyJsonContext.Default.UserDetailsResponse)
-                .AddJsonTypeInfo(EtsyJsonContext.Default.UserMeResponse)
-                .AddJsonTypeInfo(EtsyJsonContext.Default.PingResponse)
-            )
+            //.UseSerialization((context, services) => services
+            //    // Adding String TypeInfo <see href="https://github.com/unoplatform/uno/issues/20546"/>
+            //    .AddContentSerializer(context)
+            //    .AddJsonTypeInfo(OAuthFlowContext.Default.AccessGrantResponse)
+            //    .AddJsonTypeInfo(OAuthFlowContext.Default.TokenResponse)
+            //    .AddJsonTypeInfo(EtsyJsonContext.Default.OAuthOptions)
+            //    .AddJsonTypeInfo(EtsyJsonContext.Default.UserDetailsResponse)
+            //    .AddJsonTypeInfo(EtsyJsonContext.Default.UserMeResponse)
+            //    .AddJsonTypeInfo(EtsyJsonContext.Default.PingResponse)
+            //)
+            .ConfigureServices((context, services) =>
+            {
+                services.AddValidatorsFromAssemblies(AppDomain.CurrentDomain.GetAssemblies()
+                    .Where(a => a.GetName().Name?.StartsWith("DevTKSS.Extensions.") ?? false));
+
+                services.AddOptionsWithFluentValidation<OAuthOptions>(OAuthOptions.DefaultName);
+
+                // TODO: Register your sp
+                //#if !WINDOWS
+                //                services.AddSingleton<IWebAuthenticationBrokerProvider, SystemBrowserAuthBroker>();
+                //#endif
+                services.AddSingleton<IBrowserProvider, BrowserProvider>();
+                services.AddSingleton<IHttpListenerService, HttpListenerService>();
+                
+                // Register our custom OAuth service as the main authentication service
+                services.AddSingleton<IOAuthService,OAuthService>();
+            })
             .UseHttp((context, services) =>
             {
 #if DEBUG
@@ -95,36 +111,21 @@ public partial class App : Application
 #endif
                 services.AddRefitClientWithEndpoint<IEtsyOAuthEndpoints, OAuthOptions>(
                     context: context,
-                    options: context.Configuration.GetSection("EtsyOAuthOptions").Get<OAuthOptions>(),
-                    name: "EtsyClient",
+                    name: "OAuth",
                     configure: (clientBuilder, options) => clientBuilder
-                    .ConfigureHttpClient(httpClient =>
+                    .ConfigureHttpClient((serviceProvider,httpClient) =>
                     {
-                        httpClient.BaseAddress = new Uri("https://openapi.etsy.com");
-                        if (options?.ClientID is null)
-                        {
-                            throw new ArgumentNullException(options?.ClientID,nameof(options.ClientID));
-                        }
+                        var options = serviceProvider.GetRequiredService<IOptions<OAuthOptions>>().Value;
                         httpClient.DefaultRequestHeaders.Add("x-api-key", options.ClientID);
+                        
+                        
                     })
                 )
                 .AddRefitClient<IEtsyUserEndpoints>(context);
             })
-            .ConfigureServices((context, services) =>
-            {
-                // TODO: Register your sp
-//#if !WINDOWS
-//                services.AddSingleton<IWebAuthenticationBrokerProvider, SystemBrowserAuthBroker>();
-//#endif
-                services.AddSingleton<IBrowserProvider, BrowserProvider>();
-                services.AddSingleton<IHttpListenerService, HttpListenerService>();
-                                
-                // Register our custom OAuth service as the main authentication service
-                services.AddSingleton<IOAuthService,OAuthService>();
-            })
+
             .UseAuthentication(authBuilder =>
             authBuilder.AddCustom<OAuthService>(custom =>
-
             #region Web Auth configuration
             // reference used: https://github.com/unoplatform/uno.extensions/blob/main/testing/TestHarness/TestHarness/Ext/Authentication/Web/WebAuthenticationHostInit.cs
             //authBuilder.AddWeb<IEtsyOAuthEndpoints>(configureWeb =>
@@ -158,7 +159,10 @@ public partial class App : Application
                     => await service.RefreshAsync(serviceProvider, tokens, ct));
                 custom.Logout(async (service, serviceProvider,dispatcher, tokenCache, tokens, ct)
                     => await service.LogoutAsync(dispatcher,tokens, ct));
-            }, name: OAuthService.ProviderName ))
+            }, name: OAuthService.ProviderName ),
+            configureAuth =>
+             configureAuth.AuthorizationHeader(scheme: "Bearer")
+             )
             .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
         );
         MainWindow = builder.Window;
@@ -197,7 +201,7 @@ public partial class App : Application
         credentials ??= new Dictionary<string, string>();
 
         if (string.IsNullOrWhiteSpace(loginStartUri))
-            loginStartUri = options.AuthorizationEndpoint!;
+            loginStartUri = options.EndpointOptions.AuthorizationEndpoint!;
         
         var scope = string.Join(' ', options.Scopes);
         var state = OAuth2Utilitys.GenerateState();
@@ -213,7 +217,7 @@ public partial class App : Application
         }
         add(OAuthAuthRequestDefaults.ResponseTypeKey, OAuthAuthRequestDefaults.CodeKey);
         add(OAuthAuthRequestDefaults.ClientIdKey, options.ClientID);
-        add(OAuthAuthRequestDefaults.RedirectUriKey, options.RedirectUri);
+        add(OAuthAuthRequestDefaults.RedirectUriKey, options.EndpointOptions.RedirectUri);
         add(OAuthAuthRequestDefaults.ScopeKey, scope);
         add(OAuthAuthRequestDefaults.StateKey, state);
         add(OAuthPkceDefaults.CodeChallengeKey, codeChallenge);
@@ -263,7 +267,7 @@ public partial class App : Application
         if (!string.IsNullOrEmpty(state) && !string.IsNullOrEmpty(codeVerifyer))
         {
             // Copyed from Uno.Extensions.Web.WebAuthenticationProvider
-            var query = redirectUri.StartsWith(options.RedirectUri!)
+            var query = redirectUri.StartsWith(options.EndpointOptions.RedirectUri!)
                 ? AuthHttpUtility.ExtractArguments(redirectUri)  // authData is a fully qualified url, so need to extract query or fragment
                 : AuthHttpUtility.ParseQueryString(redirectUri.TrimStart('#').TrimStart('?')); // authData isn't full url, so just process as query or fragment
 
@@ -288,7 +292,7 @@ public partial class App : Application
             {
                 GrantType = OAuthTokenRefreshDefaults.AuthorizationCode,
                 ClientId = options.ClientID!,
-                RedirectUri = options.RedirectUri!,
+                RedirectUri = options.EndpointOptions.RedirectUri!,
                 Code = authorizationCode,
                 CodeVerifier = codeVerifyer!
             });

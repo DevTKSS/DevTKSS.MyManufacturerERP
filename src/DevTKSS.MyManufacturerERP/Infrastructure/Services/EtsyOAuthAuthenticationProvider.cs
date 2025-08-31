@@ -1,8 +1,3 @@
-using System.Text.Json;
-using DevTKSS.Extensions.OAuth.Dictionarys;
-using DevTKSS.Extensions.OAuth.Options;
-using DevTKSS.Extensions.OAuth.Responses;
-
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Services;
 
 internal sealed partial record EtsyOAuthAuthenticationProvider 
@@ -36,7 +31,7 @@ internal sealed partial record EtsyOAuthAuthenticationProvider
             var authGrantResponse = await _authEndpointsClient.SendAuthorizationCodeRequestAsync(new AuthorizationCodeRequest
             {
                 ResponseType = OAuthAuthRequestDefaults.CodeKey,
-                RedirectUri = _options.RedirectUri!,
+                RedirectUri = _options.EndpointOptions.RedirectUri!,
                 Scope = Uri.EscapeDataString(string.Join(' ', _options.Scopes)),
                 ClientId = _options.ClientID!,
                 State = _state!,
@@ -98,7 +93,7 @@ internal sealed partial record EtsyOAuthAuthenticationProvider
         credentials ??= new Dictionary<string, string>();
 
         if (string.IsNullOrWhiteSpace(loginStartUri))
-            loginStartUri = options.AuthorizationEndpoint!;
+            loginStartUri = options.EndpointOptions.AuthorizationEndpoint!;
 
         var scope = string.Join(' ', options.Scopes);
         var state = OAuth2Utilitys.GenerateState();
@@ -114,7 +109,7 @@ internal sealed partial record EtsyOAuthAuthenticationProvider
         }
         add(OAuthAuthRequestDefaults.ResponseTypeKey, OAuthAuthRequestDefaults.CodeKey);
         add(OAuthAuthRequestDefaults.ClientIdKey, options.ClientID);
-        add(OAuthAuthRequestDefaults.RedirectUriKey, options.RedirectUri);
+        add(OAuthAuthRequestDefaults.RedirectUriKey,options.EndpointOptions .RedirectUri);
         add(OAuthAuthRequestDefaults.ScopeKey, scope);
         add(OAuthAuthRequestDefaults.StateKey, state);
         add(OAuthPkceDefaults.CodeChallengeKey, codeChallenge);
@@ -164,7 +159,7 @@ internal sealed partial record EtsyOAuthAuthenticationProvider
         if (!string.IsNullOrEmpty(state) && !string.IsNullOrEmpty(codeVerifyer))
         {
             // Copyed from Uno.Extensions.Web.WebAuthenticationProvider
-            var query = redirectUri.StartsWith(options.RedirectUri!)
+            var query = redirectUri.StartsWith(options.EndpointOptions.RedirectUri!)
                 ? AuthHttpUtility.ExtractArguments(redirectUri)  // authData is a fully qualified url, so need to extract query or fragment
                 : AuthHttpUtility.ParseQueryString(redirectUri.TrimStart('#').TrimStart('?')); // authData isn't full url, so just process as query or fragment
 
@@ -189,7 +184,7 @@ internal sealed partial record EtsyOAuthAuthenticationProvider
             {
                 GrantType = OAuthTokenRefreshDefaults.AuthorizationCode,
                 ClientId = options.ClientID!,
-                RedirectUri = options.RedirectUri!,
+                RedirectUri = options.EndpointOptions.RedirectUri!,
                 Code = authorizationCode,
                 CodeVerifier = codeVerifyer!
             });

@@ -10,4 +10,6 @@ global using FluentValidation.Results;
 global using Microsoft.Extensions.Options;
 global using Windows.Security.Authentication.Web;
 global using DevTKSS.Extensions.OAuth.Options;
-global using Microsoft.Extensions.Logging;
+global using Serilog;
+global using Microsoft.Extensions.Hosting;
+global using Microsoft.Extensions.DependencyInjection;

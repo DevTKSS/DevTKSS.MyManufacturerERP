@@ -1,12 +1,14 @@
 ﻿<Project Sdk="Uno.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFrameworks>net9.0;net9.0-desktop</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UnoFeatures>
       Configuration;
       Authentication;
+      LoggingSerilog;
+      SkiaRenderer;
     </UnoFeatures>
   </PropertyGroup>
 
@@ -14,6 +16,7 @@
     <PackageReference Include="Microsoft.Extensions.Options" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="FluentValidation" />
+    <PackageReference Include="Yllibed.HttpServer"/>
   </ItemGroup>
 
 </Project>

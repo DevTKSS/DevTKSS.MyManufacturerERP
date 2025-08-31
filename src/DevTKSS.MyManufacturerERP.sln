@@ -45,8 +45,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.W
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Providers", "Providers", "{C9B34190-793B-47F8-B6D2-1EF61AC113B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Temp.Extensibility.DesktopAuthBroker", "Temp.Extensibility.SystemAuthBrokerServer\Temp.Extensibility.DesktopAuthBroker.csproj", "{CCF4311D-F8B0-4380-4B65-88B6B8F4CB7E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.Extensions.OAuth", "DevTKSS.Extensions.OAuth\DevTKSS.Extensions.OAuth.csproj", "{A08DB2EB-F215-41E1-ADB4-EB961AA28C4E}"
 EndProject
 Global
@@ -93,10 +91,6 @@ Global
 		{0CC286C8-A886-1674-0274-F36EBE5073E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0CC286C8-A886-1674-0274-F36EBE5073E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0CC286C8-A886-1674-0274-F36EBE5073E6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CCF4311D-F8B0-4380-4B65-88B6B8F4CB7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CCF4311D-F8B0-4380-4B65-88B6B8F4CB7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CCF4311D-F8B0-4380-4B65-88B6B8F4CB7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CCF4311D-F8B0-4380-4B65-88B6B8F4CB7E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A08DB2EB-F215-41E1-ADB4-EB961AA28C4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A08DB2EB-F215-41E1-ADB4-EB961AA28C4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A08DB2EB-F215-41E1-ADB4-EB961AA28C4E}.Release|Any CPU.ActiveCfg = Release|Any CPU

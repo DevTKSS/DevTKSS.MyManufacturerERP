@@ -1,5 +1,7 @@
 
 
+using Uno.AuthenticationBroker;
+
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Services;
 
 /// <summary>
@@ -12,7 +14,7 @@ public partial class OAuthService : IOAuthService
     [GeneratedRegex(@"^(\d+)\.")]
     private static partial Regex DoesContainUserId();
 
-    public const string ProviderName = "EtsyOAuth";
+    public const string ProviderName = "OAuth";
 
     private readonly IEtsyOAuthEndpoints _authEndpointsClient;
     private readonly IEtsyUserEndpoints _userEndpointsClient;
@@ -88,22 +90,23 @@ public partial class OAuthService : IOAuthService
         //    return false;
         //}
         var userEndpointsClient = serviceProvider.GetRequiredService<IEtsyUserEndpoints>();
-        var httpListenerServer = serviceProvider.GetRequiredService<IHttpListenerService>();
+        var authBrokerProvider = serviceProvider.GetRequiredService<ISystemBrowserAuthBrokerProvider>();
+        var logger = serviceProvider.GetRequiredService<ILogger>();
+        logger = logger.ForContext<OAuthService>();
         try
         {
             Log.Information("Starting OAuth login flow using HttpListenerServer");
+             var callbackUri = authBrokerProvider.GetCurrentApplicationCallbackUri();  
 
-            // Get callback URI from the server
-            var callbackUri = httpListenerServer.GetCurrentApplicationCallbackUri();
-
+                       Log.Debug("Using callback URI: {CallbackUri}", callbackUri);
             // Create authorization request URI  
             var authUrl = PrepareLoginStartUri(callbackUri.ToString());
             var requestUri = new Uri(authUrl);
 
-            Log.Debug("Starting authentication with auth URL: {AuthUrl}", authUrl);
+            logger.Debug("Starting authentication with auth URL: {AuthUrl}", authUrl);
 
             // Use HttpListenerServer for authentication flow
-            var result = await httpListenerServer.AuthenticateAsync(
+            var result = await authBrokerProvider.AuthenticateAsync(
                 WebAuthenticationOptions.None,
                 requestUri,
                 callbackUri,
@@ -253,7 +256,7 @@ public partial class OAuthService : IOAuthService
         _codeVerifier = OAuth2Utilitys.GenerateCodeVerifier();
         var codeChallenge = OAuth2Utilitys.GenerateCodeChallenge(_codeVerifier);
 
-        var url = new UriBuilder(_options.AuthorizationEndpoint!);
+        var url = new UriBuilder(_options.EndpointOptions.AuthorizationEndpoint!);
         var queryParams = new StringBuilder();
 
         void AddParam(string key, string value)
@@ -277,7 +280,7 @@ public partial class OAuthService : IOAuthService
     }
     private NameValueCollection GetQuery(string redirectUri)
     {
-        return redirectUri.StartsWith(_options.RedirectUri!)
+        return redirectUri.StartsWith(_options.EndpointOptions.RedirectUri!)
              ? AuthHttpUtility.ExtractArguments(redirectUri)  // authData is a fully qualified url, so need to extract query or fragment
              : AuthHttpUtility.ParseQueryString(redirectUri.TrimStart('#').TrimStart('?')); // authData isn't full url, so just process as query or fragment
 
@@ -332,4 +335,52 @@ public partial class OAuthService : IOAuthService
             return null;
         }
     }
+    //private async Task<WebAuthenticationResult> PerformCodeExchangeAsync(string code, string codeVerifier, string redirectURI)
+    //{
+    //    output("Exchanging code for tokens...");
+
+    //    string tokenRequestURI = _oAuthOptions.EndpointOptions.TokenEndpoint;
+    //    string tokenRequestBody = string.Format("code={0}&redirect_uri={1}&client_id={2}&code_verifier={3}&scope={4}&grant_type=authorization_code",
+    //        code,
+    //        Uri.EscapeDataString(redirectURI),
+    //        _oAuthOptions.ClientID,
+    //        codeVerifier,
+    //        Uri.EscapeDataString(string.Join(' ', _oAuthOptions.Scopes))
+    //    );
+
+    //    using var httpClient = new HttpClient();
+    //    var content = new StringContent(tokenRequestBody, Encoding.UTF8, System.Net.Mime.MediaTypeNames.Application.Json);
+
+    //    try
+    //    {
+    //        var tokenResponse = await httpClient.PostAsync(tokenRequestURI, content);
+    //        var responseUri = tokenResponse.RequestMessage?.RequestUri?.ToString() ?? string.Empty;
+    //        tokenResponse.EnsureSuccessStatusCode();
+
+    //        string responseText = await tokenResponse.Content.ReadAsStringAsync();
+    //        output(responseText);
+
+    //        // Return the response URI as responseData
+    //        return new WebAuthenticationResult(responseUri, 200, WebAuthenticationStatus.Success);
+
+    //    }
+    //    catch (HttpRequestException ex)
+    //    {
+    //        output($"HTTP error during token exchange: {ex.Message}");
+    //        return new WebAuthenticationResult(string.Empty, 400, WebAuthenticationStatus.ErrorHttp);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        output($"Error during token exchange: {ex.Message}");
+    //        return new WebAuthenticationResult(string.Empty, 500, WebAuthenticationStatus.ErrorHttp);
+    //    }
+    //}
+
+    //private void output(string output)
+    //{
+    //    if (_logger.IsEnabled(Serilog.Events.LogEventLevel.Verbose))
+    //    {
+    //        _logger.Verbose($"[HttpListenerService] {output}");
+    //    }
+    //}
 }

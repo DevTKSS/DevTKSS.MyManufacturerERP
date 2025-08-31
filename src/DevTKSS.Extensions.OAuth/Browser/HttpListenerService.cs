@@ -1,176 +1,161 @@
-
+using System.Collections.Immutable;
+using System.Net.Mime;
+using Yllibed.HttpServer;
+using Yllibed.HttpServer.Extensions;
+using Yllibed.HttpServer.Handlers;
 
 namespace DevTKSS.Extensions.OAuth.Browser;
-
 public class HttpListenerService : IHttpListenerService
 {
-    private readonly ServerOptions _options;
-    private readonly OAuthOptions _oAuthOptions;
-    private readonly ILogger<HttpListenerService> _logger;
+    private readonly CancellationTokenSource _cts = new();
+    private readonly ILogger _logger;
     private readonly IBrowserProvider _browserProvider;
+    private readonly ServerOptions _serverOptions;
+    private ImmutableList<IHttpListenerCallbackHandler> _handlers = ImmutableList<IHttpListenerCallbackHandler>.Empty;
+    private ImmutableArray<HttpListenerCallback> _requests = [];
     public HttpListenerService(
-        ILogger<HttpListenerService> logger,
+        ILogger logger,
         IBrowserProvider browserProvider,
-        IOptions<ServerOptions> serverOptions,
-        IOptions<OAuthOptions> oAuthOptions
-        )
+        IOptions<ServerOptions>? options = null)
     {
-        _logger = logger;
+        _logger = logger.ForContext<HttpListenerService>();
         _browserProvider = browserProvider;
-        _options = serverOptions.Value;
-        _oAuthOptions = oAuthOptions.Value;
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(_options.RootUri, nameof(_options.RootUri));
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(_options.CallbackUri, nameof(_options.CallbackUri));
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(_oAuthOptions.ClientID, nameof(_oAuthOptions.ClientID));
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(_oAuthOptions.AuthorizationEndpoint, nameof(_oAuthOptions.AuthorizationEndpoint));
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(_oAuthOptions.TokenEndpoint, nameof(_oAuthOptions.TokenEndpoint));
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(_oAuthOptions.UserInfoEndpoint, nameof(_oAuthOptions.UserInfoEndpoint));
-        if (_oAuthOptions.Scopes == null || _oAuthOptions.Scopes.Length == 0)
-            throw new ArgumentNullException(nameof(_oAuthOptions.Scopes), "At least one scope must be specified.");
+        _serverOptions = options?.Value ?? new ServerOptions();
     }
 
-    public Uri GetCurrentApplicationCallbackUri()
+    public Uri GetCallbackUri()
     {
-        var listener = new TcpListener(IPAddress.Loopback, _options.Port);
-        listener.Start();
-        var resultingPort = ((IPEndPoint)listener.LocalEndpoint).Port;
-        listener.Stop();
-        return new Uri($"{_options.RootUri}:{resultingPort}/{_options.CallbackUri}");
-    }
+        var uriString = _serverOptions.ToString();
 
-    public async Task<WebAuthenticationResult> AuthenticateAsync(WebAuthenticationOptions options, Uri requestUri, Uri callbackUri, CancellationToken ct)
-    {
-        try
+        if (!Uri.TryCreate(uriString, UriKind.Absolute, out var callbackUri))
         {
-            // Generates state and PKCE values.
-            string state = OAuth2Utilitys.GenerateState();
-            string codeVerifier = OAuth2Utilitys.GenerateCodeVerifier();
-            string codeChallenge = OAuth2Utilitys.GenerateCodeChallenge(codeVerifier);
-            const string codeChallengeMethod = OAuthPkceDefaults.CodeChallengeMethodS256;
-
-            // Creates a redirect URI using an available port on the loopback address.
-            string redirectURI = GetCurrentApplicationCallbackUri().AbsoluteUri;
-            output("redirect URI: " + redirectURI);
-
-            // Creates an HttpListener to listen for requests on that redirect URI.
-            var http = new HttpListener();
-            http.Prefixes.Add(redirectURI);
-            output("Listening..");
-            http.Start();
-
-            try
-            {
-                // Creates the OAuth 2.0 authorization request.
-                string authorizationRequest = string.Format("{0}?response_type=code&scope={1}&redirect_uri={2}&client_id={3}&state={4}&code_challenge={5}&code_challenge_method={6}",
-                    _oAuthOptions.AuthorizationEndpoint,
-                    Uri.EscapeDataString(string.Join(' ', _oAuthOptions.Scopes)),
-                    Uri.EscapeDataString(redirectURI),
-                    _oAuthOptions.ClientID,
-                    state,
-                    codeChallenge,
-                    codeChallengeMethod);
-
-                // Opens request in the browser.
-                _browserProvider.OpenBrowser(new Uri(authorizationRequest));
-
-                // Waits for the OAuth authorization response.
-                var context = await http.GetContextAsync();
-
-                // Sends an HTTP response to the browser.
-                var response = context.Response;
-                string responseString = "<html><head><meta http-equiv='refresh' content='10;url=https://google.com'></head><body>Please return to the app.</body></html>";
-                var buffer = Encoding.UTF8.GetBytes(responseString);
-                response.ContentLength64 = buffer.Length;
-                var responseOutput = response.OutputStream;
-                await responseOutput.WriteAsync(buffer, 0, buffer.Length);
-                responseOutput.Close();
-
-                // Checks for errors.
-                if (context.Request.QueryString.Get(OAuthErrorResponseDefaults.ErrorKey) is string error)
-                {
-                    output($"OAuth authorization error: {error}");
-                    return new WebAuthenticationResult(string.Empty, 400, WebAuthenticationStatus.ErrorHttp);
-                }
-
-                if (context.Request.QueryString.Get(OAuthAuthRequestDefaults.CodeKey) is not string code
-                    || context.Request.QueryString.Get(OAuthAuthRequestDefaults.StateKey) is not string incomingState)
-                {
-                    output("Malformed authorization response. " + context.Request.QueryString);
-                    return new WebAuthenticationResult(string.Empty, 400, WebAuthenticationStatus.ErrorHttp);
-                }
-
-                // Compares the received state to the expected value, to ensure that
-                // this app made the request which resulted in authorization.
-                if (incomingState != state)
-                {
-                    output($"Received request with invalid state ({incomingState})");
-                    return new WebAuthenticationResult(string.Empty, 400, WebAuthenticationStatus.ErrorHttp);
-                }
-
-                output("Authorization code: " + code);
-
-                // Call the PerformCodeExchangeAsync to exchange the code for tokens
-
-                return await PerformCodeExchangeAsync(code, codeVerifier, redirectURI);
-            }
-            finally
-            {
-                http.Stop();
-            }
+            throw new ArgumentException("The RedirectUri is not a valid absolute URI.");
         }
-        catch (Exception ex)
-        {
-            output($"Authentication error: {ex.Message}");
-            return new WebAuthenticationResult(string.Empty, 500, WebAuthenticationStatus.ErrorHttp);
+        if (_serverOptions.UriFormat == UriFormatMode.Standard
+            && callbackUri.IsLoopback
+            && (callbackUri.Scheme == Uri.UriSchemeHttp || callbackUri.Scheme == Uri.UriSchemeHttps)
+            && callbackUri.Port == 0)
+        { 
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+
+            listener.Start();
+            var resultingPort = ((IPEndPoint)listener.LocalEndpoint).Port;
+            listener.Stop();
+
+            var builder = new UriBuilder(callbackUri)
+            {
+                Port = resultingPort
+            };
+            return builder.Uri;
         }
+        return callbackUri;
+
     }
-
-    private async Task<WebAuthenticationResult> PerformCodeExchangeAsync(string code, string codeVerifier, string redirectURI)
+    /// <summary>
+    /// <summary>
+    /// Authenticates the user by starting an HTTP listener on the specified callback URI, opening the browser to the OAuth request URI,
+    /// and waiting for the OAuth authorization response. Handles the OAuth redirect, processes any errors, and returns the authentication result.
+    /// </summary>
+    /// <param name="options">The web authentication options to use for the authentication process.</param>
+    /// <param name="callbackUri">The callback URI where the HTTP listener will wait for the OAuth response.</param>
+    /// <param name="ct">A cancellation token to observe while waiting for the authentication process to complete.</param>
+    /// <returns>
+    /// A <see cref="Task{WebAuthenticationResult}"/> representing the asynchronous operation, containing the result of the authentication process.
+    /// </returns>
+    /// <exception cref="NotSupportedException">Thrown if <see cref="HttpListener"/> is not supported on the current platform.</exception>
+    public void Start(Uri requestUri, Uri callbackUri)
     {
-        output("Exchanging code for tokens...");
+        if (!HttpListener.IsSupported) 
+            throw new NotSupportedException("HttpListener is not supported on this platform.");
+        
+        using var httpListener = new HttpListener();
+        httpListener.Prefixes.Add(callbackUri.AbsoluteUri);
+        _logger.Information($"Listening on {callbackUri.AbsoluteUri}...");
+        httpListener.Start();
 
-        string tokenRequestURI = _oAuthOptions.TokenEndpoint!;
-        string tokenRequestBody = string.Format("code={0}&redirect_uri={1}&client_id={2}&code_verifier={3}&scope={4}&grant_type=authorization_code",
-            code,
-            Uri.EscapeDataString(redirectURI),
-            _oAuthOptions.ClientID,
-            codeVerifier,
-            Uri.EscapeDataString(string.Join(' ', _oAuthOptions.Scopes))
-        );
-
-        using var httpClient = new HttpClient();
-        var content = new StringContent(tokenRequestBody, Encoding.UTF8, System.Net.Mime.MediaTypeNames.Application.Json);
+        _browserProvider.OpenBrowser(requestUri);
 
         try
         {
-            var tokenResponse = await httpClient.PostAsync(tokenRequestURI, content);
-            var responseUri = tokenResponse.RequestMessage?.RequestUri?.ToString() ?? string.Empty;
-            tokenResponse.EnsureSuccessStatusCode();
-
-            string responseText = await tokenResponse.Content.ReadAsStringAsync();
-            output(responseText);
-
-            // Return the response URI as responseData
-            return new WebAuthenticationResult(responseUri, 200, WebAuthenticationStatus.Success);
             
+            _ = Task.Run(() => HandleIncomingRequests(httpListener, _cts.Token));
         }
-        catch (HttpRequestException ex)
+        catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested)
         {
-            output($"HTTP error during token exchange: {ex.Message}");
-            return new WebAuthenticationResult(string.Empty, 400, WebAuthenticationStatus.ErrorHttp);
+            _logger.Information("Operation was canceled.");
+            throw;
         }
         catch (Exception ex)
         {
-            output($"Error during token exchange: {ex.Message}");
-            return new WebAuthenticationResult(string.Empty, 500, WebAuthenticationStatus.ErrorHttp);
+            _logger.Error(ex, "Error during StartAsync");
+            throw;
         }
-    }
-
-    private void output(string output)
-    {
-        if (_logger.IsEnabled(LogLevel.Trace))
+        finally
         {
-            _logger.LogTrace($"[OAuth] {output}");
+            httpListener.Stop();
         }
     }
+    private async Task HandleIncomingRequests(HttpListener httpListener, CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
+        {
+            var context = await httpListener.GetContextAsync().ConfigureAwait(true);
+            var relativePath = context.Request.Url?.AbsolutePath ?? string.Empty;
+            HttpListenerCallback? callback = null;
+            
+            callback = new HttpListenerCallback(
+                context,
+                onReady: HandleRequest,
+                onCompletedOrDisconnected:OnCompletedOrDisconnected,
+                ct);
+            void OnCompletedOrDisconnected() => ImmutableInterlocked.Update(ref _requests, (list, r2) => list.Remove(r2), callback);
+            ImmutableInterlocked.Update(ref _requests, (list, r) => list.Add(r), callback);
+
+            foreach (var handler in _handlers)
+            {
+                try
+                {
+                    await handler.HandleRequest(callback, relativePath, ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Error in handler {HandlerType} for request {RequestUrl}", handler.GetType().FullName, context.Request.Url);
+                }
+            }
+
+            if (!callback.IsResponseSet)
+            {
+                await callback.SetResponseAsync(
+                    "Not Found",
+                    MediaTypeNames.Text.Plain,
+                    statusCode: 404,
+                    cancellationToken: ct);
+            }
+            break;
+        }
+    }
+    public IDisposable RegisterHandler(IHttpListenerCallbackHandler handler)
+    {
+        ImmutableInterlocked.Update(ref _handlers, (list, h) => list.Add(h), handler);
+
+        return Disposable.Create(handler,h =>
+        {
+            ImmutableInterlocked.Update(ref _handlers, (list, h2) => list.Remove(h2), h);
+            (h as IDisposable)?.Dispose();
+        });
+
+    }
+    private async Task HandleRequest(HttpListenerCallback callback, CancellationToken cancellationToken)
+    {
+        if (!callback.IsResponseSet)
+        {
+
+            await callback.SetResponseAsync(
+                "Auth completed - you can close this browser now.",
+                MediaTypeNames.Text.Plain,
+                statusCode: 200,
+                cancellationToken: cancellationToken);
+        }
+    }
+    public void Dispose() => _cts.Cancel();
 }
