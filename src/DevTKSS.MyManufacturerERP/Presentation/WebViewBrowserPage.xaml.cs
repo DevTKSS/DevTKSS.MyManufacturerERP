@@ -11,11 +11,10 @@ public sealed partial class WebViewBrowserPage : Page
 {
     public WebViewBrowserPage()
     {
-        this.InitializeComponent();
-        
-        
+        InitializeComponent();
+
     }
-    private Window? webViewWindow;
+    // private Window? webViewWindow;
     //private async void OpenWindow_Click(object sender, RoutedEventArgs e)
     //{
     //    if (webViewWindow is null) webViewWindow = new Window();

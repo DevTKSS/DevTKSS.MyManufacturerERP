@@ -23,6 +23,7 @@ public class OAuthOptions : EndpointOptions
     public string? RefreshToken { get; init; }
     public string? ExpirationDate { get; init; }
     public string? IdToken { get; init; }
+    public string? TokenType { get; init; } = "Bearer";
     public string[] Scopes { get; init; } = []; 
     public IDictionary<string, string> AdditionalParameters { get; init; } = new Dictionary<string,string> ();
     public OAuthEndpointOptions EndpointOptions { get; init; } = new ();

@@ -7,7 +7,8 @@
     <UnoFeatures>
       Configuration;
       Authentication;
-      LoggingSerilog;
+      HttpRefit;
+      Logging;
       SkiaRenderer;
     </UnoFeatures>
   </PropertyGroup>
@@ -16,7 +17,7 @@
     <PackageReference Include="Microsoft.Extensions.Options" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="FluentValidation" />
-    <PackageReference Include="Yllibed.HttpServer"/>
+    <PackageReference Include="Yllibed.HttpServer" />
   </ItemGroup>
 
 </Project>

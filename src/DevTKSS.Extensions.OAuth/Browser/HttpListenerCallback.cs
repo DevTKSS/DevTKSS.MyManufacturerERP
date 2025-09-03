@@ -3,20 +3,15 @@ namespace DevTKSS.Extensions.OAuth.Browser;
 public record HttpListenerCallback
 {
     private readonly HttpListenerContext _context;
-    public HttpListenerCallback(
-        HttpListenerContext context,
-        Func<HttpListenerCallback,CancellationToken,Task> onReady,
-        Action onCompletedOrDisconnected,
-        CancellationToken cancellationToken)
+
+    public HttpListenerCallback(HttpListenerContext context)
     {
         _context = context;
-        _onReady = onReady;
-        _onCompletedOrDisconnected = onCompletedOrDisconnected;
     }
+
     public HttpListenerRequest Request => _context.Request;
     internal bool IsResponseSet { get; private set; } = false;
-    private Func<HttpListenerCallback, CancellationToken, Task> _onReady;
-    private readonly Action _onCompletedOrDisconnected;
+
     public async Task SetResponseAsync(
         string content,
         string? contentType = null,
@@ -33,7 +28,7 @@ public record HttpListenerCallback
         response.ContentLength64 = buffer.Length;
 
         await using var responseOutput = response.OutputStream;
-        await responseOutput.WriteAsync(buffer,cancellationToken);
+        await responseOutput.WriteAsync(buffer, cancellationToken);
         await responseOutput.FlushAsync(cancellationToken);
         IsResponseSet = true;
     }

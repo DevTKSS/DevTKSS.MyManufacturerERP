@@ -6,7 +6,8 @@ public class ServerOptionsValidator : AbstractValidator<ServerOptions>
     {
         RuleFor(x => x.Protocol)
             .NotEmpty()
-            .WithMessage("Protocol must not be empty.");
+            .Must(p => p is "http" or "https")
+            .WithMessage("Protocol must be 'http' or 'https'.");
 
         RuleFor(x => x.RootUri)
             .NotEmpty()
@@ -20,19 +21,5 @@ public class ServerOptionsValidator : AbstractValidator<ServerOptions>
             .NotEmpty()
             .Must(uri => uri.StartsWith('/'))
             .WithMessage("CallbackUri must start with '/'.");
-
-        When(x => x.UriFormat == UriFormatMode.Custom, () =>
-        {
-            RuleFor(x => x.CustomUri)
-                .NotEmpty()
-                .WithMessage("CustomUri must be set when UriFormat is Custom.");
-        });
-
-        When(x => x.UriFormat != UriFormatMode.Custom, () =>
-        {
-            RuleFor(x => x.CustomUri)
-                .Null()
-                .WithMessage("CustomUri must be null unless UriFormat is Custom.");
-        });
     }
 }

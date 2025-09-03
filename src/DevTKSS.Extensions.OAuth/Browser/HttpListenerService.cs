@@ -1,43 +1,70 @@
 using System.Collections.Immutable;
 using System.Net.Mime;
-using Yllibed.HttpServer;
 using Yllibed.HttpServer.Extensions;
-using Yllibed.HttpServer.Handlers;
 
 namespace DevTKSS.Extensions.OAuth.Browser;
 public class HttpListenerService : IHttpListenerService
 {
     private readonly CancellationTokenSource _cts = new();
-    private readonly ILogger _logger;
+    private readonly ILogger<HttpListenerService> _logger;
     private readonly IBrowserProvider _browserProvider;
     private readonly ServerOptions _serverOptions;
+    private readonly IOptions<OAuthOptions>? _oauthOptions;
     private ImmutableList<IHttpListenerCallbackHandler> _handlers = ImmutableList<IHttpListenerCallbackHandler>.Empty;
-    private ImmutableArray<HttpListenerCallback> _requests = [];
+    private HttpListener? _httpListener;
+
     public HttpListenerService(
-        ILogger logger,
+        ILogger<HttpListenerService> logger,
         IBrowserProvider browserProvider,
-        IOptions<ServerOptions>? options = null)
+        IOptions<ServerOptions>? options = null,
+        IOptions<OAuthOptions>? oauthOptions = null)
     {
-        _logger = logger.ForContext<HttpListenerService>();
+        _logger = logger;
         _browserProvider = browserProvider;
         _serverOptions = options?.Value ?? new ServerOptions();
+        _oauthOptions = oauthOptions; // may be null if not configured by consumer
     }
 
     public Uri GetCallbackUri()
     {
+        // If OAuthOptions.RedirectUri is provided, honor it strictly
+        var configuredRedirect = _oauthOptions?.Value?.EndpointOptions?.RedirectUri;
+        if (!string.IsNullOrWhiteSpace(configuredRedirect)
+            && Uri.TryCreate(configuredRedirect, UriKind.Absolute, out var oauthRedirect)
+            && (oauthRedirect.Scheme == Uri.UriSchemeHttp || oauthRedirect.Scheme == Uri.UriSchemeHttps))
+        {
+            if (_logger.IsEnabled(LogLevel.Debug))
+            {
+                _logger.LogDebug("Using OAuthOptions RedirectUri as callback: {Callback}", oauthRedirect.ToSafeDisplay());
+            }
+            return oauthRedirect;
+        }
+
         var uriString = _serverOptions.ToString();
+        if (_logger.IsEnabled(LogLevel.Debug))
+        {
+            _logger.LogDebug("Building callback URI from ServerOptions: {ServerOptions}", new { _serverOptions.Protocol, _serverOptions.RootUri, _serverOptions.Port, _serverOptions.CallbackUri });
+        }
 
         if (!Uri.TryCreate(uriString, UriKind.Absolute, out var callbackUri))
         {
+            if (_logger.IsEnabled(LogLevel.Error))
+            {
+                _logger.LogError("Invalid RedirectUri in ServerOptions: {UriString}", uriString);
+            }
             throw new ArgumentException("The RedirectUri is not a valid absolute URI.");
         }
-        if (_serverOptions.UriFormat == UriFormatMode.Standard
-            && callbackUri.IsLoopback
+
+        // Only auto-assign a port when explicitly requested (Port == 0) for loopback URIs.
+        if (callbackUri.IsLoopback
             && (callbackUri.Scheme == Uri.UriSchemeHttp || callbackUri.Scheme == Uri.UriSchemeHttps)
             && callbackUri.Port == 0)
-        { 
+        {
+            if (_logger.IsEnabled(LogLevel.Debug))
+            {
+                _logger.LogDebug("No port specified for loopback URI. Allocating a free port.");
+            }
             var listener = new TcpListener(IPAddress.Loopback, 0);
-
             listener.Start();
             var resultingPort = ((IPEndPoint)listener.LocalEndpoint).Port;
             listener.Stop();
@@ -46,116 +73,194 @@ public class HttpListenerService : IHttpListenerService
             {
                 Port = resultingPort
             };
-            return builder.Uri;
+            callbackUri = builder.Uri;
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation("Assigned loopback port {Port} for callback URI.", resultingPort);
+            }
+        }
+
+        if (_logger.IsEnabled(LogLevel.Debug))
+        {
+            _logger.LogDebug("Final callback URI: {Callback}", callbackUri.ToSafeDisplay());
         }
         return callbackUri;
-
     }
-    /// <summary>
-    /// <summary>
-    /// Authenticates the user by starting an HTTP listener on the specified callback URI, opening the browser to the OAuth request URI,
-    /// and waiting for the OAuth authorization response. Handles the OAuth redirect, processes any errors, and returns the authentication result.
-    /// </summary>
-    /// <param name="options">The web authentication options to use for the authentication process.</param>
-    /// <param name="callbackUri">The callback URI where the HTTP listener will wait for the OAuth response.</param>
-    /// <param name="ct">A cancellation token to observe while waiting for the authentication process to complete.</param>
-    /// <returns>
-    /// A <see cref="Task{WebAuthenticationResult}"/> representing the asynchronous operation, containing the result of the authentication process.
-    /// </returns>
-    /// <exception cref="NotSupportedException">Thrown if <see cref="HttpListener"/> is not supported on the current platform.</exception>
+
+    private static Uri EnsurePrefixUriFormat(Uri uri)
+    {
+        var builder = new UriBuilder(uri) { Query = string.Empty, Fragment = string.Empty };
+        var cleaned = builder.Uri;
+        if (!cleaned.AbsoluteUri.EndsWith('/'))
+        {
+            return new Uri(cleaned.AbsoluteUri + "/");
+        }
+        return cleaned;
+    }
+
     public void Start(Uri requestUri, Uri callbackUri)
     {
-        if (!HttpListener.IsSupported) 
+        if (!HttpListener.IsSupported)
             throw new NotSupportedException("HttpListener is not supported on this platform.");
-        
-        using var httpListener = new HttpListener();
-        httpListener.Prefixes.Add(callbackUri.AbsoluteUri);
-        _logger.Information($"Listening on {callbackUri.AbsoluteUri}...");
-        httpListener.Start();
 
+        if (!(callbackUri.Scheme == Uri.UriSchemeHttp || callbackUri.Scheme == Uri.UriSchemeHttps))
+        {
+            if (_logger.IsEnabled(LogLevel.Error))
+            {
+                _logger.LogError("Unsupported callback URI scheme: {Scheme}", callbackUri.Scheme);
+            }
+            throw new NotSupportedException($"Only http/https callback URIs are supported by this implementation. Provided: {callbackUri.Scheme}");
+        }
+
+        StopInternal();
+
+        var prefixUri = EnsurePrefixUriFormat(callbackUri);
+        var prefix = prefixUri.AbsoluteUri;
+
+        _httpListener = new HttpListener();
+        _httpListener.Prefixes.Add(prefix);
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.LogInformation("Starting HTTP listener at {Prefix}", prefix);
+        }
+        _httpListener.Start();
+
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.LogInformation("Opening system browser to begin authentication. Request: {RequestUri}", requestUri.ToSafeDisplay());
+        }
         _browserProvider.OpenBrowser(requestUri);
 
-        try
-        {
-            
-            _ = Task.Run(() => HandleIncomingRequests(httpListener, _cts.Token));
-        }
-        catch (OperationCanceledException) when (_cts.Token.IsCancellationRequested)
-        {
-            _logger.Information("Operation was canceled.");
-            throw;
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "Error during StartAsync");
-            throw;
-        }
-        finally
-        {
-            httpListener.Stop();
-        }
+        _ = Task.Run(() => HandleIncomingRequests(_httpListener, _cts.Token));
     }
+
+    public void Stop() => StopInternal();
+
     private async Task HandleIncomingRequests(HttpListener httpListener, CancellationToken ct)
     {
-        while (!ct.IsCancellationRequested)
+        try
         {
-            var context = await httpListener.GetContextAsync().ConfigureAwait(true);
+            HttpListenerContext context;
+            try
+            {
+                context = await httpListener.GetContextAsync().ConfigureAwait(false);
+            }
+            catch (HttpListenerException) when (!httpListener.IsListening)
+            {
+                if (_logger.IsEnabled(LogLevel.Debug))
+                {
+                    _logger.LogDebug("Listener stopped before receiving a request.");
+                }
+                return;
+            }
+            catch (ObjectDisposedException)
+            {
+                if (_logger.IsEnabled(LogLevel.Debug))
+                {
+                    _logger.LogDebug("Listener disposed before receiving a request.");
+                }
+                return;
+            }
+
             var relativePath = context.Request.Url?.AbsolutePath ?? string.Empty;
-            HttpListenerCallback? callback = null;
-            
-            callback = new HttpListenerCallback(
-                context,
-                onReady: HandleRequest,
-                onCompletedOrDisconnected:OnCompletedOrDisconnected,
-                ct);
-            void OnCompletedOrDisconnected() => ImmutableInterlocked.Update(ref _requests, (list, r2) => list.Remove(r2), callback);
-            ImmutableInterlocked.Update(ref _requests, (list, r) => list.Add(r), callback);
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation("Received auth callback at path {Path} from {Remote}", relativePath, context.Request.RemoteEndPoint);
+            }
+
+            var callback = new HttpListenerCallback(context);
 
             foreach (var handler in _handlers)
             {
                 try
                 {
-                    await handler.HandleRequest(callback, relativePath, ct);
+                    await handler.HandleRequest(callback, relativePath, ct).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(ex, "Error in handler {HandlerType} for request {RequestUrl}", handler.GetType().FullName, context.Request.Url);
+                    if (_logger.IsEnabled(LogLevel.Error))
+                    {
+                        _logger.LogError(ex, "Error in handler {HandlerType} for request {RequestUrl}", handler.GetType().FullName, context.Request.Url?.ToSafeDisplay());
+                    }
                 }
             }
 
             if (!callback.IsResponseSet)
             {
+                if (_logger.IsEnabled(LogLevel.Warning))
+                {
+                    _logger.LogWarning("No handler produced a response. Returning 404.");
+                }
                 await callback.SetResponseAsync(
                     "Not Found",
                     MediaTypeNames.Text.Plain,
                     statusCode: 404,
-                    cancellationToken: ct);
+                    cancellationToken: ct).ConfigureAwait(false);
             }
-            break;
+            else
+            {
+                if (_logger.IsEnabled(LogLevel.Debug))
+                {
+                    _logger.LogDebug("Response sent to browser.");
+                }
+            }
+        }
+        finally
+        {
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation("Stopping HTTP listener.");
+            }
+            StopInternal();
         }
     }
+
     public IDisposable RegisterHandler(IHttpListenerCallbackHandler handler)
     {
+        if (_logger.IsEnabled(LogLevel.Debug))
+        {
+            _logger.LogDebug("Registering callback handler {HandlerType}", handler.GetType().FullName);
+        }
         ImmutableInterlocked.Update(ref _handlers, (list, h) => list.Add(h), handler);
 
-        return Disposable.Create(handler,h =>
+        return Disposable.Create(handler, h =>
         {
+            if (_logger.IsEnabled(LogLevel.Debug))
+            {
+                _logger.LogDebug("Unregistering callback handler {HandlerType}", h.GetType().FullName);
+            }
             ImmutableInterlocked.Update(ref _handlers, (list, h2) => list.Remove(h2), h);
             (h as IDisposable)?.Dispose();
         });
 
     }
-    private async Task HandleRequest(HttpListenerCallback callback, CancellationToken cancellationToken)
-    {
-        if (!callback.IsResponseSet)
-        {
 
-            await callback.SetResponseAsync(
-                "Auth completed - you can close this browser now.",
-                MediaTypeNames.Text.Plain,
-                statusCode: 200,
-                cancellationToken: cancellationToken);
+    private void StopInternal()
+    {
+        try
+        {
+            if (_httpListener is { IsListening: true })
+            {
+                _httpListener.Stop();
+            }
+            _httpListener?.Close();
+        }
+        catch (Exception ex)
+        {
+            if (_logger.IsEnabled(LogLevel.Error))
+            {
+                _logger.LogError(ex, "Error while stopping HTTP listener");
+            }
+        }
+        finally
+        {
+            _httpListener = null;
         }
     }
-    public void Dispose() => _cts.Cancel();
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        StopInternal();
+    }
 }

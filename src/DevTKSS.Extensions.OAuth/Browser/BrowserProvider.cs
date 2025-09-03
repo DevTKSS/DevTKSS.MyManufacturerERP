@@ -10,10 +10,10 @@ public interface IBrowserProvider
 
 public class BrowserProvider : IBrowserProvider
 {
-    private readonly ILogger _logger;
-    public BrowserProvider(ILogger? logger = null) 
+    private readonly ILogger<BrowserProvider> _logger;
+    public BrowserProvider(ILogger<BrowserProvider> logger)
     {
-        _logger = logger?.ForContext<BrowserProvider>() ?? Log.Logger.ForContext<BrowserProvider>();
+        _logger = logger;
     }
     /// <summary>
     /// Helper method to open the browser through the url.dll.
@@ -28,7 +28,10 @@ public class BrowserProvider : IBrowserProvider
         }
         catch(Exception ex)
         {
-            _logger?.Error(ex, "Failed to open URL in default browser using Process.Start. Falling back to platform specific handling.");
+            if (_logger.IsEnabled(LogLevel.Error))
+            {
+                _logger.LogError(ex, "Failed to open URL in default browser using Process.Start. Falling back to platform specific handling.");
+            }
 
             // hack because of this: https://github.com/dotnet/corefx/issues/10361
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -44,8 +47,10 @@ public class BrowserProvider : IBrowserProvider
                 }
                 catch(Exception ex1)
                 {
-                    _logger?.Error(ex1, "Failed to open URL in default browser using ProcessStartInfo. Falling back to cmd.");
-                    
+                    if (_logger.IsEnabled(LogLevel.Error))
+                    {
+                        _logger.LogError(ex1, "Failed to open URL in default browser using ProcessStartInfo. Falling back to cmd.");
+                    }
                     url = url.Replace("&", "^&");
                     var psi = new ProcessStartInfo("cmd", $"/c start {url}") 
                     { 

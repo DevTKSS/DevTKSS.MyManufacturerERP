@@ -1,5 +1,7 @@
+using System.Collections.Specialized;
 using System.Security.Cryptography;
 using System.Text.Encodings.Web;
+using System.Web;
 
 namespace DevTKSS.Extensions.OAuth;
 
@@ -30,5 +32,14 @@ public static class OAuth2Utilitys
         var challengeBytes = SHA256.HashData(System.Text.Encoding.ASCII.GetBytes(codeVerifier));
         return Convert.ToBase64String(challengeBytes).TrimEnd('=')
             .Replace('+', '-').Replace('/', '_');
+    }
+    public static NameValueCollection GetQuery(this string? redirectUri, string callbackUri)
+    {
+        if (string.IsNullOrWhiteSpace(redirectUri))
+            return [];
+        return redirectUri.StartsWith(callbackUri)
+             ? AuthHttpUtility.ExtractArguments(redirectUri)  // authData is a fully qualified url, so need to extract query or fragment
+             : AuthHttpUtility.ParseQueryString(redirectUri.TrimStart('#').TrimStart('?')); // authData isn't full url, so just process as query or fragment
+
     }
 }

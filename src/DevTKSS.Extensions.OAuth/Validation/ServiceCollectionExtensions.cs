@@ -5,15 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace DevTKSS.Extensions.OAuth.Validation;
+
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddOptionsWithFluentValidation<TOptions>(this IServiceCollection services, string configurationSection)
+    public static OptionsBuilder<TOptions> AddOptionsWithFluentValidation<TOptions>(this IServiceCollection services, string sectionName)
         where TOptions : class
     {
-        services.AddOptions<TOptions>()
-            .BindConfiguration(configurationSection)
-            .ValidateFluentValidation()
-            .ValidateOnStart();
-        return services;
+        return services.AddOptions<TOptions>()
+            .BindConfiguration(sectionName)
+            .ValidateFluentValidation();
     }
 }
