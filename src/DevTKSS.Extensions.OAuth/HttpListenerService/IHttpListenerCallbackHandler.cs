@@ -1,11 +1,13 @@
-// Import the namespace its defined (the one below) to make it available in the attribute which needs to be above the namespace declaration.
-//[assembly:
-//    ApiExtension(typeof(IWebAuthenticationBrokerProvider), typeof(SystemBrowserAuthBroker))]
+//// Import the namespace its defined (the one below) to make it available in the attribute which needs to be above the namespace declaration.
+////[assembly:
+////    ApiExtension(typeof(IWebAuthenticationBrokerProvider), typeof(SystemBrowserAuthBroker))]
 
-namespace DevTKSS.Extensions.OAuth.HttpListenerService;
+//using Uno.Disposables;
 
-public interface IHttpListenerCallbackHandler
-{
-    public Task HandleRequest(HttpListenerCallback request, string relativePath, CancellationToken ct);
-    public Task<WebAuthenticationResult> WaitForCallbackAsync();
-}
+//namespace DevTKSS.Extensions.OAuth.HttpListenerService;
+
+//public interface IHttpListenerCallbackHandler : IDisposable
+//{
+//    public Task HandleRequest(HttpListenerCallback request, string relativePath, CancellationToken ct);
+//    public Task<WebAuthenticationResult> WaitForCallbackAsync();
+//}

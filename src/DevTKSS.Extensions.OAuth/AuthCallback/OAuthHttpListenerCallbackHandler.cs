@@ -80,4 +80,6 @@ public sealed class OAuthHttpListenerCallbackHandler : IHttpListenerCallbackHand
     {
         return _tcs.Task;
     }
+
+    public void Dispose() => _tcs.TrySetResult(new WebAuthenticationResult(null, 0, WebAuthenticationStatus.UserCancel));
 }

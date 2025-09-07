@@ -67,7 +67,7 @@ public sealed class SystemBrowserAuthBroker
             _logger.LogInformation("Listening for callback at: {Callback}", callbackUri.ToString());
         }
         var startedServerRootUri = ServerRootUri;
-        var callbackHandler = new AuthCallbackHandler(callbackUri);
+        var callbackHandler = new OAuthCallbackHandler(callbackUri);
         using (_server.RegisterHandler(callbackHandler))
         {
             _browserProvider.OpenBrowser(requestUri);

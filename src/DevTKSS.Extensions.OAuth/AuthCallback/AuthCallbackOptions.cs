@@ -1,15 +1,14 @@
 namespace DevTKSS.Extensions.OAuth.AuthCallback;
 
-public record AuthCallbackOptions
+public interface IAuthCallbackOptions
 {
-    //public string Protocol { get; init; } = "http";
-    //public string RootUri { get; init; } = "localhost";
-    //public ushort Port { get; init; } = 0; // 0 means auto-assign for loopback flows
-    
+    Uri? CallbackUri { get; init; }
+}
+
+public record AuthCallbackOptions : IAuthCallbackOptions
+{
+    public const string DefaultName = "AuthCallback";
     public Uri? CallbackUri { get; init; }
 
-    //public override string ToString()
-    //{
-    //    return $"{Protocol}://{RootUri}{(Port > 0 ? $":{Port}" : "")}{CallbackUri}";
-    //}
+
 }

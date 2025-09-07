@@ -9,9 +9,9 @@ using Microsoft.Extensions.Options;
 
 namespace DevTKSS.AspNet.Security.OAuth.Etsy;
 // Not sure if OpenIdConnect requires a asp net core provider like this to be showed in the client hostbuilder?
-public partial class EtsyAuthenticationhandler : OAuthHandler<EtsyAuthenticationOptions>
+public partial class EtsyAuthenticationHandler : OAuthHandler<EtsyAuthenticationOptions>
 {
-    public EtsyAuthenticationhandler(
+    public EtsyAuthenticationHandler(
         [NotNull] IOptionsMonitor<EtsyAuthenticationOptions> options,
         [NotNull] ILoggerFactory logger,
         [NotNull] UrlEncoder encoder)

@@ -1,42 +1,47 @@
 using System.Collections.Specialized;
 
 namespace DevTKSS.Extensions.OAuth.AuthCallback;
-public interface IAuthCallbackHandler : IHttpHandler
-{
-    public Uri CallbackUri { get; }
-    public Task<WebAuthenticationResult> WaitForCallbackAsync();
-}
-public record AuthCallbackHandler : IAuthCallbackHandler
+public record OAuthCallbackHandler : IAuthCallbackHandler
 {    
+    public const string DefaultName = "OAuthCallback";
     private readonly TaskCompletionSource<WebAuthenticationResult> _tcs = new();
     public Uri CallbackUri { get; init; }
-    public AuthCallbackHandler(Uri callbackUri)
+    public string Name { get; init; } = DefaultName;
+    public OAuthCallbackHandler(
+        Uri callbackUri,
+        [ServiceKey] string name = DefaultName)
     {
-        if(callbackUri is null || callbackUri.Scheme != Uri.UriSchemeHttp && callbackUri.Scheme != Uri.UriSchemeHttps)
+        if (callbackUri is null || callbackUri.Scheme != Uri.UriSchemeHttp && callbackUri.Scheme != Uri.UriSchemeHttps)
         {
             throw new ArgumentException("The CallbackUri must be an absolute URI with HTTP or HTTPS scheme.", nameof(callbackUri));
         }
+        Name = name;
         CallbackUri = callbackUri;
     }
-    public AuthCallbackHandler(
-        AuthCallbackOptions options)
+    public OAuthCallbackHandler(
+        AuthCallbackOptions options,
+        [ServiceKey] string name = DefaultName)
     {
         if (options?.CallbackUri is not Uri uri
             || uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
         {
             throw new ArgumentException("The CallbackUri must be an absolute URI with HTTP or HTTPS scheme.", nameof(AuthCallbackOptions.CallbackUri));
         }
+        Name = name;
         CallbackUri = uri;
     }
     [ActivatorUtilitiesConstructor]
-    public AuthCallbackHandler(
-        IOptions<AuthCallbackOptions> options)
+    public OAuthCallbackHandler(
+        IOptions<AuthCallbackOptions> options,
+        [ServiceKey] string name = DefaultName)
     {
-        if(options?.Value?.CallbackUri is not Uri uri
+
+        if (options?.Value?.CallbackUri is not Uri uri
             || uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
         {
             throw new ArgumentException("The CallbackUri must be an absolute URI with HTTP or HTTPS scheme.", nameof(AuthCallbackOptions.CallbackUri));
         }
+        Name = name;
         CallbackUri = uri;
     }
 
