@@ -42,11 +42,25 @@ public class OAuthOptionsBuilder
 
         return this;
     }
+    public OAuthOptionsBuilder WithCallbackUri(string callbackUri)
+    {
+        
+        return this;
+    }
     public OAuthOptionsBuilder WithClientID(string clientId)
     {
         _clientID = clientId;
         return this;
     }
+    /// <summary>
+    /// Sets the client secret for the OAuth client.
+    /// </summary>
+    /// <remarks>This method is intended for use with confidential clients that can securely store the client
+    /// secret.  Public clients, such as mobile or desktop applications, typically do not use a client secret as they 
+    /// cannot guarantee its confidentiality.</remarks>
+    /// <param name="clientSecret">The client secret to be used for authentication. This is typically required for confidential clients,  such as
+    /// web applications or services, that need to authenticate securely with the OAuth provider.</param>
+    /// <returns>The current <see cref="OAuthOptionsBuilder"/> instance, allowing for method chaining.</returns>
     public OAuthOptionsBuilder WithClientSecret(string clientSecret)
     {
         _clientSecret = clientSecret;
@@ -60,7 +74,7 @@ public class OAuthOptionsBuilder
     }
     public OAuthOptions Build()
     {
-        var options = new OAuthOptions
+        return new OAuthOptions
         {
             ProviderName = _providerName,
             ClientID = _clientID,
@@ -69,12 +83,6 @@ public class OAuthOptionsBuilder
             ClientSecret = _clientSecret,
             EndpointOptions = _endpointOptions ?? preConfiguredOptions?.EndpointOptions ?? new(),
         };
-        // Validate the options
-        var validator = new OAuthOptionsValidator();
-        var validationResult = validator.Validate(options);
-        if(!validationResult.IsValid)
-          throw new ValidationException(validationResult.Errors.First().ErrorMessage);
-        return options;
-    
+
     }
 }

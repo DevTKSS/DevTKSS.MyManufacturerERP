@@ -1,49 +1,46 @@
 namespace DevTKSS.Extensions.OAuth.Options;
-public class OAuthEndpointOptions 
-{
-    public const string ConfigurationSection = "EndpointOptions";
 
-    public string? AuthorizationEndpoint { get; init; }
-    public string? UserInfoEndpoint { get; init; }
-    public string? TokenEndpoint { get; init; }
-    public string? RedirectUri { get; init; }
-}
-
+// Inheriting here from Endpoint Options to get the possibility to use this Options directly with Refit client configuration in Uno also, but this isnt a pretty workaround
 public class OAuthOptions : EndpointOptions
 {
     public const string DefaultName = "OAuth";
+    public string ProviderName { get; init; } = DefaultName;
 
+    public new string? Url
+    {
+        get => base.Url;
+        init
+        {
+            if (value == null)
+            {
+                base.Url = null;
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Base address cannot be null or empty.", nameof(value));
+            if (!value.EndsWith('/'))
+                value += '/';
+            if (!Uri.TryCreate(value, UriKind.Absolute, out var absoluteUri) || (absoluteUri.Scheme != Uri.UriSchemeHttp && absoluteUri.Scheme != Uri.UriSchemeHttps))
+                throw new InvalidOperationException("AuthorizationEndpoint must be a valid absolute URI with HTTP or HTTPS scheme.");
+            base.Url = value;
+        }
+    }
     /// <summary>
-    /// Gets the unique identifier for the client. Can be named as keystring at registration.
+    /// Gets the unique identifier for the client. Might be named as keystring at registration.
     /// </summary>
     public string? ClientID { get; init; }
+    /// <summary>
+    /// Gets the client secret used for authentication with the external service.
+    /// </summary>
+    /// <remarks>
+    /// Not implemented so far, since not all OAuth providers use a client secret (e.g., public clients or mobile apps) as they are not able to keep them secret.<br/>
+    /// Its used for confidential clients only which are used for the passwort flow and implicit flows for example, that do not require user interaction but verification of the calling application.
+    /// </remarks>
     public string? ClientSecret { get; init; }
-    public string ProviderName { get; init; } = DefaultName;
-    public string? AccessToken { get; init; }
-    public string? RefreshToken { get; init; }
-    public string? ExpirationDate { get; init; }
-    public string? IdToken { get; init; }
-    public string? TokenType { get; init; } = "Bearer";
-    public string[] Scopes { get; init; } = []; 
-    public IDictionary<string, string> AdditionalParameters { get; init; } = new Dictionary<string,string> ();
-    public OAuthEndpointOptions EndpointOptions { get; init; } = new ();
-    public TokenCacheKeyOptions TokenCacheKeyOptions { get; init; } = new ();
-}
-/// <summary>
-/// Represents configuration options for token keys used in authentication or authorization workflows.<br/>
-/// The Token Keys will be used to store and retrieve tokens from a cache or storage mechanism.
-/// </summary>
-/// <remarks>
-/// This class provides predefined keys for common token types, such as access tokens, refresh tokens, 
-/// and ID tokens, while also allowing the inclusion of additional custom token keys through the  <see
-/// cref="OtherTokenKeys"/> property.
-/// </remarks>
-public class TokenCacheKeyOptions
-{
-    public string AccessTokenKey { get; init; } = "AccessToken";
-    public string RefreshTokenKey { get; init; } = "RefreshToken";
-    public string ExpirationDateKey { get; init; } = "ExpirationDate";
-    public string IdTokenKey { get; init; } = "UserId";
-    public IDictionary<string, string> OtherTokenKeys { get; init; } = new Dictionary<string, string>();
-
+    public string[] Scopes { get; init; } = [];
+    public AuthCallbackOptions? CallbackOptions { get; init; }
+    public TokenCacheOptions TokenCacheOptions { get; init; } = new ();
+    public OAuthEndpointOptions? EndpointOptions { get; init; }
+    public TokenCacheKeyOptions TokenCacheKeys { get; init; } = new ();
 }

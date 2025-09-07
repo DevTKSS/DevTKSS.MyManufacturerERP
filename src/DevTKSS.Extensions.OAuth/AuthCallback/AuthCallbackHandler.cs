@@ -1,6 +1,4 @@
 using System.Collections.Specialized;
-using Yllibed.HttpServer;
-using Yllibed.HttpServer.Handlers;
 
 namespace DevTKSS.Extensions.OAuth.AuthCallback;
 public interface IAuthCallbackHandler : IHttpHandler
