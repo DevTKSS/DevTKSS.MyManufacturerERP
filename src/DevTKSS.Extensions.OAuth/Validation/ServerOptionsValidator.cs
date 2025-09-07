@@ -1,3 +1,4 @@
+using static DevTKSS.Extensions.OAuth.Validation.UriValidationUtility;
 namespace DevTKSS.Extensions.OAuth.Validation;
 
 public class ServerOptionsValidator : AbstractValidator<AuthCallbackOptions>
@@ -22,12 +23,5 @@ public class ServerOptionsValidator : AbstractValidator<AuthCallbackOptions>
             .Must(BeAValidUrl)
             .WithMessage("CallbackUri must be a valid relative Uri.");
     }
-    private static bool BeAValidRelativeUrl(string? url)
-    {
-        return Uri.TryCreate(url, UriKind.Relative, out var _);
-    }
-    private static bool BeAValidUrl(Uri? url)
-    {
-        return url is not null && url.IsAbsoluteUri; // Uri.TryCreate(url, UriKind.Absolute, out var _);
-    }
+
 }
