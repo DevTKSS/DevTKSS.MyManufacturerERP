@@ -18,7 +18,7 @@ public sealed partial record EtsyOAuthService : OAuthProvider
         ISystemBrowserAuthBrokerProvider systemBrowser,
         ITokenCache tokenCache,
         string name = ProviderName) 
-        : base(providerLogger, options, serviceProvider, authEndpoints, systemBrowser, tokenCache, name)
+        : base(providerLogger, serviceProvider, authEndpoints,systemBrowser, tokenCache, name)
     {
         _serviceProvider = serviceProvider;
         _options = options.Value;
@@ -84,7 +84,7 @@ public sealed partial record EtsyOAuthService : OAuthProvider
             }
             var result = new Dictionary<string, string>
             {
-                [$"{_options.TokenCacheKeyOptions.IdTokenKey}_{EtsyOAuthMeRequestDefaults.ShopIdKey}"] = meResponse.ShopId.ToString()
+                [$"{_options.TokenCacheKeys.IdTokenKey}_{EtsyOAuthMeRequestDefaults.ShopIdKey}"] = meResponse.ShopId.ToString()
             };
             return result;
         }
