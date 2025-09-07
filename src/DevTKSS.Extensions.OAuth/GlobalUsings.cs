@@ -1,4 +1,5 @@
 global using System;
+global using System.Web;
 global using System.Collections.Generic;
 global using System.Net;
 global using System.Net.Sockets;
@@ -21,4 +22,7 @@ global using Microsoft.Extensions.Options;
 global using Windows.Security.Authentication.Web;
 global using DevTKSS.Extensions.OAuth.Responses;
 global using DevTKSS.Extensions.OAuth.Services;
+global using DevTKSS.Extensions.OAuth.AuthCallback;
+global using Yllibed.HttpServer;
+global using Yllibed.HttpServer.Handlers;
 global using Refit;

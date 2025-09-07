@@ -1,43 +1,51 @@
-using System.Collections.Specialized;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using DevTKSS.Extensions.OAuth.Browser;
-
-
-// Import the namespace its defined (the one below) to make it available in the attribute which needs to be above the namespace declaration.
-using Uno.AuthenticationBroker;
+using Uno.AuthenticationBroker; // BUG: This is known to cause CS issue: https://github.com/unoplatform/uno/issues/21237
 using Uno.Foundation.Extensibility;
 
-//[assembly:
-//    ApiExtension(typeof(IWebAuthenticationBrokerProvider), typeof(SystemBrowserAuthBroker))]
+[assembly:
+    ApiExtension(typeof(IWebAuthenticationBrokerProvider), typeof(SystemBrowserAuthBroker))]
 
 namespace DevTKSS.Extensions.OAuth.Browser;
-public sealed class SystemBrowserAuthBroker : ISystemBrowserAuthBrokerProvider
-//: IWebAuthenticationBrokerProvider
+public sealed class SystemBrowserAuthBroker
+    : IWebAuthenticationBrokerProvider
 {
-    private readonly IHttpListenerService _httpService;
     private readonly ILogger<SystemBrowserAuthBroker> _logger;
-    private readonly IHttpListenerCallbackHandler _callbackHandler;
-
-    public SystemBrowserAuthBroker(
-        IBrowserProvider browserProvider,
-        IHttpListenerService httpService,
-        ILogger<SystemBrowserAuthBroker> logger,
-        IHttpListenerCallbackHandler callbackHandler)
+    private readonly IHttpServer _server;
+    private readonly IAuthCallbackHandler _callbackHandler;
+    private readonly IBrowserProvider _browserProvider;
+    private Uri? _serverRootUri;
+    private Uri ServerRootUri
     {
-        _httpService = httpService;
-        _logger = logger;
+        get
+        {
+            if (_serverRootUri is null)
+            {
+                (_serverRootUri, _) = _server.Start();
+            }
+
+            return _serverRootUri;
+        }
+    }
+    public SystemBrowserAuthBroker(
+        ILogger<SystemBrowserAuthBroker> logger,
+        IBrowserProvider browserProvider,
+        IHttpServer httpServer,
+        IAuthCallbackHandler callbackHandler)
+    {
+        _browserProvider = browserProvider;
+        _server = httpServer;
         _callbackHandler = callbackHandler;
+        _logger = logger;
+        _server = httpServer;
     }
 
     public Uri GetCurrentApplicationCallbackUri()
     {
-        var uri = _httpService.GetCallbackUri();
-        if (_logger.IsEnabled(LogLevel.Debug))
+        if( _callbackHandler.CallbackUri is null)
         {
-            _logger.LogDebug("Broker provided callback URI: {Callback}", uri.ToSafeDisplay());
+            // TODO: Check if we can get the callback URI from somewhere else, e.g. from protocol if existing in the target platform.
+            throw new InvalidOperationException("The callback URI has not been set. Make sure to call AuthenticateAsync first.");
         }
-        return uri;
+        return new Uri(ServerRootUri, _callbackHandler.CallbackUri);
     }
 
     public async Task<WebAuthenticationResult> AuthenticateAsync(
@@ -51,6 +59,54 @@ public sealed class SystemBrowserAuthBroker : ISystemBrowserAuthBrokerProvider
             _logger.LogInformation("Starting desktop OAuth authorization code flow.");
         }
 
+        CheckWebAuthOptionFlag(options);
+
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.LogInformation("Opening browser to authorization endpoint: {AuthUri}", requestUri.ToSafeDisplay()); // TODO: Check if logging the full URI is safe enough.
+            _logger.LogInformation("Listening for callback at: {Callback}", callbackUri.ToString());
+        }
+        var startedServerRootUri = ServerRootUri;
+        var callbackHandler = new AuthCallbackHandler(callbackUri);
+        using (_server.RegisterHandler(callbackHandler))
+        {
+            _browserProvider.OpenBrowser(requestUri);
+            var result = await _callbackHandler.WaitForCallbackAsync();
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation("Authentication flow completed with status: {Status}", result.ResponseStatus);
+            }
+            return result;
+
+        }
+    }
+public async Task<WebAuthenticationResult> AuthenticateAsync(
+        WebAuthenticationOptions options,
+        Uri requestUri,
+        CancellationToken ct)
+    {
+        if (_logger.IsEnabled(LogLevel.Information))
+        {
+            _logger.LogInformation("Starting desktop OAuth authorization code flow.");
+        }
+
+        CheckWebAuthOptionFlag(options);
+        var startedServerRootUri = ServerRootUri;
+        using (_server.RegisterHandler(_callbackHandler))
+        {
+            _browserProvider.OpenBrowser(requestUri);
+            var result = await _callbackHandler.WaitForCallbackAsync();
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation("Authentication flow completed with status: {Status}", result.ResponseStatus);
+            }
+            return result;
+
+        }
+    }
+
+    private void CheckWebAuthOptionFlag(WebAuthenticationOptions options)
+    {
         if (options.HasFlag(WebAuthenticationOptions.SilentMode))
         {
             if (_logger.IsEnabled(LogLevel.Error))
@@ -89,40 +145,7 @@ public sealed class SystemBrowserAuthBroker : ISystemBrowserAuthBrokerProvider
         }
 #pragma warning restore Uno0001 // WebAuthenticationOptions.UseTitle is not supported to be used in Uno Platform.
 #pragma warning restore IDE0079 // Remove unnecessary suppression of the warning.
-
-        if (_logger.IsEnabled(LogLevel.Information))
-        {
-            _logger.LogInformation("Opening browser to authorization endpoint: {AuthUri}", requestUri.ToSafeDisplay());
-            _logger.LogInformation("Listening for callback at: {Callback}", callbackUri.ToSafeDisplay());
-        }
-;
-        using (_httpService.RegisterHandler(_callbackHandler))
-        {
-            try
-            {
-                _httpService.Start(requestUri, callbackUri);
-
-                using (ct.Register(() =>
-                {
-                    try { _httpService.Stop(); } catch (Exception ex) { if (_logger.IsEnabled(LogLevel.Warning)) { _logger.LogWarning(ex, "Error while stopping listener on cancellation"); } }
-                }))
-                {
-                    var result = await _callbackHandler.WaitForCallbackAsync().ConfigureAwait(false);
-                    if (_logger.IsEnabled(LogLevel.Information))
-                    {
-                        _logger.LogInformation("Authentication flow completed with status: {Status}", result.ResponseStatus);
-                    }
-                    return result;
-                }
-            }
-            catch (Exception ex)
-            {
-                if (_logger.IsEnabled(LogLevel.Error))
-                {
-                    _logger.LogError(ex, "Error during authentication flow");
-                }
-                return new WebAuthenticationResult(null, 0, WebAuthenticationStatus.ErrorHttp);
-            }
-        }
     }
+
+    
 }
