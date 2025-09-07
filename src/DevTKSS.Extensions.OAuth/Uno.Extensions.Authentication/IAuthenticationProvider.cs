@@ -1,10 +1,7 @@
-namespace DevTKSS.Extensions.OAuth.Services;
-
-internal interface IOAuthProvider
+namespace Uno.Extensions.Authentication;
+internal interface IAuthenticationProvider
 {
     public string Name { get; }
-    public OAuthSettings Settings { get; }
-    public void Configure(OAuthOptions options, OAuthSettings settings);
 
     public ValueTask<IDictionary<string, string>?> LoginAsync(IDispatcher? dispatcher, IDictionary<string, string>? credentials, CancellationToken cancellationToken);
 

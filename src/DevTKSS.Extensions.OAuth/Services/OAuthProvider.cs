@@ -6,7 +6,7 @@ namespace DevTKSS.Extensions.OAuth.Services;
 /// <summary>
 /// Service for handling OAuth authentication flows (desktop loopback via system browser).
 /// </summary>
-public partial record OAuthProvider : BaseAuthenticationProvider, IOAuthProvider
+public partial record OAuthProvider : BaseAuthenticationProvider, IAuthProvider
 {
     [GeneratedRegex(@"^(\d+)\.")]
     public static partial Regex DoesContainUserId();
@@ -55,7 +55,7 @@ public partial record OAuthProvider : BaseAuthenticationProvider, IOAuthProvider
             _logger.LogError("OAuth options are not configured.");
             return default;
         }
-        if (_options.EndpointOptions.RedirectUri is not string redirectUri || string.IsNullOrWhiteSpace(redirectUri)
+        if (_options.Url is not string redirectUri || string.IsNullOrWhiteSpace(redirectUri)
             || !Uri.TryCreate(redirectUri, UriKind.Absolute, out Uri? callbackUri))
         {
             if (_systemBrowser.GetCurrentApplicationCallbackUri() is Uri appCallbackUri)
@@ -122,7 +122,7 @@ public partial record OAuthProvider : BaseAuthenticationProvider, IOAuthProvider
         CancellationToken cancellationToken)
     {
 
-        if (_options?.EndpointOptions.RedirectUri is not string redirectUriConfig
+        if (_options?.Url is not string redirectUriConfig
             || string.IsNullOrWhiteSpace(redirectUriConfig))
         {
             _logger.LogError("Redirect URI is not configured.");
@@ -232,10 +232,9 @@ public partial record OAuthProvider : BaseAuthenticationProvider, IOAuthProvider
                 return default;
             }
 
-            // Update stored tokens using dictionary indexer
-            tokens[_options.TokenCacheKeyOptions.AccessTokenKey] = tokenResponse.AccessToken;
-            tokens[_options.TokenCacheKeyOptions.RefreshTokenKey] = tokenResponse.RefreshToken;
-            tokens[_options.TokenCacheKeyOptions.ExpirationDateKey] = DateTime.Now.AddSeconds(tokenResponse.ExpiresIn).ToString("g");
+            tokens[_options.TokenCacheKeys.AccessTokenKey] = tokenResponse.AccessToken;
+            tokens[_options.TokenCacheKeys.RefreshTokenKey] = tokenResponse.RefreshToken;
+            tokens[_options.TokenCacheKeys.ExpirationDateKey] = DateTime.Now.AddSeconds(tokenResponse.ExpiresIn).ToString("g");
 
             _logger.LogInformation("Tokens refreshed successfully");
             return tokens;
@@ -291,7 +290,7 @@ public partial record OAuthProvider : BaseAuthenticationProvider, IOAuthProvider
         void AddParam(string key, string value)
         {
             if (queryParams.Length > 0) queryParams.Append('&');
-            queryParams.Append(Uri.EscapeDataString(key))
+            queryParams.AppendFormat(Uri.EscapeDataString(key))
                       .Append('=')
                       .Append(Uri.EscapeDataString(value));
         }
@@ -330,9 +329,9 @@ public partial record OAuthProvider : BaseAuthenticationProvider, IOAuthProvider
             _logger.LogError("Authorization code is missing.");
             return null;
         }
-        if (string.IsNullOrWhiteSpace(_options.EndpointOptions.RedirectUri))
+        if (string.IsNullOrWhiteSpace(_options.Url))
         {
-            _logger.LogError("Redirect URI is not configured.");
+            _logger.LogError("Callback URI is not configured.");
             return null;
         }
         try
@@ -341,7 +340,7 @@ public partial record OAuthProvider : BaseAuthenticationProvider, IOAuthProvider
             {
                 GrantType = OAuthTokenRefreshDefaults.AuthorizationCode,
                 ClientId = _options.ClientID,
-                RedirectUri = _options.EndpointOptions.RedirectUri,
+                RedirectUri = _options.Url,
                 Code = authCode,
                 CodeVerifier = _codeVerifier
             },cancellationToken);
@@ -360,15 +359,15 @@ public partial record OAuthProvider : BaseAuthenticationProvider, IOAuthProvider
             }
 
             // Store tokens
-            tokens[_options.TokenCacheKeyOptions.AccessTokenKey] = accessToken;
-            tokens[_options.TokenCacheKeyOptions.RefreshTokenKey] = refreshToken;
-            tokens[_options.TokenCacheKeyOptions.ExpirationDateKey] = DateTime.Now.AddSeconds(tokenResponse.ExpiresIn).ToString("g");
+            tokens[_options.TokenCacheKeys.AccessTokenKey] = accessToken;
+            tokens[_options.TokenCacheKeys.RefreshTokenKey] = refreshToken;
+            tokens[_options.TokenCacheKeys.ExpirationDateKey] = DateTime.Now.AddSeconds(tokenResponse.ExpiresIn).ToString("g");
 
             if (DoesContainUserId().Match(refreshToken!) is { Success: true, Groups.Count: > 1 } match)
             {
                 var userId = match.Groups[1].Value;
                 _logger.LogInformation("Logged in as user ID: {UserId}", userId);
-                tokens.AddOrReplace(_options.TokenCacheKeyOptions.IdTokenKey, userId);
+                tokens.AddOrReplace(_options.TokenCacheKeys.IdTokenKey, userId);
             }
             return tokens;
         }
