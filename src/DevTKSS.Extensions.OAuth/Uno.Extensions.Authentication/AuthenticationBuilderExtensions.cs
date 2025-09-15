@@ -8,7 +8,7 @@ internal static class AuthenticationBuilderExtensions
        string name,
        TSettings settings,
        Func<TAuthProvider, TSettings, TAuthProvider> configureProvider)
-       where TAuthProvider : class, IAuthProvider
+       where TAuthProvider : class, IAuthenticationProvider
        where TSettings : class
     {
         var hostBuilder = (builder as IBuilder)?.HostBuilder;
@@ -20,7 +20,7 @@ internal static class AuthenticationBuilderExtensions
         hostBuilder
             .ConfigureServices(services =>
             {
-                services.AddSingleton<IAuthProvider, TAuthProvider>(serviceProvider =>
+                services.AddSingleton<IAuthenticationProvider, TAuthProvider>(serviceProvider =>
                 {
                     var auth = serviceProvider.GetRequiredService<TAuthProvider>();
 

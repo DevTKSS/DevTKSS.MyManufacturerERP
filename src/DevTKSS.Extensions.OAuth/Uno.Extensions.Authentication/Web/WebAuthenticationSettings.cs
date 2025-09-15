@@ -1,6 +1,6 @@
-﻿namespace Uno.Extensions.Authentication.Web;
+namespace Uno.Extensions.Authentication.Web;
 
-internal record WebAuthenticationSettings
+public record WebAuthenticationSettings
 {
 	public bool PrefersEphemeralWebBrowserSession { get; init; }
 
@@ -12,8 +12,8 @@ internal record WebAuthenticationSettings
 
 	public AsyncFunc<IServiceProvider, ITokenCache, IDictionary<string, string>?, string?, string>? PrepareLoginCallbackUri { get; init; }
 
-    public TokenCacheOptions TokenOptions { get; init; } = new ();
-
+	public TokenCacheOptions TokenCacheOptions { get; init; } = new();
+	public UriTokenOptions UriTokenOptions { get; init; } = new();
 	public AsyncFunc<IServiceProvider, ITokenCache, IDictionary<string, string>?, string, IDictionary<string, string>, IDictionary<string, string>?>? PostLoginCallback { get; init; }
 
 	public string? LogoutStartUri { get; init; }
@@ -27,7 +27,7 @@ internal record WebAuthenticationSettings
 	public AsyncFunc<IServiceProvider, ITokenCache, IDictionary<string, string>, IDictionary<string, string>?>? RefreshCallback { get; init; }
 }
 
-internal record WebAuthenticationSettings<TService> : WebAuthenticationSettings
+public record WebAuthenticationSettings<TService> : WebAuthenticationSettings
 	where TService : notnull
 {
 	public new AsyncFunc<TService, IServiceProvider, ITokenCache, IDictionary<string, string>?, string?, string>? PrepareLoginStartUri { get; init; }

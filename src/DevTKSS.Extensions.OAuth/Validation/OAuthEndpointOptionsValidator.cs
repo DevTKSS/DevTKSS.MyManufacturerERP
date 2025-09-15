@@ -1,3 +1,4 @@
+using DevTKSS.Extensions.OAuth.Endpoints;
 using static DevTKSS.Extensions.OAuth.Validation.UriValidationUtility;
 namespace DevTKSS.Extensions.OAuth.Validation;
 

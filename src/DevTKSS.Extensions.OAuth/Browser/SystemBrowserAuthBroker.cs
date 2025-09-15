@@ -1,12 +1,12 @@
 using Uno.AuthenticationBroker; // BUG: This is known to cause CS issue: https://github.com/unoplatform/uno/issues/21237
 using Uno.Foundation.Extensibility;
 
-[assembly:
-    ApiExtension(typeof(IWebAuthenticationBrokerProvider), typeof(SystemBrowserAuthBroker))]
+//[assembly:
+//    ApiExtension(typeof(IWebAuthenticationBrokerProvider), typeof(SystemBrowserAuthBroker))]
 
 namespace DevTKSS.Extensions.OAuth.Browser;
 public sealed class SystemBrowserAuthBroker
-    : IWebAuthenticationBrokerProvider
+    : ISystemBrowserAuthBrokerProvider // IWebAuthenticationBrokerProvider
 {
     private readonly ILogger<SystemBrowserAuthBroker> _logger;
     private readonly IHttpServer _server;
@@ -27,11 +27,11 @@ public sealed class SystemBrowserAuthBroker
     }
     public SystemBrowserAuthBroker(
         ILogger<SystemBrowserAuthBroker> logger,
-        IBrowserProvider browserProvider,
         IHttpServer httpServer,
-        IAuthCallbackHandler callbackHandler)
+        IAuthCallbackHandler callbackHandler,
+        IBrowserProvider? browserProvider = null)
     {
-        _browserProvider = browserProvider;
+        _browserProvider = browserProvider ?? new BrowserProvider(logger);
         _server = httpServer;
         _callbackHandler = callbackHandler;
         _logger = logger;
@@ -68,8 +68,8 @@ public sealed class SystemBrowserAuthBroker
         }
         var startedServerRootUri = ServerRootUri;
         var callbackHandler = new OAuthCallbackHandler(callbackUri);
-        using (_server.RegisterHandler(callbackHandler))
-        {
+       // using (_server.RegisterHandler(callbackHandler))
+       // {
             _browserProvider.OpenBrowser(requestUri);
             var result = await _callbackHandler.WaitForCallbackAsync();
             if (_logger.IsEnabled(LogLevel.Information))
@@ -78,7 +78,7 @@ public sealed class SystemBrowserAuthBroker
             }
             return result;
 
-        }
+       // }
     }
 public async Task<WebAuthenticationResult> AuthenticateAsync(
         WebAuthenticationOptions options,
@@ -94,6 +94,7 @@ public async Task<WebAuthenticationResult> AuthenticateAsync(
         var startedServerRootUri = ServerRootUri;
         using (_server.RegisterHandler(_callbackHandler))
         {
+            _server.Start();
             _browserProvider.OpenBrowser(requestUri);
             var result = await _callbackHandler.WaitForCallbackAsync();
             if (_logger.IsEnabled(LogLevel.Information))

@@ -21,7 +21,7 @@ global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 global using Windows.Security.Authentication.Web;
 global using DevTKSS.Extensions.OAuth.Responses;
-global using DevTKSS.Extensions.OAuth.Services;
+global using DevTKSS.Extensions.OAuth.OAuthServices;
 global using DevTKSS.Extensions.OAuth.AuthCallback;
 global using Yllibed.HttpServer;
 global using Yllibed.HttpServer.Handlers;

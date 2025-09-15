@@ -1,13 +1,6 @@
-// this is somehow not detected even while its the correct namespace
-//#if !WINDOWS
-//using IWebAuthenticationBrokerProvider = Uno.AuthenticationBroker.IWebAuthenticationBrokerProvider;
-//using Temp.Extensibility.DesktopAuthBroker;
-//#endif
 using DevTKSS.Extensions.OAuth.Endpoints;
-using DevTKSS.Extensions.OAuth.Services;
 using DevTKSS.Extensions.OAuth.Validation;
 using FluentValidation;
-using Microsoft.Extensions.Configuration;
 
 namespace DevTKSS.MyManufacturerERP;
 public partial class App : Application
@@ -74,6 +67,8 @@ public partial class App : Application
 
              }, enableUnoLogging: true)
              .UseSerilog(consoleLoggingEnabled: true, fileLoggingEnabled: true)
+            .UseValidation(configure:(validatorBuilder) => validatorBuilder
+                .Validator<OAuthOptions, OAuthOptionsValidator>())
             
             // Enable localization (see appsettings.json for supported languages)
             .UseLocalization()
@@ -112,7 +107,11 @@ public partial class App : Application
                     .ConfigureHttpClient((serviceProvider,httpClient) =>
                     {
                         var options = serviceProvider.GetRequiredService<IOptions<OAuthOptions>>().Value;
-                        httpClient.DefaultRequestHeaders.Add("x-api-key", options.ClientID);
+                        if(options.ClientOptions?.ClientID is not string clientId || string.IsNullOrWhiteSpace(clientId))
+                        {
+                            throw new InvalidOperationException("OAuthOptions.ClientOptions.ClientID is not configured.");
+                        }
+                        httpClient.DefaultRequestHeaders.Add("x-api-key", clientId);
                         
                         
                     })
@@ -121,37 +120,40 @@ public partial class App : Application
             })
 
             .UseAuthentication(authBuilder =>
-            authBuilder.AddOAuth(),
-            #region Web Auth configuration
-            // reference used: https://github.com/unoplatform/uno.extensions/blob/main/testing/TestHarness/TestHarness/Ext/Authentication/Web/WebAuthenticationHostInit.cs
-            //authBuilder.AddWeb<IEtsyOAuthEndpoints>(configureWeb =>
-            //configureWeb
-            //    .AccessTokenKey(OAuthTokenRefreshDefaults.AccessTokenKey)
-            //    .RefreshTokenKey(OAuthTokenRefreshDefaults.RefreshToken)
-            //    .PrepareLoginCallbackUri(
-            //        async(service,serviceProvider,tokencache,loginCallbackUri,ct)
-            //        => loginCallbackUri!)
+            {
+                authBuilder.AddOAuth(callbackKeyName: $"{OAuthOptions.DefaultName}:{OAuthClientOptions.DefaultName}");
 
-            //    .PrepareLoginStartUri(async (sp, tokens, credentials, loginStartUri, ct)
-            //        => await CreateLoginStartUri(sp, tokens, credentials, loginStartUri, ct))
+                #region Web Auth configuration
+                // reference used: https://github.com/unoplatform/uno.extensions/blob/main/testing/TestHarness/TestHarness/Ext/Authentication/Web/WebAuthenticationHostInit.cs
+                //authBuilder.AddWeb<IEtsyOAuthEndpoints>(configureWeb =>
+                //configureWeb
+                //    .AccessTokenKey(OAuthTokenRefreshDefaults.AccessTokenKey)
+                //    .RefreshTokenKey(OAuthTokenRefreshDefaults.RefreshToken)
+                //    .PrepareLoginCallbackUri(
+                //        async(service,serviceProvider,tokencache,loginCallbackUri,ct)
+                //        => loginCallbackUri!)
 
-            //    .PostLogin(async(authService, serviceProvider,tokenCache, credentials, redirectUri, tokens,cancellationToken)
-            //        => await ProcessPostLoginAsync(authService, serviceProvider,tokenCache,credentials,redirectUri,tokens, cancellationToken))
+                //    .PrepareLoginStartUri(async (sp, tokens, credentials, loginStartUri, ct)
+                //        => await CreateLoginStartUri(sp, tokens, credentials, loginStartUri, ct))
 
-            //    .Refresh(async (authService, serviceProvider, tokenCache, tokens, cancellationToken) =>
-            //        await RefreshTokensAsync(authService, serviceProvider, tokenCache, tokens, cancellationToken))
+                //    .PostLogin(async(authService, serviceProvider,tokenCache, credentials, redirectUri, tokens,cancellationToken)
+                //        => await ProcessPostLoginAsync(authService, serviceProvider,tokenCache,credentials,redirectUri,tokens, cancellationToken))
 
-            //    ,name: "EtsyOAuth"),
-            //},
-            //    configureAuthorization: builder =>
-            //    {
-            //        builder.AuthorizationHeader(scheme: "Bearer");
-            //    }
-            #endregion
- 
-            configureAuth =>
-             configureAuth.AuthorizationHeader(scheme: "Bearer")
-             )
+                //    .Refresh(async (authService, serviceProvider, tokenCache, tokens, cancellationToken) =>
+                //        await RefreshTokensAsync(authService, serviceProvider, tokenCache, tokens, cancellationToken))
+
+                //    ,name: "EtsyOAuth"),
+                //},
+                //    configureAuthorization: builder =>
+                //    {
+                //        builder.AuthorizationHeader(scheme: "Bearer");
+                //    }
+                #endregion
+            },configureAuth =>
+                configureAuth.AuthorizationHeader(scheme: "Bearer")
+            )
+             
+            
             .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
         );
         MainWindow = builder.Window;

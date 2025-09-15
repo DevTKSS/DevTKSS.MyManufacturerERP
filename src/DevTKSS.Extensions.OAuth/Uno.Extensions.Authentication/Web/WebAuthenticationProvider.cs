@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 
 namespace Uno.Extensions.Authentication.Web;
 
@@ -32,7 +32,8 @@ internal record WebAuthenticationProvider
 						PrefersEphemeralWebBrowserSession = _internalSettings.PrefersEphemeralWebBrowserSession || config.PrefersEphemeralWebBrowserSession,
 						LoginStartUri = !string.IsNullOrWhiteSpace(config.LoginStartUri) ? config.LoginStartUri : _internalSettings.LoginStartUri,
 						LoginCallbackUri = !string.IsNullOrWhiteSpace(config.LoginCallbackUri) ? config.LoginCallbackUri : _internalSettings.LoginCallbackUri,
-						TokenOptions = config.TokenOptions ?? _internalSettings.TokenOptions,
+						TokenCacheOptions = config.TokenCacheOptions ?? _internalSettings.TokenCacheOptions,
+						UriTokenOptions = config.UriTokenOptions ?? _internalSettings.UriTokenOptions,
 						LogoutStartUri = !string.IsNullOrWhiteSpace(config.LogoutStartUri) ? config.LogoutStartUri : _internalSettings.LogoutStartUri,
 						LogoutCallbackUri = !string.IsNullOrWhiteSpace(config.LogoutCallbackUri) ? config.LogoutCallbackUri : _internalSettings.LogoutCallbackUri,
 					};
@@ -86,7 +87,8 @@ internal record WebAuthenticationProvider
 		var userResult = await WinUIEx.WebAuthenticator.AuthenticateAsync(new Uri(loginStartUri), new Uri(loginCallbackUri));
 		var authData = string.Join("&", userResult.Properties.Select(x => $"{x.Key}={x.Value}"))??string.Empty;
 #else
-		var userResult = await WebAuthenticationBroker.AuthenticateAsync(WebAuthenticationOptions.None, new Uri(loginStartUri), new Uri(loginCallbackUri));
+        var SystemBrowser = Services.GetRequiredService<ISystemBrowserAuthBrokerProvider>();
+		var userResult = await SystemBrowser.AuthenticateAsync(WebAuthenticationOptions.None, new Uri(loginStartUri), new Uri(loginCallbackUri),cancellationToken);
 		var authData = userResult?.ResponseData ?? string.Empty;
 
 #endif
@@ -99,31 +101,31 @@ internal record WebAuthenticationProvider
 		{
 			return tokens;
 		}
-		var accessTokenKey = InternalSettings.TokenOptions.AccessTokenKey ?? TokenCacheExtensions.AccessTokenKey;
-		var accessToken = query.Get(accessTokenKey);
+
+		var accessToken = query.Get(InternalSettings.UriTokenOptions.AccessTokenKey);
 		if (!string.IsNullOrWhiteSpace(accessToken))
 		{
-			tokens.AddOrReplace(accessTokenKey,accessToken);
-		}
-		var refreshTokenKey = InternalSettings.TokenOptions.RefreshTokenKey ?? TokenCacheExtensions.RefreshTokenKey;
-		var refreshToken = query.Get(refreshTokenKey);
-		if (!string.IsNullOrWhiteSpace(refreshToken))
-		{
-			tokens.AddOrReplace(refreshTokenKey,refreshToken);
-		}
-		var idTokenKey = InternalSettings.TokenOptions.IdTokenKey ?? TokenCacheExtensions.IdTokenKey;
-		var idToken = query.Get(idTokenKey);
-		if (!string.IsNullOrWhiteSpace(idToken))
-		{
-			tokens.AddOrReplace(idTokenKey, idToken);
+			tokens.AddOrReplace(InternalSettings.TokenCacheOptions.AccessTokenKey, accessToken);
 		}
 
-		foreach(var (codeKey, uriKey) in InternalSettings.TokenOptions.OtherTokenKeys)
+		var refreshToken = query.Get(InternalSettings.UriTokenOptions.RefreshTokenKey);
+		if (!string.IsNullOrWhiteSpace(refreshToken))
+		{
+			tokens.AddOrReplace(InternalSettings.UriTokenOptions.RefreshTokenKey, refreshToken);
+		}
+
+		var idToken = query.Get(InternalSettings.UriTokenOptions.IdTokenKey);
+		if (!string.IsNullOrWhiteSpace(idToken))
+		{
+			tokens.AddOrReplace(InternalSettings.TokenCacheOptions.IdTokenKey, idToken);
+		}
+
+		foreach (var (tokenCacheKey, uriKey) in InternalSettings.UriTokenOptions.OtherTokenKeys)
 		{
 			var uriValue = query.Get(uriKey);
 			if (!string.IsNullOrWhiteSpace(uriValue))
 			{
-				tokens.AddOrReplace(codeKey, uriValue);
+				tokens.AddOrReplace(tokenCacheKey, uriValue);
 			}
 		}
 

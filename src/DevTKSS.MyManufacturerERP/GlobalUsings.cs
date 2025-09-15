@@ -26,7 +26,7 @@ global using DevTKSS.Extensions.OAuth.Dictionarys;
 global using DevTKSS.Extensions.OAuth.Options;
 global using DevTKSS.Extensions.OAuth.Responses;
 global using DevTKSS.Extensions.OAuth.Requests;
-global using DevTKSS.Extensions.OAuth.Services;
+global using DevTKSS.Extensions.OAuth.OAuthServices;
 global using DevTKSS.MyManufacturerERP.Infrastructure.EtsyDefaults;
 global using Windows.Security.Authentication.Web;
 global using Refit;
