@@ -2,7 +2,7 @@ using DevTKSS.Extensions.OAuth.Endpoints;
 
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Services;
 
-public sealed partial record EtsyOAuthService : OAuthService
+public sealed partial record EtsyOAuthService : OAuthProvider
 {
     [GeneratedRegex(@"^(?<userId>\d+)\.(?<token>.+)$",
         RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.NonBacktracking | RegexOptions.ExplicitCapture)]
@@ -13,13 +13,13 @@ public sealed partial record EtsyOAuthService : OAuthService
     private readonly OAuthOptions _options;
     public EtsyOAuthService(
         ILogger<EtsyOAuthService> providerLogger,
+        ILogger<OAuthProvider> baseLogger,
         IOptionsSnapshot<OAuthOptions> Configuration,
         IServiceProvider ServiceProvider,
         IOAuthEndpoints AuthEndpoints,
         ITokenCache tokenCache,
-        ISystemBrowserAuthBrokerProvider systemBrowserAuthBrokerProvider,
-        string name = ProviderName) 
-        : base(providerLogger, ServiceProvider, AuthEndpoints, tokenCache, Configuration,systemBrowserAuthBrokerProvider,name)
+        ISystemBrowserAuthBrokerProvider systemBrowserAuthBrokerProvider) 
+        : base(baseLogger, ServiceProvider, AuthEndpoints, tokenCache, Configuration, systemBrowserAuthBrokerProvider)
     {
         _serviceProvider = ServiceProvider;
         _options = Configuration.Value;

@@ -1,11 +1,6 @@
 namespace DevTKSS.Extensions.OAuth.AuthCallback;
 
-public interface IAuthCallbackOptions
-{
-	string? CallbackUri { get; init; }
-}
-
-public record AuthCallbackOptions : IAuthCallbackOptions
+public record AuthCallbackOptions
 {
 	public const string DefaultName = "AuthCallback";
 	public string? CallbackUri { get; init; }

@@ -1,3 +1,5 @@
+using System.Collections.Specialized;
+using System.Net;
 using DevTKSS.Extensions.OAuth.Endpoints;
 using Microsoft.Extensions.Configuration;
 using static DevTKSS.Extensions.OAuth.Validation.UriValidationUtility;
@@ -6,14 +8,14 @@ namespace DevTKSS.Extensions.OAuth.OAuthServices;
 /// <summary>
 /// Service for handling OAuth authentication flows (desktop loopback via system browser).
 /// </summary>
-public partial record OAuthService(
-        ILogger<OAuthService> ProviderLogger,
+public record OAuthProvider(
+        ILogger<OAuthProvider> ProviderLogger,
         IServiceProvider ServiceProvider,
         IOAuthEndpoints AuthEndpoints,
         ITokenCache Tokens,
         IOptionsSnapshot<OAuthOptions> Configuration,
-        ISystemBrowserAuthBrokerProvider AuthBrowserProvider,
-        [ServiceKey] string Name = OAuthService.DefaultName) : IOAuthService
+        ISystemBrowserAuthBrokerProvider AuthBrowserProvider) 
+    : BaseAuthenticationProvider(ProviderLogger,DefaultName,Tokens)
 {
 
     public OAuthSettings? Settings { get; init; }
@@ -46,19 +48,99 @@ public partial record OAuthService(
             return _internalSettings;
         }
     }
-    public async ValueTask<IDictionary<string, string>?> PostLoginAsync(
-        IDictionary<string, string> tokens,
-        string redirectUri,
+    private async ValueTask<(string? redirectUri, Dictionary<string,string> tokens, NameValueCollection? queryParams)> GetAuthenticationDataAsync(CancellationToken cancellationToken)
+    {
+        var loginStartUri = InternalSettings.LoginStartUri;
+        loginStartUri = await InternalPrepareLoginStartUri(loginStartUri, cancellationToken);
+
+        if (loginStartUri is null ||
+            string.IsNullOrWhiteSpace(loginStartUri))
+        {
+            if (ProviderLogger.IsEnabled(LogLevel.Warning))
+            {
+                ProviderLogger.LogWarning($"{nameof(InternalSettings.LoginStartUri)} not specified, unable to start login flow");
+            }
+            return default;
+        }
+
+        var loginCallbackUri = InternalSettings.ClientOptions?.CallbackUri;
+
+        if (string.IsNullOrWhiteSpace(loginCallbackUri) &&
+            loginStartUri.Contains(OAuthAuthRequestDefaults.RedirectUriKey))
+        {
+            var args = AuthHttpUtility.ExtractArguments(loginStartUri);
+            loginCallbackUri = args[OAuthAuthRequestDefaults.RedirectUriKey];
+        }
+
+        if (string.IsNullOrWhiteSpace(loginCallbackUri))
+        {
+            if (ProviderLogger.IsEnabled(LogLevel.Warning))
+            {
+                ProviderLogger.LogWarning($"{nameof(InternalSettings.ClientOptions.CallbackUri)} not specified and {OAuthAuthRequestDefaults.RedirectUriKey} not set in {nameof(InternalSettings.LoginStartUri)}, unable to start login flow");
+            }
+            return default;
+        }
+
+#if __IOS__
+		WinRTFeatureConfiguration.WebAuthenticationBroker.PrefersEphemeralWebBrowserSession = InternalSettings.PrefersEphemeralWebBrowserSession;
+#endif
+
+#if WINDOWS
+		var userResult = await WinUIEx.WebAuthenticator.AuthenticateAsync(new Uri(loginStartUri), new Uri(loginCallbackUri));
+		var authData = string.Join("&", userResult.Properties.Select(x => $"{x.Key}={x.Value}"))??string.Empty;
+#else
+        var SystemBrowser = ServiceProvider.GetRequiredService<ISystemBrowserAuthBrokerProvider>();
+        var userResult = await SystemBrowser.AuthenticateAsync(WebAuthenticationOptions.None, new Uri(loginStartUri), new Uri(loginCallbackUri), cancellationToken);
+        var authData = userResult?.ResponseData ?? string.Empty;
+
+#endif
+        var query = authData.StartsWith(loginCallbackUri) ?
+            AuthHttpUtility.ExtractArguments(authData) : // authData is a fully qualified url, so need to extract query or fragment
+            AuthHttpUtility.ParseQueryString(authData.TrimStart('#').TrimStart('?')); // authData isn't full url, so just process as query or fragment
+
+        var tokens = new Dictionary<string, string>();
+        if (query is null)
+        {
+            return (null, tokens,null);
+        }
+
+        var accessToken = query.Get(InternalSettings.UriTokenOptions.AccessTokenKey);
+        if (!string.IsNullOrWhiteSpace(accessToken))
+        {
+            tokens.AddOrReplace(InternalSettings.TokenCacheOptions.AccessTokenKey, accessToken);
+        }
+
+        var refreshToken = query.Get(InternalSettings.UriTokenOptions.RefreshTokenKey);
+        if (!string.IsNullOrWhiteSpace(refreshToken))
+        {
+            tokens.AddOrReplace(InternalSettings.UriTokenOptions.RefreshTokenKey, refreshToken);
+        }
+
+        var idToken = query.Get(InternalSettings.UriTokenOptions.IdTokenKey);
+        if (!string.IsNullOrWhiteSpace(idToken))
+        {
+            tokens.AddOrReplace(InternalSettings.TokenCacheOptions.IdTokenKey, idToken);
+        }
+
+        foreach (var (tokenCacheKey, uriKey) in InternalSettings.UriTokenOptions.OtherTokenKeys)
+        {
+            var uriValue = query.Get(uriKey);
+            if (!string.IsNullOrWhiteSpace(uriValue))
+            {
+                tokens.AddOrReplace(tokenCacheKey, uriValue);
+            }
+        }
+
+        return (authData, tokens, query);
+    }
+    protected async override ValueTask<IDictionary<string, string>?> InternalLoginAsync(
+        IDispatcher? dispatcher,
+        IDictionary<string, string>? credentials,
         CancellationToken cancellationToken)
     {
 
-        if (InternalSettings.LoginStartUri is not string redirectUriConfig
-            || string.IsNullOrWhiteSpace(redirectUriConfig))
-        {
-            ProviderLogger.LogError("{loginStartUri} URI is not configured.", nameof(OAuthSettings.LoginStartUri));
-            return default;
-        }
-        var queryParams = redirectUri.GetQuery(redirectUriConfig);
+        (string? redirectUri,Dictionary<string,string> tokens, NameValueCollection? queryParams) = await GetAuthenticationDataAsync(cancellationToken);
+
         if (queryParams is null || queryParams.Count == 0)
         {
             ProviderLogger.LogWarning("No query parameters found in authentication result");
@@ -95,8 +177,23 @@ public partial record OAuthService(
         ProviderLogger.LogInformation("OAuth post login finished");
         return tokenResponse;
     }
-
-    public async ValueTask<IDictionary<string, string>?> RefreshAsync(
+    protected async virtual Task<string?> PrepareLoginCallbackUri(string? loginCallbackUri, CancellationToken cancellationToken)
+    {
+        if (InternalSettings.PrepareLoginCallbackUri is not null)
+        {
+            return await InternalSettings.PrepareLoginCallbackUri(ServiceProvider, Tokens, loginCallbackUri, cancellationToken);
+        }
+        return loginCallbackUri;
+    }
+    protected async virtual ValueTask<IDictionary<string, string>?> PostLogin(string redirectUri, IDictionary<string, string> tokens, CancellationToken cancellationToken)
+    {
+        if (InternalSettings.PostLoginCallback is not null)
+        {
+            return await InternalSettings.PostLoginCallback(ServiceProvider, Tokens, redirectUri, tokens, cancellationToken);
+        }
+        return tokens;
+    }
+    protected async override ValueTask<IDictionary<string, string>?> InternalRefreshAsync(
         CancellationToken cancellationToken)
     {
 
@@ -147,43 +244,43 @@ public partial record OAuthService(
         }
     }
 
-    public async ValueTask<string> PrepareLoginStartUri(
+    protected async virtual ValueTask<string?> InternalPrepareLoginStartUri(
         string? loginStartUri,
         CancellationToken token)
     {
-        const string defaultReturn = "";
+
         if (InternalSettings is null)
         {
             ProviderLogger.LogError("OAuth Settings are not configured.");
-            return defaultReturn;
+            return default;
         }
 
         if (string.IsNullOrWhiteSpace(loginStartUri))
         {
-            return defaultReturn;
+            return default;
         }
         if (InternalSettings.ClientOptions is not OAuthClientOptions clientOptions)
         {
             ProviderLogger.LogError("{ClientOptions}: Client options are not configured.", nameof(OAuthClientOptions));
-            return defaultReturn;
+            return default;
         }
         if (clientOptions.EndpointOptions?.AuthorizationEndpoint is not string authEndpoint
             || BeAValidUrl(authEndpoint))
         {
             ProviderLogger.LogError("{AuthorizationEndpoint}: Authorization endpoint is not configured.", nameof(OAuthEndpointOptions.AuthorizationEndpoint));
-            return defaultReturn;
+            return default;
         }
         if (clientOptions.ClientID is not string clientID ||
             string.IsNullOrWhiteSpace(clientID))
         {
             ProviderLogger.LogError("{ClientID}: Client ID is not valid configured.", nameof(OAuthClientOptions.ClientID));
-            return defaultReturn;
+            return default;
         }
         if (clientOptions.Scopes is not { } scopes
             || scopes.Length == 0)
         {
             ProviderLogger.LogError("{Scopes}: At least one scope must be configured and have at least one entry.", nameof(OAuthClientOptions.Scopes));
-            return defaultReturn;
+            return default;
         }
 
         while (!token.IsCancellationRequested)
@@ -216,13 +313,20 @@ public partial record OAuthService(
             var configuredUri = url.Uri.ToString();
             if (InternalSettings.PrepareLoginStartUri is not null)
             {
-                return await InternalSettings.PrepareLoginStartUri(ServiceProvider, Tokens, await Tokens.GetAsync(token), configuredUri, token);
+                return await PrepareLoginStartUri(configuredUri, token);
             }
             return configuredUri;
         }
-        return defaultReturn;
+        return default;
     }
-
+    protected async virtual Task<string?> PrepareLoginStartUri(string? loginStartUri, CancellationToken cancellationToken)
+    {
+        if (InternalSettings.PrepareLoginStartUri is not null)
+        {
+            return await InternalSettings.PrepareLoginStartUri(ServiceProvider, Tokens, loginStartUri, cancellationToken);
+        }
+        return loginStartUri;
+    }
     protected async virtual ValueTask<IDictionary<string, string>?> InternalExchangeCodeForTokensAsync(
         IDictionary<string, string> tokens,
         string authorizationCode,
@@ -285,9 +389,9 @@ public partial record OAuthService(
             tokens[InternalSettings.TokenCacheOptions.RefreshTokenKey] = refreshToken;
             tokens[InternalSettings.TokenCacheOptions.ExpiresInKey] = DateTime.Now.AddSeconds(tokenResponse.ExpiresIn).ToString("g");
 
-            if (InternalSettings.ExchangeCodeForTokensAsync is not null)
+            if (InternalSettings.CodeExchangeCallback is not null)
             {
-                return await InternalSettings.ExchangeCodeForTokensAsync(ServiceProvider, Tokens, await Tokens.GetAsync(cancellationToken), redirectUri, cancellationToken);
+                return await InternalSettings.CodeExchangeCallback(ServiceProvider, Tokens, await Tokens.GetAsync(cancellationToken), redirectUri, cancellationToken);
             }
             return tokens;
         }
@@ -303,4 +407,66 @@ public partial record OAuthService(
             return default;
         }
     }
+
+}
+public record OAuthProvider<TService>(
+        ILogger<OAuthProvider<TService>> ServiceLogger,
+        IServiceProvider ServiceProvider,
+        IOAuthEndpoints AuthEndpoints,
+        ITokenCache Tokens,
+        IOptionsSnapshot<OAuthOptions> Configuration,
+        ISystemBrowserAuthBrokerProvider AuthBrowserProvider) 
+    : OAuthProvider(ServiceLogger, ServiceProvider, AuthEndpoints, Tokens, Configuration, AuthBrowserProvider)
+    where TService : notnull
+{
+
+    public OAuthSettings<TService>? TypedSettings
+    {
+        get => base.Settings as OAuthSettings<TService>;
+        init => base.Settings = value;
+    }
+    protected async override Task<string?> PrepareLoginStartUri(string? loginStartUri, CancellationToken cancellationToken)
+    {
+        if (TypedSettings?.PrepareLoginStartUri is not null)
+        {
+            return await TypedSettings.PrepareLoginStartUri(ServiceProvider.GetRequiredService<TService>(), ServiceProvider, Tokens, loginStartUri, cancellationToken);
+        }
+        return await base.PrepareLoginStartUri(loginStartUri, cancellationToken);
+    }
+
+    protected async override Task<string?> PrepareLoginCallbackUri(string? loginCallbackUri, CancellationToken cancellationToken)
+    {
+        if (TypedSettings?.PrepareLoginCallbackUri is not null)
+        {
+            return await TypedSettings.PrepareLoginCallbackUri(ServiceProvider.GetRequiredService<TService>(), ServiceProvider, Tokens, loginCallbackUri, cancellationToken);
+        }
+        return await base.PrepareLoginCallbackUri(loginCallbackUri, cancellationToken);
+    }
+    protected async override ValueTask<IDictionary<string, string>?> PostLogin(string redirectUri, IDictionary<string, string> tokens, CancellationToken cancellationToken)
+    {
+        if (TypedSettings?.PostLoginCallback is not null)
+        {
+            return await TypedSettings.PostLoginCallback(ServiceProvider.GetRequiredService<TService>(), ServiceProvider, Tokens, redirectUri, tokens, cancellationToken);
+        }
+        return await base.PostLogin(redirectUri, tokens, cancellationToken);
+    }
+    protected async override ValueTask<IDictionary<string, string>?> InternalRefreshAsync(CancellationToken cancellationToken)
+    {
+
+        if (TypedSettings?.RefreshCallback is not null)
+        {
+            return await TypedSettings.RefreshCallback(ServiceProvider.GetRequiredService<TService>(), ServiceProvider, Tokens, await Tokens.GetAsync(cancellationToken), cancellationToken);
+        }
+        return await base.InternalRefreshAsync(cancellationToken);
+    }
+
+    protected async override ValueTask<IDictionary<string, string>?> InternalExchangeCodeForTokensAsync(IDictionary<string, string> tokens, string authorizationCode, string? redirectUri, CancellationToken cancellationToken)
+    {
+        if(TypedSettings?.CodeExchangeCallback is not null)
+        {
+            return await TypedSettings.CodeExchangeCallback(ServiceProvider.GetRequiredService<TService>(), ServiceProvider, Tokens, await Tokens.GetAsync(cancellationToken), redirectUri, cancellationToken);
+        }
+        return await base.InternalExchangeCodeForTokensAsync(tokens, authorizationCode, redirectUri, cancellationToken);
+    }
+
 }

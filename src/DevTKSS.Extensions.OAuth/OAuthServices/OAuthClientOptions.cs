@@ -4,7 +4,7 @@ namespace DevTKSS.Extensions.OAuth.OAuthServices;
 
 public record OAuthClientOptions : AuthCallbackOptions
 {   
-	public new const string DefaultName = "OAuthClient";
+	public new const string DefaultName = "ClientOptions";
 	public string ProviderName { get; init; } = DefaultName;
 
 	/// <summary>

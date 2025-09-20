@@ -24,21 +24,21 @@ public static class ServiceCollectionExtensions
 	}
 
 	#region Keyed overload
-	public static IServiceCollection AddKeyedOAuthCallbackHandler(this IServiceCollection services, string name) // named implementation
-	{
-		services.AddKeyedSingleton<IAuthCallbackHandler, OAuthCallbackHandler>(name,(sp,_) =>
-		   new OAuthCallbackHandler(sp.GetRequiredService<IOptionsSnapshot<AuthCallbackOptions>>().Get(name)));// regular IOptions do not support named options
-		services.AddSingleton<IHttpHandler>(sp => sp.GetRequiredKeyedService<IAuthCallbackHandler>(name));
+	//public static IServiceCollection AddKeyedOAuthCallbackHandler(this IServiceCollection services, string name) // named implementation
+	//{
+	//	services.AddKeyedSingleton<IAuthCallbackHandler, OAuthCallbackHandler>(name,(sp,_) =>
+	//	   new OAuthCallbackHandler(sp.GetRequiredService<IOptionsSnapshot<AuthCallbackOptions>>().Get(name)));// regular IOptions do not support named options
+	//	services.AddSingleton<IHttpHandler>(sp => sp.GetRequiredKeyedService<IAuthCallbackHandler>(name));
 		   
-		return services;
-	}
+	//	return services;
+	//}
 
-	public static IServiceCollection AddKeyedOAuthCallbackHandler(this IServiceCollection services, Action<AuthCallbackOptions> configureOptions, string name)
-	{
-		services.Configure(name, configureOptions);
-		services.AddKeyedOAuthCallbackHandler(name);
-		return services;
-	}
+	//public static IServiceCollection AddKeyedOAuthCallbackHandler(this IServiceCollection services, Action<AuthCallbackOptions> configureOptions, string name)
+	//{
+	//	services.Configure(name, configureOptions);
+	//	services.AddKeyedOAuthCallbackHandler(name);
+	//	return services;
+	//}
 
 	#endregion
 	public static IServiceCollection AddOAuthCallbackHandlerAndRegister(
@@ -48,19 +48,19 @@ public static class ServiceCollectionExtensions
 	{
 		if (configureOptions is not null)
 		{
-			if (name is not null)
-			{
-				services.AddKeyedOAuthCallbackHandler(configureOptions, name);
-			}
-			else
-			{
+			//if (name is not null)
+			//{
+			//	services.AddKeyedOAuthCallbackHandler(configureOptions, name);
+			//}
+			//else
+			//{
 				services.AddOAuthCallbackHandler(configureOptions);
-			}
+			//}
 		}
-		else if (name is not null)
-		{
-			services.AddKeyedOAuthCallbackHandler(name);
-		}
+		//else if (name is not null)
+		//{
+		//	services.AddKeyedOAuthCallbackHandler(name);
+		//}
 		else
 		{
 			services.AddOAuthCallbackHandler();
@@ -93,23 +93,23 @@ public static class ServiceCollectionExtensions
 		return services;
 	}
 #region Keyed overload
-	public static IServiceCollection AddKeyedAuthCallbackHandler<TCallbackHandler, TOptions>(this IServiceCollection services, Action<TOptions> configure, string name)
-   where TCallbackHandler : class, IAuthCallbackHandler
-   where TOptions : AuthCallbackOptions, new()
-	{
-		services.Configure(name, configure);
-		services.AddKeyedAuthCallbackHandler<TCallbackHandler>(name);
-		return services;
-	}
-	public static IServiceCollection AddKeyedAuthCallbackHandler<TCallbackHandler>(this IServiceCollection services, string name) // named implementation
-	where TCallbackHandler : class, IAuthCallbackHandler
-	{
-		services.AddKeyedSingleton<IAuthCallbackHandler, TCallbackHandler>(name);// regular IOptions do not support named options
-		services.AddSingleton<IHttpHandler>(sp =>
-			sp.GetRequiredKeyedService<IAuthCallbackHandler>(name));
+	//public static IServiceCollection AddKeyedAuthCallbackHandler<TCallbackHandler, TOptions>(this IServiceCollection services, Action<TOptions> configure, string name)
+ //  where TCallbackHandler : class, IAuthCallbackHandler
+ //  where TOptions : AuthCallbackOptions, new()
+	//{
+	//	services.Configure(name, configure);
+	//	services.AddKeyedAuthCallbackHandler<TCallbackHandler>(name);
+	//	return services;
+	//}
+	//public static IServiceCollection AddKeyedAuthCallbackHandler<TCallbackHandler>(this IServiceCollection services, string name) // named implementation
+	//where TCallbackHandler : class, IAuthCallbackHandler
+	//{
+	//	services.AddKeyedSingleton<IAuthCallbackHandler, TCallbackHandler>(name);// regular IOptions do not support named options
+	//	services.AddSingleton<IHttpHandler>(sp =>
+	//		sp.GetRequiredKeyedService<IAuthCallbackHandler>(name));
 
-		return services;
-	}
+	//	return services;
+	//}
 	#endregion
 	public static IServiceCollection AddAuthCallbackHandlerAndRegister<TCallbackHandler, TOptions>(
 	   this IServiceCollection services,
@@ -120,23 +120,23 @@ public static class ServiceCollectionExtensions
 	{
 		if (configure is not null)
 		{
-			if (name is not null)
-			{
-				services.AddKeyedAuthCallbackHandler<TCallbackHandler, TOptions>(configure, name);
-			}
-			else
-			{
+			//if (name is not null)
+			//{
+			//	services.AddKeyedAuthCallbackHandler<TCallbackHandler, TOptions>(configure, name);
+			//}
+			//else
+			//{
 				services.AddAuthCallbackHandler<TCallbackHandler, TOptions>(configure);
-			}
+			//}
 		}
-		else if (name is not null)
-		{
-			services.AddKeyedAuthCallbackHandler<TCallbackHandler>(name);
-		}
-		else
-		{
+		//else if (name is not null)
+		//{
+		//	services.AddKeyedAuthCallbackHandler<TCallbackHandler>(name);
+		//}
+		//else
+		//{
 			services.AddAuthCallbackHandler<TCallbackHandler>();
-		}
+		//}
 
 		services.AddSingleton<AuthCallbackHandlerRegistration>();
 		return services;

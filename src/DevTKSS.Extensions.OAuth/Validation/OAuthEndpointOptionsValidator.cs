@@ -14,15 +14,18 @@ public class OAuthEndpointOptionsValidator : AbstractValidator<OAuthEndpointOpti
 
         // UserInfoEndpoint: allow empty, but if not empty, must be a valid relative URL
         RuleFor(x => x.UserInfoEndpoint)
+            .Cascade(CascadeMode.Stop)
             .Must(BeAValidRelativeUrl)
             .When(x => !string.IsNullOrWhiteSpace(x.UserInfoEndpoint))
             .WithMessage("UserInfoEndpoint must be a valid relative URL if provided.");
 
         RuleFor(x => x.TokenEndpoint)
-            .NotEmpty()
-            .WithMessage("TokenEndpoint must not be empty.");
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty().WithMessage("TokenEndpoint must not be empty.")
+            .Must(BeAValidRelativeUrl).WithMessage("TokenEndpoint must be a valid relative URL.");
 
         RuleFor(x=> x.TokenEndpoint)
+            .Cascade(CascadeMode.Stop)
             .Must(BeAValidRelativeUrl)
             .When(x => !string.IsNullOrWhiteSpace(x.TokenEndpoint))
             .WithMessage("TokenEndpoint must be a valid URL.");

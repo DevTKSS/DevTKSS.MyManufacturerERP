@@ -1,3 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+
 namespace DevTKSS.Extensions.OAuth.OAuthServices;
 
 public static class HostBuilderExtensions
@@ -8,18 +11,19 @@ public static class HostBuilderExtensions
 	/// call this in UseAuthentication of the HostBuilder.
 	/// </summary>
 	public static IAuthenticationBuilder AddOAuth(
-		this IAuthenticationBuilder authBuilder,
+		this IAuthenticationBuilder builder,
+        Action<IOAuthAuthenticationBuilder>? configure = default,
 		Action<OAuthOptions>? configureOAuthOptions = null,
 		Action<AuthCallbackOptions>? configureCallbackOptions = null,
 		Action<ServerOptions>? configureServerOptions = null,
-		string authKeyName =  OAuthService.DefaultName,
+		string authKeyName = OAuthProvider.DefaultName,
 		string callbackKeyName = OAuthCallbackHandler.DefaultName,
 		string serverOptionsName = nameof(ServerOptions))
 	{
-		var hostBuilder = (authBuilder as IBuilder)?.HostBuilder;
+		var hostBuilder = (builder as IBuilder)?.HostBuilder;
 		if (hostBuilder is null)
 		{
-			return authBuilder;
+			return builder;
 		}
 		// Bind options into configuration and add validation
 		hostBuilder.UseConfiguration(configure: configBuilder =>
@@ -29,43 +33,65 @@ public static class HostBuilderExtensions
 				configBuilder
 					.Section<OAuthOptions>(authKeyName);
 			}
-			else if (configureCallbackOptions is null)
-			{
-				configBuilder
-					.Section<AuthCallbackOptions>(string.Join(':',authKeyName,callbackKeyName));
-			}
-			else if (configureServerOptions is null)
-			{
-				configBuilder
-					.Section<ServerOptions>(serverOptionsName);
-			}
+
 			return configBuilder;
 		});
 		hostBuilder.ConfigureServices(services =>
 		{
 			services.AddSystemBrowserServices(configureCallbackOptions, configureServerOptions, callbackKeyName);
-           
-            services.AddSingleton<ITokenCache>(sp =>
-                new TokenCache(sp.GetRequiredService<ILogger<TokenCache>>(),
-                                sp.GetRequiredDefaultInstance<IKeyValueStorage>()))
-                    .AddSingleton<IAuthenticationService, AuthenticationService>();
 
-            services.AddSingleton<IOAuthService, OAuthService>();
+		});
+        var authBuilder = builder.AsBuilder<OAuthAuthenticationBuilder>();
+        configure?.Invoke(authBuilder);
+
+        return builder.AddAuthentication<OAuthProvider, OAuthSettings>(
+            authKeyName,
+            authBuilder.Settings,
+            (provider,settings) => provider with { Name = authKeyName, Settings = settings });
+	}
+    /// <summary>
+    /// Registers desktop OAuth services into the host while using Uno.Extensions Authentication.
+    /// call this in UseAuthentication of the HostBuilder.
+    /// </summary>
+    public static IAuthenticationBuilder AddOAuth<TService>(
+        this IAuthenticationBuilder builder,
+        Action<IOAuthAuthenticationBuilder<TService>>? configure = default,
+        Action<OAuthOptions>? configureOAuthOptions = null,
+        Action<AuthCallbackOptions>? configureCallbackOptions = null,
+        Action<ServerOptions>? configureServerOptions = null,
+        string authKeyName = OAuthProvider.DefaultName,
+        string callbackKeyName = OAuthCallbackHandler.DefaultName,
+        string serverOptionsName = nameof(ServerOptions))
+        where TService : notnull
+    {
+        var hostBuilder = (builder as IBuilder)?.HostBuilder;
+        if (hostBuilder is null)
+        {
+            return builder;
+        }
+        // Bind options into configuration and add validation
+        hostBuilder.UseConfiguration(configure: configBuilder =>
+        {
+            if (configureOAuthOptions is null)
+            {
+                configBuilder
+                    .Section<OAuthOptions>(authKeyName);
+            }
+
+            return configBuilder;
+        });
+        hostBuilder.ConfigureServices(services =>
+        {
+            services.AddSystemBrowserServices(configureCallbackOptions, configureServerOptions, callbackKeyName);
 
         });
-		authBuilder.AddWeb<IOAuthService>(webAuth=>
-		{
-			webAuth.PrepareLoginStartUri<IOAuthService>(async (service,serviceProvider,tokenCache,credentials,loginStartUri,cancellationToken) 
-				=> await service.PrepareLoginStartUri(loginStartUri,cancellationToken));
-			webAuth.PostLogin<IOAuthService>(async (authService, serviceProvider,tokenCache,credentials,redirectUri, tokens,cancellationToken) =>
-				await authService.PostLoginAsync(tokens, redirectUri, cancellationToken));
-			webAuth.Refresh<IOAuthService>(async (authService, serviceProvider, tokenCache, tokens, cancellationToken) 
-				=> await authService.RefreshAsync(cancellationToken));
-		},name: authKeyName);
+        var authBuilder = builder.AsBuilder<OAuthAuthenticationBuilder<TService>>();
+        configure?.Invoke(authBuilder);
 
-	    
-
-		return authBuilder;
-	}
+        return builder.AddAuthentication<OAuthProvider<TService>, OAuthSettings<TService>>(
+            authKeyName,
+            authBuilder.Settings,
+            (provider, settings) => provider with { Name = authKeyName, TypedSettings = settings });
+    }
 
 }
