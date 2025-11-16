@@ -1,6 +1,6 @@
 using System.Drawing;
 
-namespace DevTKSS.Domain.Entities;
+namespace DevTKSS.MyManufacturerERP.Domain.Entities;
 
 public class TodoList
 {
@@ -8,4 +8,3 @@ public class TodoList
     public Colour? Color { get; set; }
     public IList<TodoItem> Items { get; set; } = new List<TodoItem>();
 }
-

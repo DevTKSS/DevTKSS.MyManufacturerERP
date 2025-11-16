@@ -6,12 +6,12 @@
     See https://aka.platform.uno/using-uno-sdk#implicit-packages for more information regarding the Implicit Packages.
   -->
   <ItemGroup>
-    <PackageVersion Include="Uno.Extensions.Validation.Fluent" Version="6.2.3" />
-    <PackageVersion Include="FluentValidation" Version="12.1.0" />
-    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
+    <PackageVersion Include="Uno.Extensions.Validation.Fluent" Version="6.2.3"/>
+    <PackageVersion Include="FluentValidation" Version="12.0.0" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication" Version="2.3.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.OAuth" Version="2.3.0" />
-    <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.11" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.8" />
     <PackageVersion Include="Yllibed.HttpServer" Version="1.0.0-dev.24" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
     <!--<PackageVersion Include="Xamarin.AndroidX.Browser" Version="1.8.0.11" />-->
@@ -28,11 +28,11 @@
   </ItemGroup>
   <ItemGroup Label="CA Packages">
     <PackageVersion Include="Ardalis.GuardClauses" Version="5.0.0" />
-    <PackageVersion Include="AutoMapper" Version="15.1.0" />
+    <PackageVersion Include="AutoMapper" Version="15.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
   </ItemGroup>
   <ItemGroup Label="EntityFramework">
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.8" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.8" />
     <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.8" />
@@ -41,14 +41,14 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.7" />
   </ItemGroup>
   <ItemGroup Label="OpenApi Packages">
-    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.11" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
     <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="9.0.8">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
-    <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.10.3" />
-    <PackageVersion Include="Scalar.AspNetCore.Microsoft" Version="2.10.3" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.6.9" />
+    <PackageVersion Include="Scalar.AspNetCore.Microsoft" Version="2.6.9" />
   </ItemGroup>
   <ItemGroup Label="General Test Packages">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />

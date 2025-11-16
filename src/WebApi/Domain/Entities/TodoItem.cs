@@ -1,4 +1,4 @@
-namespace DevTKSS.Domain.Entities;
+namespace DevTKSS.MyManufacturerERP.Domain.Entities;
 
 public class TodoItem : BaseAuditableEntity
 {

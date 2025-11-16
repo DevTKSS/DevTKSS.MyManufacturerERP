@@ -1,4 +1,4 @@
-namespace DevTKSS.Domain.Exceptions;
+namespace DevTKSS.MyManufacturerERP.Domain.Exceptions;
 public class UnsupportedColourException : Exception
 {
     public UnsupportedColourException(string code)
@@ -6,4 +6,3 @@ public class UnsupportedColourException : Exception
     {
     }
 }
-

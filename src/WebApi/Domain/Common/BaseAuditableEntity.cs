@@ -1,4 +1,4 @@
-namespace DevTKSS.Domain.Common;
+namespace DevTKSS.MyManufacturerERP.Domain.Common;
 
 public abstract class BaseAuditableEntity : BaseEntity
 {
@@ -10,4 +10,3 @@ public abstract class BaseAuditableEntity : BaseEntity
 
     public string? LastModifiedBy { get; set; }
 }
-

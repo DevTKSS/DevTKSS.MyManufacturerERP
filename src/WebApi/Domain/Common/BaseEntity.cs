@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DevTKSS.Domain.Common;
+namespace DevTKSS.MyManufacturerERP.Domain.Common;
 
 public abstract class BaseEntity
 {
@@ -28,4 +28,3 @@ public abstract class BaseEntity
         _domainEvents.Clear();
     }
 }
-
