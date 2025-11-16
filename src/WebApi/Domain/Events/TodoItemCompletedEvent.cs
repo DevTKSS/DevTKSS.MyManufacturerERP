@@ -1,4 +1,4 @@
-namespace DevTKSS.MyManufacturerERP.Domain.Events;
+namespace DevTKSS.Domain.Events;
 
 public class TodoItemCompletedEvent : BaseEvent
 {
@@ -9,3 +9,4 @@ public class TodoItemCompletedEvent : BaseEvent
 
     public TodoItem Item { get; }
 }
+

@@ -1,6 +1,7 @@
-namespace DevTKSS.MyManufacturerERP.Domain.Events;
+namespace DevTKSS.Domain.Events;
 
 public class TodoItemDeletedEvent(TodoItem item) : BaseEvent
 {
     public TodoItem Item { get; } = item;
 }
+

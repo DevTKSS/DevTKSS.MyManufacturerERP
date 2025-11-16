@@ -1,2 +1,2 @@
-namespace DevTKSS.MyManufacturerERP.Domain.Common;
+namespace DevTKSS.Domain.Common;
 public interface INotification { }

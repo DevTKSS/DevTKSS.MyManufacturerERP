@@ -1,4 +1,4 @@
-namespace DevTKSS.MyManufacturerERP.Domain.Enums;
+namespace DevTKSS.Domain.Enums;
 
 public enum PriorityLevel
 {
@@ -7,3 +7,4 @@ public enum PriorityLevel
     Medium = 2,
     High = 3
 }
+

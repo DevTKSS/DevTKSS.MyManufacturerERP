@@ -1,4 +1,4 @@
-namespace DevTKSS.MyManufacturerERP.Domain.ValueObjects;
+namespace DevTKSS.Domain.ValueObjects;
 
 public class Colour(string code) : ValueObject
 {
@@ -67,3 +67,4 @@ public class Colour(string code) : ValueObject
         yield return Code;
     }
 }
+
