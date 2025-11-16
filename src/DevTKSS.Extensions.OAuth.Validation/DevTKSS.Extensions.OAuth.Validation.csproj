@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>DevTKSS.Extensions.OAuth.Validation</RootNamespace>
+    <AssemblyName>DevTKSS.Extensions.OAuth.Validation</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Extensions\OAuth\DevTKSS.Extensions.OAuth.csproj" />
+  </ItemGroup>
+</Project>
