@@ -4,7 +4,7 @@ using Uno.Foundation.Extensibility;
 //[assembly:
 //    ApiExtension(typeof(IWebAuthenticationBrokerProvider), typeof(SystemBrowserAuthBroker))]
 
-namespace DevTKSS.Extensions.OAuth.Browser;
+namespace DesktopAuthenticationIntegration;
 public sealed class SystemBrowserAuthBroker
     : ISystemBrowserAuthBrokerProvider // IWebAuthenticationBrokerProvider
 {

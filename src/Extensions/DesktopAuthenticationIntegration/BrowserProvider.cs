@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace DevTKSS.Extensions.OAuth.Browser;
+namespace DesktopAuthenticationIntegration;
 
 public interface IBrowserProvider
 {

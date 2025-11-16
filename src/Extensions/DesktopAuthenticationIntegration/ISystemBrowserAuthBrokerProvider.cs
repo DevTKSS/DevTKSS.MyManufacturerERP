@@ -1,5 +1,4 @@
-
-namespace DevTKSS.Extensions.OAuth.Browser;
+namespace DesktopAuthenticationIntegration;
 
 public interface ISystemBrowserAuthBrokerProvider
 {
