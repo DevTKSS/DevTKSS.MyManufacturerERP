@@ -1,13 +1,19 @@
-﻿<Project Sdk="Uno.Sdk">
+<Project Sdk="Uno.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks>$(DefaultTargetFramework)</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <RootNamespace>DevTKSS.Extensions.Uno.DesktopAuthenticationIntegration</RootNamespace>
+    <AssemblyName>DevTKSS.Extensions.Uno.DesktopAuthenticationIntegration</AssemblyName>
+    <Authors>$(Authors)</Authors>
     <UnoFeatures>
       Authentication;
       Logging;
     </UnoFeatures>
   </PropertyGroup>
-
+  <ItemGroup>
+    <PackageReference Include="Yllibed.HttpServer" />
+    <PackageReference Include="Yllibed.HttpServer.Handlers.Uno" />
+  </ItemGroup>
 </Project>

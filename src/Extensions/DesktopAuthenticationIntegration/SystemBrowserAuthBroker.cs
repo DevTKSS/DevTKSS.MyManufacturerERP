@@ -61,33 +61,30 @@ public sealed class SystemBrowserAuthBroker
 
         CheckWebAuthOptionFlag(options);
 
-        if (_logger.IsEnabled(LogLevel.Information))
+        if (_logger.IsEnabled(LogLevel.Trace))
         {
-            _logger.LogInformation("Opening browser to authorization endpoint: {AuthUri}", requestUri.ToSafeDisplay()); // TODO: Check if logging the full URI is safe enough.
-            _logger.LogInformation("Listening for callback at: {Callback}", callbackUri.ToString());
+            _logger.LogTrace("Opening browser to authorization endpoint: {AuthUri}", requestUri);
+            _logger.LogTrace("Listening for callback at: {Callback}", callbackUri.ToString());
         }
         var startedServerRootUri = ServerRootUri;
         var callbackHandler = new OAuthCallbackHandler(callbackUri);
-       // using (_server.RegisterHandler(callbackHandler))
-       // {
-            _browserProvider.OpenBrowser(requestUri);
-            var result = await _callbackHandler.WaitForCallbackAsync();
-            if (_logger.IsEnabled(LogLevel.Information))
-            {
-                _logger.LogInformation("Authentication flow completed with status: {Status}", result.ResponseStatus);
-            }
-            return result;
 
-       // }
+        _browserProvider.OpenBrowser(requestUri);
+        var result = await _callbackHandler.WaitForCallbackAsync();
+        if (_logger.IsEnabled(LogLevel.Trace))
+        {
+            _logger.LogTrace("Authentication flow completed with status: {Status}", result.ResponseStatus);
+        }
+        return result;
     }
 public async Task<WebAuthenticationResult> AuthenticateAsync(
         WebAuthenticationOptions options,
         Uri requestUri,
         CancellationToken ct)
     {
-        if (_logger.IsEnabled(LogLevel.Information))
+        if (_logger.IsEnabled(LogLevel.Trace))
         {
-            _logger.LogInformation("Starting desktop OAuth authorization code flow.");
+            _logger.LogTrace("Starting desktop OAuth authorization code flow.");
         }
 
         CheckWebAuthOptionFlag(options);

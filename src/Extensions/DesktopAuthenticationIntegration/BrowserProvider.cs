@@ -15,13 +15,16 @@ public class BrowserProvider : IBrowserProvider
 	{
 		_logger = logger;
 	}
-	/// <summary>
-	/// Helper method to open the browser through the url.dll.
-	/// </summary>
-	/// <param name="uri">The Uri to open</param>
-	public void OpenBrowser(Uri uri)
+    /// <summary>
+    /// Helper method to open the System browser with the provided Uri
+    /// </summary>
+    /// <param name="uri">The Uri to open</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="uri"/> is <see langword="null"/></exception>"
+    public void OpenBrowser(Uri uri)
 	{
-		var url = uri.AbsoluteUri;
+        ArgumentNullException.ThrowIfNull(uri);
+
+        var url = uri.AbsoluteUri;
 		try
 		{
 			Process.Start(url);
@@ -51,13 +54,16 @@ public class BrowserProvider : IBrowserProvider
 					{
 						_logger.LogError(ex1, "Failed to open URL in default browser using ProcessStartInfo. Falling back to cmd.");
 					}
+
 					url = url.Replace("&", "^&");
+
 					var psi = new ProcessStartInfo("cmd", $"/c start {url}") 
 					{ 
 						CreateNoWindow = true,
-						UseShellExecute = false
+						UseShellExecute = true
 					};
-					Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+
+					Process.Start(psi);
 				}
 			   
 			}
