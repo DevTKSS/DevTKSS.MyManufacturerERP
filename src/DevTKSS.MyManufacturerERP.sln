@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36202.13
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11205.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP", "DevTKSS.MyManufacturerERP\DevTKSS.MyManufacturerERP.csproj", "{F3355C83-3B86-436F-ABD8-5A5B93DE4FEB}"
 EndProject
@@ -23,16 +23,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External OpenApi Specs", "E
 		OpenApiSpecs\sevdesk-open-api-spec-2.0.yaml = OpenApiSpecs\sevdesk-open-api-spec-2.0.yaml
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebApi", "WebApi", "{CAFF3A25-6F05-4437-8ED7-BC3EB9E50198}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "WebApi\Application\Application.csproj", "{2FE82DF5-7293-26CE-5C11-15AB47FC8B14}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "WebApi\Domain\Domain.csproj", "{C8EFA65D-771C-050D-5E08-E571F72060F2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi", "WebApi\WebApi\WebApi.csproj", "{64BD1B3A-9E2F-2982-1233-9B15CD10350A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.AspNet.Security.OAuth.Etsy", "DevTKSS.AspNet.Security.OAuth.Etsy\DevTKSS.AspNet.Security.OAuth.Etsy.csproj", "{A0349742-EAC1-49E8-9251-CC687B68FF66}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.UITests", "Tests\DevTKSS.MyManufacturerERP.UITests\DevTKSS.MyManufacturerERP.UITests.csproj", "{5FF30EE8-75FF-4689-A8D4-3EC856A07262}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.xUnitTests", "Tests\DevTKSS.MyManufacturerERP.xUnitTests\DevTKSS.MyManufacturerERP.xUnitTests.csproj", "{9E76F440-A479-7386-83B3-544D5558115A}"
@@ -43,7 +33,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.MyManufacturerERP.W
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{C9B34190-793B-47F8-B6D2-1EF61AC113B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.Extensions.OAuth", "DevTKSS.Extensions.OAuth\DevTKSS.Extensions.OAuth.csproj", "{A08DB2EB-F215-41E1-ADB4-EB961AA28C4E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.Extensions.OAuth", "Extensions\OAuth\DevTKSS.Extensions.OAuth.csproj", "{166AFB31-959B-2E94-3709-E55C2AE1B174}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopAuthenticationIntegration", "Extensions\DesktopAuthenticationIntegration\DesktopAuthenticationIntegration.csproj", "{F35B0C11-6BB2-E90A-6548-EB230C55AF2C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTKSS.Extensions.OAuth.Validation", "DevTKSS.Extensions.OAuth.Validation\DevTKSS.Extensions.OAuth.Validation.csproj", "{1E08E4C4-37CA-4ECC-865C-F14D1601B1A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -93,19 +87,29 @@ Global
 		{A08DB2EB-F215-41E1-ADB4-EB961AA28C4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A08DB2EB-F215-41E1-ADB4-EB961AA28C4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A08DB2EB-F215-41E1-ADB4-EB961AA28C4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{166AFB31-959B-2E94-3709-E55C2AE1B174}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{166AFB31-959B-2E94-3709-E55C2AE1B174}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{166AFB31-959B-2E94-3709-E55C2AE1B174}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{166AFB31-959B-2E94-3709-E55C2AE1B174}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F35B0C11-6BB2-E90A-6548-EB230C55AF2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F35B0C11-6BB2-E90A-6548-EB230C55AF2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F35B0C11-6BB2-E90A-6548-EB230C55AF2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F35B0C11-6BB2-E90A-6548-EB230C55AF2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E08E4C4-37CA-4ECC-865C-F14D1601B1A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E08E4C4-37CA-4ECC-865C-F14D1601B1A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E08E4C4-37CA-4ECC-865C-F14D1601B1A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E08E4C4-37CA-4ECC-865C-F14D1601B1A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{2FE82DF5-7293-26CE-5C11-15AB47FC8B14} = {CAFF3A25-6F05-4437-8ED7-BC3EB9E50198}
-		{C8EFA65D-771C-050D-5E08-E571F72060F2} = {CAFF3A25-6F05-4437-8ED7-BC3EB9E50198}
-		{64BD1B3A-9E2F-2982-1233-9B15CD10350A} = {CAFF3A25-6F05-4437-8ED7-BC3EB9E50198}
-		{A0349742-EAC1-49E8-9251-CC687B68FF66} = {C9B34190-793B-47F8-B6D2-1EF61AC113B6}
 		{5FF30EE8-75FF-4689-A8D4-3EC856A07262} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{9E76F440-A479-7386-83B3-544D5558115A} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{B2882421-9639-6ECD-8721-FDA8B194E19F} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{A08DB2EB-F215-41E1-ADB4-EB961AA28C4E} = {C9B34190-793B-47F8-B6D2-1EF61AC113B6}
+		{166AFB31-959B-2E94-3709-E55C2AE1B174} = {C9B34190-793B-47F8-B6D2-1EF61AC113B6}
+		{F35B0C11-6BB2-E90A-6548-EB230C55AF2C} = {C9B34190-793B-47F8-B6D2-1EF61AC113B6}
+		{1E08E4C4-37CA-4ECC-865C-F14D1601B1A1} = {C9B34190-793B-47F8-B6D2-1EF61AC113B6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B1820EEA-ABC2-45C8-A59E-478FE7808EBF}

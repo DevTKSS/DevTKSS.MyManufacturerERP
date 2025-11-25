@@ -3,6 +3,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <DefaultTargetFramework>net10.0</DefaultTargetFramework>
+    <MyManufacturerERPUserSecretsId>73d0e72f-3b9d-4ea9-bc0e-ca05efc5cd26</MyManufacturerERPUserSecretsId>
     <!--
       Adding NoWarn to remove build warnings
       NU1507: Warning when there are multiple package sources when using CPM with no source mapping
@@ -13,4 +15,25 @@
     -->
     <NoWarn>$(NoWarn);NU1507;NETSDK1201;PRI257,CA1416;WMC0001</NoWarn>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Update="Mediator.SourceGenerator"
+                      PrivateAssets="all"
+                      IncludeAssets="runtime; build; native; contentfiles; analyzers" />
+    
+    <PackageReference Update="Microsoft.Extensions.ApiDescription.Server"
+                      PrivateAssets="all"
+                      IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+
+    <PackageReference Update="xunit.runner.visualstudio"
+                      PrivateAssets="all"
+                      IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive"/>
+
+    <PackageReference Update="coverlet.collector"
+                      PrivateAssets="all"
+                      IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+
+    <PackageReference Update="GitHubActionsTestLogger"
+                      PrivateAssets="all"
+                      IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+  </ItemGroup>
 </Project>
