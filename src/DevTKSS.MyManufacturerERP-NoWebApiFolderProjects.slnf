@@ -1,0 +1,13 @@
+{
+  "solution": {
+    "path": "DevTKSS.MyManufacturerERP.sln",
+    "projects": [
+      "DataContracts\\DataContracts.csproj",
+      "DevTKSS.Extensions.OAuth.Validation\\DevTKSS.Extensions.OAuth.Validation.csproj",
+      "DevTKSS.MyManufacturerERP.WasmServer\\DevTKSS.MyManufacturerERP.Server.csproj",
+      "DevTKSS.MyManufacturerERP\\DevTKSS.MyManufacturerERP.csproj",
+      "Extensions\\DesktopAuthenticationIntegration\\DesktopAuthenticationIntegration.csproj",
+      "Extensions\\OAuth\\DevTKSS.Extensions.OAuth.csproj"
+    ]
+  }
+}
