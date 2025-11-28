@@ -1,8 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(DefaultTargetFramework)</TargetFrameworks>
     <RootNamespace>DevTKSS.Extensions.OAuth.Validation</RootNamespace>
     <AssemblyName>DevTKSS.Extensions.OAuth.Validation</AssemblyName>
+    <Authors>$(Authors)</Authors>
+    <OutputType>Library</OutputType>
+    <GenerateLibraryLayout>true</GenerateLibraryLayout>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />

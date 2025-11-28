@@ -38,7 +38,6 @@ try
     builder.Services.AddAuthorization();
 
     // Register AllowedOriginsProvider for auth minimal API group origin checks
-    builder.Services.AddSingleton<IAllowedOriginsProvider, AllowedOriginsProvider>();
     builder.Services.AddHttpClient();
 
     var app = builder.Build();
