@@ -17,13 +17,6 @@
     <PackageReference Include="Mapster.EFCore" />
   </ItemGroup>
 
-  <!--<Target Name="Mapster" AfterTargets="AfterBuild">
-    <Exec WorkingDirectory="$(ProjectDir)" Command="dotnet tool restore" />
-    <Exec WorkingDirectory="$(ProjectDir)" Command="dotnet-mapster model -a &quot;$(TargetDir)$(ProjectName).dll&quot;" />
-    <Exec WorkingDirectory="$(ProjectDir)" Command="dotnet-mapster extension -a &quot;$(TargetDir)$(ProjectName).dll&quot;" />
-    <Exec WorkingDirectory="$(ProjectDir)" Command="dotnet-mapster mapper -a &quot;$(TargetDir)$(ProjectName).dll&quot;" />
-  </Target>-->
-
   <!-- Mapster generated files: expose as visible None items and set DependentUpon to the source file when possible -->
   <ItemGroup Label="Include Mapster Generated Files" Condition="'$(MapsterEnabled)' == 'true' and Exists('$(BaseIntermediateOutputPath)mapster')">
     <Compile Remove="$(MapsterPath)" />
@@ -33,13 +26,4 @@
     </None>
   </ItemGroup>
 
-  <!--<ItemGroup>
-    <Compile Remove="obj\**" />
-    <EmbeddedResource Remove="obj\**" />
-    <None Remove="obj\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Riok.Mapperly" PrivateAssets="all" />
-  </ItemGroup>-->
 </Project>
