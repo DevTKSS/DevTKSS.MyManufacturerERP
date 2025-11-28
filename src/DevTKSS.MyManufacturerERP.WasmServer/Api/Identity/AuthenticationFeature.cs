@@ -54,7 +54,7 @@ public static class AuthenticationFeature
 
         if (!supported.TryGetValue(provider, out var scheme))
         {
-            return TypedResults.BadRequest(new ErrorResponse("unsupported_provider", "The requested provider is not supported."));
+            return TypedResults.BadRequest("unsupported_provider");
         }
 
         await http.ChallengeAsync(scheme, new AuthenticationProperties
@@ -76,7 +76,7 @@ public static class AuthenticationFeature
         var refreshToken = authResult.Properties.GetTokenValue("refresh_token");
         if (string.IsNullOrEmpty(refreshToken))
         {
-            return TypedResults.BadRequest(new ErrorResponse("no_refresh_token", "No refresh token available."));
+            return TypedResults.BadRequest("no_refresh_token");
         }
 
         // Attempt to use authentication handler's saved tokens - for cookie-based external providers
