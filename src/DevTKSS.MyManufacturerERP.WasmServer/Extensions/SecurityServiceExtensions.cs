@@ -1,16 +1,29 @@
+using Microsoft.AspNetCore.HostFiltering;
+using Microsoft.Extensions.Options;
+
 namespace DevTKSS.MyManufacturerERP.Server.Extensions;
 
 public static class SecurityServiceExtensions
 {
     public static IServiceCollection AddSecurityServices(this IServiceCollection services, IConfiguration configuration)
     {
-
-        // Etsy Authentication requires Cross-site request forgery (CSRF) protection,
-        // <see href="https://developers.etsy.com/documentation/essentials/authentication#requesting-an-oauth-token"/>
-        // so we need to add the Antiforgery service.
-        services.AddAntiforgery(setupAction =>
+        string[] allowedHosts = [];
+        // Configure AllowedHosts for HostFiltering from configuration (appsettings.json -> AllowedHosts)
+        services.Configure<HostFilteringOptions>(options =>
         {
-            setupAction.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Always use HTTPS
+            var allowedHostConfig = configuration["AllowedHosts"];
+            if (!string.IsNullOrEmpty(allowedHostConfig))
+            {
+                allowedHosts = allowedHostConfig.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? throw new ArgumentNullException(nameof(allowedHosts));
+                options.AllowedHosts = allowedHosts;
+            }
+        });
+        // Antiforgery: required when using cookie-based flows or server-side form posts
+        services.AddAntiforgery(options =>
+        {
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
+            options.HeaderName = "X-CSRF-TOKEN";
         });
 
         // Add CORS service policy as needed for wasm Multi-threaded applications
@@ -19,44 +32,21 @@ public static class SecurityServiceExtensions
         // <see href="https://substack.com/home/post/p-164745710"/>
         services.AddCors(options =>
         {
-            var AllowedHosts = configuration["AllowedHosts"]?
-                                              .ToLowerInvariant().Split(';', StringSplitOptions.RemoveEmptyEntries)
-                                              ?? throw new ArgumentNullException("AllowedHosts"); ;
-
-            string[] Methods = [
-                HttpMethods.Get,
-                HttpMethods.Post,
-                HttpMethods.Put,
-                HttpMethods.Delete,
-                HttpMethods.Patch
-            ];
-            string[] Headers = [
-                HeaderNames.ContentType,
-                HeaderNames.Cookie, // Adding Cookie header to allow cookies in CORS requests, as I want to use Cookie Authentication
-                HeaderNames.Authorization,
-                // Adding headers referring to MDN Docs
-                // <see href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS" />
-                // to avoid problems with browsers like Safari or Nightly
-                HeaderNames.ContentLanguage,
-                HeaderNames.AcceptLanguage,
-                HeaderNames.AcceptEncoding,
-                // Adding Preflight request headers from samples
-                // <see href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#preflighted_requests"/>
-                HeaderNames.Origin,
-                HeaderNames.UserAgent,
-                HeaderNames.AccessControlRequestHeaders,
-                HeaderNames.AccessControlRequestMethod,
-                HeaderNames.Host
-            ];
-
 
             options.AddPolicy("MyCorsPolicy", policy =>
             {
-                policy.WithOrigins()
-                .WithMethods(Methods)
-                .WithHeaders(Headers)
-                .DisallowCredentials() // Credentials are not required for cors requests as we use cookies
-                .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
+                policy
+                    .WithOrigins(allowedHosts)
+                    .WithMethods("GET", "POST", "PUT", "DELETE", "PATCH")
+                    .WithHeaders(
+                        HeaderNames.ContentType,
+                        HeaderNames.Authorization,
+                        HeaderNames.AcceptLanguage,
+                        HeaderNames.AcceptEncoding,
+                        "X-CSRF-TOKEN")
+                    // If using cookie authentication from browser, enable credentials
+                    .AllowCredentials()
+                    .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
             });
 
         });
