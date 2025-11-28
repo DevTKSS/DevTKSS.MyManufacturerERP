@@ -8,7 +8,7 @@ namespace DevTKSS.MyManufacturerERP.DataContracts;
 /// <param name="Date">Gets the Date of the Forecast.</param>
 /// <param name="TemperatureC">Gets the Forecast Temperature in Celsius.</param>
 /// <param name="Summary">Get a description of how the weather will feel.</param>
-public record WeatherForecastQuery(DateOnly Date, double TemperatureC, string? Summary)
+public record WeatherForecastQuery(DateOnly Date, double TemperatureC, string? Summary = null)
 {
     /// <summary>
     /// Gets the Forecast Temperature in Fahrenheit
