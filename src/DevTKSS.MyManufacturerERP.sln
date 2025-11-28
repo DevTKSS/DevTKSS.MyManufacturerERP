@@ -16,7 +16,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Packages.props = Directory.Packages.props
 		..\.config\dotnet-tools.json = ..\.config\dotnet-tools.json
 		global.json = global.json
-		Mapster.Build.targets = Mapster.Build.targets
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External OpenApi Specs", "External OpenApi Specs", "{30090C0E-E8F7-44B2-A5F5-FFCC2081B335}"
@@ -120,6 +119,7 @@ Global
 		{2FE82DF5-7293-26CE-5C11-15AB47FC8B14} = {2EFB6F1A-9DC0-42EB-9949-95F5CBE2A689}
 		{C8EFA65D-771C-050D-5E08-E571F72060F2} = {2EFB6F1A-9DC0-42EB-9949-95F5CBE2A689}
 		{1D92AC5C-DD95-44A8-849F-DEC2FAB47A86} = {2EFB6F1A-9DC0-42EB-9949-95F5CBE2A689}
+		{E80CC385-7441-9063-2D1C-C1C2926298A9} = {C9B34190-793B-47F8-B6D2-1EF61AC113B6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B1820EEA-ABC2-45C8-A59E-478FE7808EBF}

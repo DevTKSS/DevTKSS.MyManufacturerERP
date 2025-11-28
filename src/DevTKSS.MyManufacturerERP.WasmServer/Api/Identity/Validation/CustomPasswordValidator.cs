@@ -1,4 +1,4 @@
-namespace DevTKSS.MyManufacturerERP.Server.Validation.Identity;
+namespace DevTKSS.MyManufacturerERP.Server.Api.Identity.Validation;
 
 public class CustomPasswordValidator<TUser> : IPasswordValidator<TUser> where TUser : class
 {
