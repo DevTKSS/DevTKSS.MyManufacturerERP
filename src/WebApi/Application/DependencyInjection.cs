@@ -1,23 +1,21 @@
-﻿using System.Reflection;
-using DevTKSS.Application.Common.Behaviours;
-using Microsoft.Extensions.Hosting;
+using System.Reflection;
+using MapsterMapper;
 
-namespace Microsoft.Extensions.DependencyInjection;
+namespace DevTKSS.MyManufacturerERP.Application;
 
 public static class DependencyInjection
 {
-    public static void AddApplicationServices(this IHostApplicationBuilder builder)
+    public static void AddApplicationServices(this IServiceCollection services)
     {
-        builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+        // Register Mapster
+        var config = TypeAdapterConfig.GlobalSettings;
+        config.Scan(Assembly.GetExecutingAssembly());
+        services.AddSingleton(config);
+        services.AddScoped<IMapper, ServiceMapper>();
 
-        builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        // Register FluentValidation validators from this assembly
+        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
-        builder.Services.AddMediatR(cfg => {
-            cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
-            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehaviour<,>));
-            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehaviour<,>));
-            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
-            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(PerformanceBehaviour<,>));
-        });
+        // Pipeline behaviors will be registered in the startup project where Mediator.SourceGenerator is referenced
     }
 }

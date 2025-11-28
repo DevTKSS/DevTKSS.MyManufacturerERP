@@ -1,11 +1,11 @@
-﻿using DevTKSS.Application.Common.Interfaces;
-using DevTKSS.Domain.Events;
+using DevTKSS.MyManufacturerERP.Application.Common.Interfaces;
+using DevTKSS.MyManufacturerERP.Domain.Events;
 
-namespace DevTKSS.Application.TodoItems.Commands.DeleteTodoItem;
+namespace DevTKSS.MyManufacturerERP.Application.TodoItems.Commands.DeleteTodoItem;
 
-public record DeleteTodoItemCommand(int Id) : IRequest;
+public record DeleteTodoItemCommand(int Id) : ICommand;
 
-public class DeleteTodoItemCommandHandler : IRequestHandler<DeleteTodoItemCommand>
+public class DeleteTodoItemCommandHandler : ICommandHandler<DeleteTodoItemCommand>
 {
     private readonly IApplicationDbContext _context;
 
@@ -14,7 +14,7 @@ public class DeleteTodoItemCommandHandler : IRequestHandler<DeleteTodoItemComman
         _context = context;
     }
 
-    public async Task Handle(DeleteTodoItemCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Unit> Handle(DeleteTodoItemCommand request, CancellationToken cancellationToken)
     {
         var entity = await _context.TodoItems
             .FindAsync(new object[] { request.Id }, cancellationToken);
@@ -23,9 +23,11 @@ public class DeleteTodoItemCommandHandler : IRequestHandler<DeleteTodoItemComman
 
         _context.TodoItems.Remove(entity);
 
-        entity.AddDomainEvent(new TodoItemDeletedEvent(entity));
+        entity.AddEntityEvent(new TodoItemDeletedEvent(entity));
 
         await _context.SaveChangesAsync(cancellationToken);
+        
+        return Unit.Value;
     }
 
 }

@@ -1,10 +1,7 @@
-﻿using DevTKSS.Application.Common.Interfaces;
-using MediatR.Pipeline;
-using Microsoft.Extensions.Logging;
+namespace DevTKSS.MyManufacturerERP.Application.Common.Behaviours;
 
-namespace DevTKSS.Application.Common.Behaviours;
-
-public class LoggingBehaviour<TRequest> : IRequestPreProcessor<TRequest> where TRequest : notnull
+public sealed class LoggingBehaviour<TRequest, TResponse> : MessagePreProcessor<TRequest, TResponse>
+    where TRequest : notnull, IMessage
 {
     private readonly ILogger _logger;
     private readonly IUser _user;
@@ -17,7 +14,7 @@ public class LoggingBehaviour<TRequest> : IRequestPreProcessor<TRequest> where T
         _identityService = identityService;
     }
 
-    public async Task Process(TRequest request, CancellationToken cancellationToken)
+    protected override ValueTask Handle(TRequest request, CancellationToken cancellationToken)
     {
         var requestName = typeof(TRequest).Name;
         var userId = _user.Id ?? string.Empty;
@@ -25,10 +22,12 @@ public class LoggingBehaviour<TRequest> : IRequestPreProcessor<TRequest> where T
 
         if (!string.IsNullOrEmpty(userId))
         {
-            userName = await _identityService.GetUserNameAsync(userId);
+            userName = _identityService.GetUserNameAsync(userId).GetAwaiter().GetResult();
         }
 
         _logger.LogInformation("DevTKSS Request: {Name} {@UserId} {@UserName} {@Request}",
             requestName, userId, userName, request);
+
+        return default;
     }
 }

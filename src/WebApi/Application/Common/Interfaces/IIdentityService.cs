@@ -1,6 +1,6 @@
-﻿using DevTKSS.Application.Common.Models;
+using DevTKSS.MyManufacturerERP.Application.Common.Models;
 
-namespace DevTKSS.Application.Common.Interfaces;
+namespace DevTKSS.MyManufacturerERP.Application.Common.Interfaces;
 
 public interface IIdentityService
 {

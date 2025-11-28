@@ -1,6 +1,6 @@
 namespace DevTKSS.MyManufacturerERP.Domain.Entities;
 
-public class TodoItem : BaseAuditableEntity
+public record TodoItem : BaseAuditableEntity
 {
     public int ListId { get; set; }
 
@@ -20,7 +20,7 @@ public class TodoItem : BaseAuditableEntity
         {
             if (value && !_done)
             {
-                AddDomainEvent(new TodoItemCompletedEvent(this));
+                AddEntityEvent(new TodoItemCompletedEvent(this));
             }
 
             _done = value;

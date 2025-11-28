@@ -1,6 +1,6 @@
 namespace DevTKSS.MyManufacturerERP.Domain.Common;
 
-public abstract class BaseAuditableEntity : BaseEntity
+public abstract record BaseAuditableEntity : BaseEntity
 {
     public DateTimeOffset Created { get; set; }
 

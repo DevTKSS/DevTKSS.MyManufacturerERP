@@ -1,4 +1,4 @@
-﻿namespace DevTKSS.Application.Common.Exceptions;
+namespace DevTKSS.MyManufacturerERP.Application.Common.Exceptions;
 
 public class ForbiddenAccessException : Exception
 {

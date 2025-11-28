@@ -1,8 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+namespace DevTKSS.MyManufacturerERP.Application.Common.Behaviours;
 
-namespace DevTKSS.Application.Common.Behaviours;
-
-public class UnhandledExceptionBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : notnull
+public class UnhandledExceptionBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : notnull, IMessage
 {
     private readonly ILogger<TRequest> _logger;
 
@@ -11,17 +9,19 @@ public class UnhandledExceptionBehaviour<TRequest, TResponse> : IPipelineBehavio
         _logger = logger;
     }
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async ValueTask<TResponse> Handle(TRequest request, MessageHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
         try
         {
-            return await next();
+            return await next(request, cancellationToken);
         }
         catch (Exception ex)
         {
             var requestName = typeof(TRequest).Name;
-
-            _logger.LogError(ex, "DevTKSS Request: Unhandled Exception for Request {Name} {@Request}", requestName, request);
+            if (_logger.IsEnabled(LogLevel.Error))
+            { 
+                _logger.LogError(ex, "DevTKSS Request: Unhandled Exception for Request {Name} {@Request}", requestName, request);
+            }
 
             throw;
         }

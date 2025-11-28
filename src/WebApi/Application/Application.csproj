@@ -1,21 +1,41 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>DevTKSS.Application</RootNamespace>
-    <AssemblyName>DevTKSS.Application</AssemblyName>
-    <TargetFrameworks>net9.0</TargetFrameworks>
+    <TargetFrameworks>$(DefaultTargetFramework)</TargetFrameworks>
+    <RootNamespace>DevTKSS.MyManufacturerERP.Application</RootNamespace>
+    <AssemblyName>DevTKSS.MyManufacturerERP.Application</AssemblyName>
+    <MapsterEnabled>true</MapsterEnabled>
+    <MapsterPath>$(ProjectDir)**\mapster\**\*.g.cs</MapsterPath>
   </PropertyGroup>
 
+  <ItemGroup Label="Microsoft Packages">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+  </ItemGroup>
+  
   <ItemGroup>
     <PackageReference Include="Ardalis.GuardClauses" />
-    <PackageReference Include="AutoMapper" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Mediator.Abstractions" />
+    <PackageReference Include="Mediator.SourceGenerator" />
+  </ItemGroup>
+  
+  <ItemGroup Label="Mapster">
+    <PackageReference Include="Mapster" />
+    <PackageReference Include="Mapster.DependencyInjection" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup Label="Include Mapster Generated Files" Condition="'$(MapsterEnabled)' == 'true' and Exists('$(BaseIntermediateOutputPath)mapster')">
+    <Compile Remove="$(MapsterPath)" />
+    <None Include="$(MapsterPath)">
+      <Link>mapster-generated/$(RecursiveDir)%(Filename)%(Extension)</Link>
+      <Visible>true</Visible>
+    </None>
+  </ItemGroup>
 </Project>

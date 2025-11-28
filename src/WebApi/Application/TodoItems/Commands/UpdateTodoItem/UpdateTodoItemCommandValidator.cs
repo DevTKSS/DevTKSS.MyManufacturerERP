@@ -1,4 +1,4 @@
-﻿namespace DevTKSS.Application.TodoItems.Commands.UpdateTodoItem;
+namespace DevTKSS.MyManufacturerERP.Application.TodoItems.Commands.UpdateTodoItem;
 
 public class UpdateTodoItemCommandValidator : AbstractValidator<UpdateTodoItemCommand>
 {

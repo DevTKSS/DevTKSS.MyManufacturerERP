@@ -1,6 +1,6 @@
-﻿using DevTKSS.Application.Common.Interfaces;
+using DevTKSS.MyManufacturerERP.Application.Common.Interfaces;
 
-namespace DevTKSS.Application.TodoLists.Commands.CreateTodoList;
+namespace DevTKSS.MyManufacturerERP.Application.TodoLists.Commands.CreateTodoList;
 
 public class CreateTodoListCommandValidator : AbstractValidator<CreateTodoListCommand>
 {

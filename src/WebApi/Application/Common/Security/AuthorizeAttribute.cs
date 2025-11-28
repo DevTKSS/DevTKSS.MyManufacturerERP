@@ -1,4 +1,4 @@
-﻿namespace DevTKSS.Application.Common.Security;
+namespace DevTKSS.MyManufacturerERP.Application.Common.Security;
 
 /// <summary>
 /// Specifies the class this attribute is applied to requires authorization.

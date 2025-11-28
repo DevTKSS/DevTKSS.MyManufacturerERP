@@ -1,7 +1,4 @@
-﻿using DevTKSS.Domain.Events;
-using Microsoft.Extensions.Logging;
-
-namespace DevTKSS.Application.TodoItems.EventHandlers;
+namespace DevTKSS.MyManufacturerERP.Application.TodoItems.EventHandlers;
 
 public class TodoItemCompletedEventHandler : INotificationHandler<TodoItemCompletedEvent>
 {
@@ -12,10 +9,10 @@ public class TodoItemCompletedEventHandler : INotificationHandler<TodoItemComple
         _logger = logger;
     }
 
-    public Task Handle(TodoItemCompletedEvent notification, CancellationToken cancellationToken)
+    public ValueTask Handle(TodoItemCompletedEvent notification, CancellationToken cancellationToken)
     {
         _logger.LogInformation("DevTKSS Domain Event: {DomainEvent}", notification.GetType().Name);
 
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 }

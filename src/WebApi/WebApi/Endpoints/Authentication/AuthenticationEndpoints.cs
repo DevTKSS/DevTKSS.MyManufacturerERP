@@ -1,4 +1,6 @@
-using DevTKSS.MyManufacturerERP.WebApi.Contracts;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 
 namespace DevTKSS.MyManufacturerERP.WebApi.Endpoints.Authentication;
 
@@ -15,15 +17,15 @@ public static class AuthenticationEndpoints
             .WithDescription("Authorize a user and return an HTML page with the authorization code")
             .AllowAnonymous();
 
-        group.MapPost("/token", Token)
+        group.MapPost("/token", (Delegate)Token)
             .AllowAnonymous()
             .WithName("Token")
             .WithSummary("Exchange authorization code for access token")
             .WithDescription("Exchange an authorization code for an access token");
 
-        group.MapGet("/userinfo", UserInfo)
+        group.MapGet("users/me", (Delegate)GetMe)
             .RequireAuthorization()
-            .WithName("UserInfo")
+            .WithName("GetMe")
             .WithSummary("Get user information")
             .WithDescription("Retrieve user information based on the authenticated user's claims");
 
@@ -35,7 +37,6 @@ public static class AuthenticationEndpoints
     {
         // TODO: Validate client_id, redirect_uri, scope, state, etc.
         var query = context.Request.Query;
-        var clientId = query["client_id"].ToString();
         var redirectUri = query["redirect_uri"].ToString();
         var state = query["state"].ToString();
 
@@ -68,14 +69,13 @@ public static class AuthenticationEndpoints
             token_type = "Bearer",
             expires_in = 3600,
             refresh_token = Guid.NewGuid().ToString("N"),
-            scope = request.Scope
         };
 
         return TypedResults.Ok((object)tokenResponse);
     }
 
     // Simulate the OAuth2 UserInfo Endpoint
-    private static Task<Results<Ok<object>, UnauthorizedHttpResult>> UserInfo(HttpContext context)
+    private static Task<Results<Ok<object>, UnauthorizedHttpResult>> GetMe(HttpContext context)
     {
         var user = context.User;
         if (user?.Identity is null || !user.Identity.IsAuthenticated)

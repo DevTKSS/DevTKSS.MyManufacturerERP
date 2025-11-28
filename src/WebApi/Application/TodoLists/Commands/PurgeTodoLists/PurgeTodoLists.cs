@@ -1,14 +1,13 @@
-﻿using DevTKSS.Application.Common.Interfaces;
-using DevTKSS.Application.Common.Security;
-using DevTKSS.Domain.Constants;
+using DevTKSS.MyManufacturerERP.Application.Common.Security;
+using DevTKSS.MyManufacturerERP.Application.Common.Interfaces;
 
-namespace DevTKSS.Application.TodoLists.Commands.PurgeTodoLists;
+namespace DevTKSS.MyManufacturerERP.Application.TodoLists.Commands.PurgeTodoLists;
 
-[Authorize(Roles = Roles.Administrator)]
+[Authorize(Roles = Rule.Administrator)]
 [Authorize(Policy = Policies.CanPurge)]
-public record PurgeTodoListsCommand : IRequest;
+public record PurgeTodoListsCommand : ICommand;
 
-public class PurgeTodoListsCommandHandler : IRequestHandler<PurgeTodoListsCommand>
+public class PurgeTodoListsCommandHandler : ICommandHandler<PurgeTodoListsCommand>
 {
     private readonly IApplicationDbContext _context;
 
@@ -17,10 +16,12 @@ public class PurgeTodoListsCommandHandler : IRequestHandler<PurgeTodoListsComman
         _context = context;
     }
 
-    public async Task Handle(PurgeTodoListsCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Unit> Handle(PurgeTodoListsCommand request, CancellationToken cancellationToken)
     {
         _context.TodoLists.RemoveRange(_context.TodoLists);
 
         await _context.SaveChangesAsync(cancellationToken);
+        
+        return Unit.Value;
     }
 }

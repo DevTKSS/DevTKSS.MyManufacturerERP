@@ -1,6 +1,6 @@
-﻿using FluentValidation.Results;
+using FluentValidation.Results;
 
-namespace DevTKSS.Application.Common.Exceptions;
+namespace DevTKSS.MyManufacturerERP.Application.Common.Exceptions;
 
 public class ValidationException : Exception
 {

@@ -1,6 +1,6 @@
-﻿using DevTKSS.Application.Common.Interfaces;
+using DevTKSS.MyManufacturerERP.Application.Common.Interfaces;
 
-namespace DevTKSS.Application.TodoLists.Commands.UpdateTodoList;
+namespace DevTKSS.MyManufacturerERP.Application.TodoLists.Commands.UpdateTodoList;
 
 public class UpdateTodoListCommandValidator : AbstractValidator<UpdateTodoListCommand>
 {

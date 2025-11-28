@@ -1,4 +1,4 @@
-﻿namespace DevTKSS.Application.WeatherForecasts.Queries.GetWeatherForecasts;
+namespace DevTKSS.MyManufacturerERP.Application.WeatherForecasts.Queries.GetWeatherForecasts;
 
 public class WeatherForecast
 {

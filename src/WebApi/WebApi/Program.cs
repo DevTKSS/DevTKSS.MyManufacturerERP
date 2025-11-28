@@ -2,7 +2,7 @@
 // logger configured in `AddSerilog()` below, once configuration and dependency-injection have both been
 // set up successfully.
 
-using DevTKSS.MyManufacturerERP.WebApi.Server;
+using DevTKSS.MyManufacturerERP.WebApi;
 
 Log.Logger = new LoggerConfiguration()
       .WriteTo.Console()
@@ -12,7 +12,7 @@ Log.Information("Starting up!");
 try
 {
     var builder = WebApplication.CreateBuilder(args);
-    
+
     // Configure the application to use Serilog for logging
     builder.Host.UseSerilog((context, services, lc) => lc
          .ReadFrom.Configuration(context.Configuration)
@@ -49,9 +49,9 @@ try
     });
 
     builder.Services.AddDbContext<TodoDb>(options =>
-        {
-            options.UseInMemoryDatabase("TodoList");
-        }); 
+    {
+        options.UseInMemoryDatabase("TodoList");
+    });
 
     builder.Services.AddDatabaseDeveloperPageExceptionFilter();
     //builder.Services.AddIdentityApiEndpoints<User>()
@@ -59,52 +59,8 @@ try
     //    .AddEntityFrameworkStores<AuthDbContext>();
     #endregion
 
-    #region Add Authentication and Authorization Services old
-    //builder.Services.AddAntiforgery();
-    //builder.Services.AddCors();
-    //builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    //    .AddCookie()
-    //    .AddOAuth("Etsy", options =>
-    //    {
-    //        var etsyConfig = builder.Configuration
-    //                              .GetSection("Authentication")
-    //                              .GetSection("Etsy");
-
-    //        options.ClientId = etsyConfig["ClientId"] ?? throw new ArgumentNullException(options.ClientId);
-    //        options.ClientSecret = etsyConfig["ClientSecret"] ?? throw new ArgumentNullException(options.ClientSecret);
-    //        options.CallbackPath = new PathString(etsyConfig.GetValue<string>("CallbackPath", "/etsy-auth-callback"));
-    //        options.AuthorizationEndpoint = etsyConfig.GetValue<string>("AuthorizationEndpoint", "https://www.etsy.com/oauth/connect");
-    //        options.TokenEndpoint = etsyConfig.GetValue<string>("TokenEndpoint", "https://api.etsy.com/v3/public/oauth/token");
-    //        options.UserInformationEndpoint = etsyConfig.GetValue<string>("UserInformationEndpoint", "https://api.etsy.com/v3/application/users/me");
-    //        options.UsePkce = etsyConfig.GetValue<bool>("usePkce", true);
-
-    //        options.Events = new OAuthEvents
-    //        {
-    //            OnRemoteFailure = context =>
-    //            {
-    //                context.Response.Redirect("/error?message=" + context.Failure?.Message);
-    //                context.HandleResponse();
-    //                return Task.CompletedTask;
-    //            }
-    //        };
-
-    //        var scopes = (etsyConfig.GetValue("Scope", string.Empty) ?? string.Empty)
-    //            .Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-    //        foreach (var scope in scopes)
-    //        {
-    //            options.Scope.Add(scope);
-    //        }
-
-    //        options.SaveTokens = true;
-    //        options.Validate();
-    //    });
-    //builder.Services.AddAuthorization();
-
-    #endregion
-
     builder.Services.AddAuthentication()
-                    .AddCookie(); // if you also want to keep cookie support
+                    .AddCookie();
 
     var app = builder.Build();
 
@@ -113,10 +69,10 @@ try
         app.UseHttpsRedirection();
     }
     else
-    { 
+    {
         app.UseHsts();
-    }    
-    
+    }
+
     app.UseSerilogRequestLogging();
 
     app.UseDeveloperExceptionPage();
@@ -140,11 +96,11 @@ try
             options
                 .WithTitle("MyManufacturerERP API Reference")
                 .WithTheme(ScalarTheme.Saturn)
-                .WithLayout(ScalarLayout.Modern)
-                .WithDarkModeToggle(true)
+                .WithClassicLayout()
+                .HideDarkModeToggle()
                 .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
                 .WithDocumentDownloadType(DocumentDownloadType.Json);
-        }); 
+        });
     }
     app.Map("/api", (HttpContext context) => context.Response.Redirect("/scalar/v1"))
         .WithName("ApiReference")
@@ -153,8 +109,7 @@ try
 
     app.MapGet("/error", () => "An unexpected Error occured!")
         .AllowAnonymous()
-        .WithName("Error")
-        .WithOpenApi();
+        .WithName("Error");
 
     app.MapTodoEnpoints();
     app.MapWeatherEndpoints();

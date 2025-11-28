@@ -1,8 +1,4 @@
-﻿using DevTKSS.Application.Common.Interfaces;
-using DevTKSS.Application.Common.Mappings;
-using DevTKSS.Application.Common.Models;
-
-namespace DevTKSS.Application.TodoItems.Queries.GetTodoItemsWithPagination;
+namespace DevTKSS.MyManufacturerERP.Application.TodoItems.Queries.GetTodoItemsWithPagination;
 
 public record GetTodoItemsWithPaginationQuery : IRequest<PaginatedList<TodoItemBriefDto>>
 {
@@ -14,20 +10,22 @@ public record GetTodoItemsWithPaginationQuery : IRequest<PaginatedList<TodoItemB
 public class GetTodoItemsWithPaginationQueryHandler : IRequestHandler<GetTodoItemsWithPaginationQuery, PaginatedList<TodoItemBriefDto>>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
+    private readonly TypeAdapterConfig _mapsterConfig;
 
-    public GetTodoItemsWithPaginationQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public GetTodoItemsWithPaginationQueryHandler(IApplicationDbContext context, TypeAdapterConfig mapsterConfig)
     {
         _context = context;
-        _mapper = mapper;
+        _mapsterConfig = mapsterConfig;
     }
 
-    public async Task<PaginatedList<TodoItemBriefDto>> Handle(GetTodoItemsWithPaginationQuery request, CancellationToken cancellationToken)
+    public async ValueTask<PaginatedList<TodoItemBriefDto>> Handle(GetTodoItemsWithPaginationQuery request, CancellationToken cancellationToken)
     {
-        return await _context.TodoItems
+        var itemsQuery = _context.TodoItems
             .Where(x => x.ListId == request.ListId)
-            .OrderBy(x => x.Title)
-            .ProjectTo<TodoItemBriefDto>(_mapper.ConfigurationProvider)
-            .PaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
+            .OrderBy(x => x.Title);
+
+        var projected = await itemsQuery.ProjectToTypeListAsync<TodoItem, TodoItemBriefDto>(_mapsterConfig, cancellationToken);
+
+        return await PaginatedList<TodoItemBriefDto>.CreateAsync(projected.AsQueryable(), request.PageNumber, request.PageSize, cancellationToken);
     }
 }

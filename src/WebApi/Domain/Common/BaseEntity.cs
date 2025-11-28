@@ -1,30 +1,29 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DevTKSS.MyManufacturerERP.Domain.Common;
 
-public abstract class BaseEntity
+public abstract record BaseEntity
 {
-    // This can easily be modified to be BaseEntity<T> and public T Id to support different key types.
-    // Using non-generic integer types for simplicity
     public int Id { get; set; }
 
-    private readonly List<BaseEvent> _domainEvents = new();
+    private readonly List<BaseEvent> _Notifications = new();
 
     [NotMapped]
-    public IReadOnlyCollection<BaseEvent> DomainEvents => _domainEvents.AsReadOnly();
+    public IReadOnlyCollection<BaseEvent> Notifications => _Notifications.AsReadOnly();
 
-    public void AddDomainEvent(BaseEvent domainEvent)
+    public void AddEntityEvent(BaseEvent baseNotification)
     {
-        _domainEvents.Add(domainEvent);
+        _Notifications.Add(baseNotification);
     }
 
-    public void RemoveDomainEvent(BaseEvent domainEvent)
+    public void RemoveNotification(BaseEvent baseNotification)
     {
-        _domainEvents.Remove(domainEvent);
+        _Notifications.Remove(baseNotification);
     }
 
-    public void ClearDomainEvents()
+    public void ClearNotification()
     {
-        _domainEvents.Clear();
+        _Notifications.Clear();
     }
 }

@@ -1,6 +1,4 @@
-﻿using DevTKSS.Domain.Entities;
-
-namespace DevTKSS.Application.TodoItems.Queries.GetTodoItemsWithPagination;
+namespace DevTKSS.MyManufacturerERP.Application.TodoItems.Queries.GetTodoItemsWithPagination;
 
 public class TodoItemBriefDto
 {
@@ -12,11 +10,11 @@ public class TodoItemBriefDto
 
     public bool Done { get; init; }
 
-    private class Mapping : Profile
+    public static TodoItemBriefDto FromEntity(TodoItem item) => new()
     {
-        public Mapping()
-        {
-            CreateMap<TodoItem, TodoItemBriefDto>();
-        }
-    }
+        Id = item.Id,
+        ListId = item.ListId,
+        Title = item.Title,
+        Done = item.Done
+    };
 }

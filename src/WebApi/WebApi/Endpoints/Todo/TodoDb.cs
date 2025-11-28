@@ -1,4 +1,4 @@
-using DevTKSS.Application.Common.Interfaces;
+using DevTKSS.MyManufacturerERP.Application.Common.Interfaces;
 
 namespace DevTKSS.MyManufacturerERP.WebApi.Endpoints.Todo;
 

@@ -1,7 +1,7 @@
-﻿using DevTKSS.Application.Common.Interfaces;
-using DevTKSS.Domain.Enums;
+using DevTKSS.MyManufacturerERP.Domain.Enums;
+using DevTKSS.MyManufacturerERP.Application.Common.Interfaces;
 
-namespace DevTKSS.Application.TodoItems.Commands.UpdateTodoItemDetail;
+namespace DevTKSS.MyManufacturerERP.Application.TodoItems.Commands.UpdateTodoItemDetail;
 
 public record UpdateTodoItemDetailCommand : IRequest
 {
@@ -23,7 +23,7 @@ public class UpdateTodoItemDetailCommandHandler : IRequestHandler<UpdateTodoItem
         _context = context;
     }
 
-    public async Task Handle(UpdateTodoItemDetailCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Unit> Handle(UpdateTodoItemDetailCommand request, CancellationToken cancellationToken)
     {
         var entity = await _context.TodoItems
             .FindAsync(new object[] { request.Id }, cancellationToken);
@@ -35,5 +35,6 @@ public class UpdateTodoItemDetailCommandHandler : IRequestHandler<UpdateTodoItem
         entity.Note = request.Note;
 
         await _context.SaveChangesAsync(cancellationToken);
+        return Unit.Value;
     }
 }

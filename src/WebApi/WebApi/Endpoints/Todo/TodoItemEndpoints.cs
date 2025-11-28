@@ -4,8 +4,7 @@ public static class TodoItemEndpoints
     public static RouteGroupBuilder MapTodoEnpoints(this IEndpointRouteBuilder routes)
     {
         var group = routes.MapGroup("/todoitems")
-            .WithTags("TodoItems")
-            .WithOpenApi();
+            .WithTags("TodoItems");
 
         group.MapGet("/", GetAllTodoItems)
             .WithName("GetTodoItems")
@@ -48,7 +47,7 @@ public static class TodoItemEndpoints
 
     private static async Task<Ok<List<TodoItem>>> GetCompletedTodoItems(TodoDb db)
     {
-        var items = await db.TodoItems.Where(t => t.IsComplete).ToListAsync();
+        var items = await db.TodoItems.Where(t => t.Done).ToListAsync();
         return TypedResults.Ok(items);
     }
 
@@ -82,7 +81,7 @@ public static class TodoItemEndpoints
         db.TodoItems.Add(todo);
         await db.SaveChangesAsync();
 
-        return TypedResults.Created($"/todoitems/{todo.Id}", todo);
+        return TypedResults.Created($"/{todo.Id}", todo);
     }
 
     private static async Task<Results<NoContent, NotFound, ValidationProblem>> UpdateTodoItem(

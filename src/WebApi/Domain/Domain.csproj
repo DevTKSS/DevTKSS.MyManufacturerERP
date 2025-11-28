@@ -1,11 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <TargetFrameworks>$(DefaultTargetFramework)</TargetFrameworks>
     <RootNamespace>DevTKSS.MyManufacturerERP.Domain</RootNamespace>
     <AssemblyName>DevTKSS.MyManufacturerERP.Domain</AssemblyName>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);MSG0005</NoWarn>
   </PropertyGroup>
-
+  <ItemGroup>
+    <PackageReference Include="Mediator.Abstractions"/>
+    <PackageReference Include="Mediator.SourceGenerator"/>
+  </ItemGroup>
 </Project>

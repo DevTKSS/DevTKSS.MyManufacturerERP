@@ -1,8 +1,8 @@
-﻿using DevTKSS.Application.Common.Interfaces;
-using DevTKSS.Domain.Entities;
-using DevTKSS.Domain.Events;
+using DevTKSS.MyManufacturerERP.Application.Common.Interfaces;
+using DevTKSS.MyManufacturerERP.Domain.Entities;
+using DevTKSS.MyManufacturerERP.Domain.Events;
 
-namespace DevTKSS.Application.TodoItems.Commands.CreateTodoItem;
+namespace DevTKSS.MyManufacturerERP.Application.TodoItems.Commands.CreateTodoItem;
 
 public record CreateTodoItemCommand : IRequest<int>
 {
@@ -20,7 +20,7 @@ public class CreateTodoItemCommandHandler : IRequestHandler<CreateTodoItemComman
         _context = context;
     }
 
-    public async Task<int> Handle(CreateTodoItemCommand request, CancellationToken cancellationToken)
+    public async ValueTask<int> Handle(CreateTodoItemCommand request, CancellationToken cancellationToken)
     {
         var entity = new TodoItem
         {
@@ -29,7 +29,7 @@ public class CreateTodoItemCommandHandler : IRequestHandler<CreateTodoItemComman
             Done = false
         };
 
-        entity.AddDomainEvent(new TodoItemCreatedEvent(entity));
+        entity.AddEntityEvent(new TodoItemCreatedEvent(entity));
 
         _context.TodoItems.Add(entity);
 

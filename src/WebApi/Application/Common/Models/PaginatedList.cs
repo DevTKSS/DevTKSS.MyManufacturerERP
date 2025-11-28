@@ -1,4 +1,4 @@
-﻿namespace DevTKSS.Application.Common.Models;
+namespace DevTKSS.MyManufacturerERP.Application.Common.Models;
 
 public class PaginatedList<T>
 {

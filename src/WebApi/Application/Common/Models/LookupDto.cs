@@ -1,6 +1,6 @@
-﻿using DevTKSS.Domain.Entities;
+using DevTKSS.MyManufacturerERP.Domain.Entities;
 
-namespace DevTKSS.Application.Common.Models;
+namespace DevTKSS.MyManufacturerERP.Application.Common.Models;
 
 public class LookupDto
 {
@@ -8,12 +8,15 @@ public class LookupDto
 
     public string? Title { get; init; }
 
-    private class Mapping : Profile
+    public static LookupDto FromEntity(TodoList list) => new()
     {
-        public Mapping()
-        {
-            CreateMap<TodoList, LookupDto>();
-            CreateMap<TodoItem, LookupDto>();
-        }
-    }
+        Id = list.Id,
+        Title = list.Title
+    };
+
+    public static LookupDto FromEntity(TodoItem item) => new()
+    {
+        Id = item.Id,
+        Title = item.Title
+    };
 }

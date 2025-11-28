@@ -1,6 +1,4 @@
-﻿using DevTKSS.Application.Common.Interfaces;
-
-namespace DevTKSS.Application.TodoItems.Commands.UpdateTodoItem;
+namespace DevTKSS.MyManufacturerERP.Application.TodoItems.Commands.UpdateTodoItem;
 
 public record UpdateTodoItemCommand : IRequest
 {
@@ -20,7 +18,7 @@ public class UpdateTodoItemCommandHandler : IRequestHandler<UpdateTodoItemComman
         _context = context;
     }
 
-    public async Task Handle(UpdateTodoItemCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Unit> Handle(UpdateTodoItemCommand request, CancellationToken cancellationToken)
     {
         var entity = await _context.TodoItems
             .FindAsync(new object[] { request.Id }, cancellationToken);
@@ -31,5 +29,6 @@ public class UpdateTodoItemCommandHandler : IRequestHandler<UpdateTodoItemComman
         entity.Done = request.Done;
 
         await _context.SaveChangesAsync(cancellationToken);
+        return Unit.Value;
     }
 }

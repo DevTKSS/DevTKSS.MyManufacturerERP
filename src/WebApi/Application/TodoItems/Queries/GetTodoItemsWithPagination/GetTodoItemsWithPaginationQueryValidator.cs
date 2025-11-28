@@ -1,4 +1,4 @@
-﻿namespace DevTKSS.Application.TodoItems.Queries.GetTodoItemsWithPagination;
+namespace DevTKSS.MyManufacturerERP.Application.TodoItems.Queries.GetTodoItemsWithPagination;
 
 public class GetTodoItemsWithPaginationQueryValidator : AbstractValidator<GetTodoItemsWithPaginationQuery>
 {

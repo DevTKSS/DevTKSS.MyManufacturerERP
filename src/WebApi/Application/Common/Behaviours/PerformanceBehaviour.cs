@@ -1,10 +1,11 @@
-﻿using System.Diagnostics;
-using DevTKSS.Application.Common.Interfaces;
+using System.Diagnostics;
+using Mediator;
 using Microsoft.Extensions.Logging;
+using DevTKSS.MyManufacturerERP.Application.Common.Interfaces;
 
-namespace DevTKSS.Application.Common.Behaviours;
+namespace DevTKSS.MyManufacturerERP.Application.Common.Behaviours;
 
-public class PerformanceBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : notnull
+public class PerformanceBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : notnull, IMessage
 {
     private readonly Stopwatch _timer;
     private readonly ILogger<TRequest> _logger;
@@ -23,11 +24,11 @@ public class PerformanceBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequ
         _identityService = identityService;
     }
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async ValueTask<TResponse> Handle(TRequest request, MessageHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
         _timer.Start();
 
-        var response = await next();
+        var response = await next(request, cancellationToken);
 
         _timer.Stop();
 
@@ -41,11 +42,15 @@ public class PerformanceBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequ
 
             if (!string.IsNullOrEmpty(userId))
             {
-                userName = await _identityService.GetUserNameAsync(userId);
+                userName = _identityService.GetUserNameAsync(userId).GetAwaiter().GetResult();
             }
 
-            _logger.LogWarning("DevTKSS Long Running Request: {Name} ({ElapsedMilliseconds} milliseconds) {@UserId} {@UserName} {@Request}",
-                requestName, elapsedMilliseconds, userId, userName, request);
+            if (_logger.IsEnabled(LogLevel.Warning))
+            {
+                _logger.LogWarning("DevTKSS Long Running Request: {Name} ({ElapsedMilliseconds} milliseconds) {@UserId} {@UserName} {@Request}",
+                    requestName, elapsedMilliseconds, userId, userName, request);
+            }
+        
         }
 
         return response;

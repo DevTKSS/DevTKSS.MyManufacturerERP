@@ -1,4 +1,4 @@
-﻿namespace DevTKSS.Application.TodoItems.Commands.CreateTodoItem;
+namespace DevTKSS.MyManufacturerERP.Application.TodoItems.Commands.CreateTodoItem;
 
 public class CreateTodoItemCommandValidator : AbstractValidator<CreateTodoItemCommand>
 {

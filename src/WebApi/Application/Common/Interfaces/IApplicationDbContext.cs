@@ -1,6 +1,6 @@
 using DevTKSS.MyManufacturerERP.Domain.Entities;
 
-namespace DevTKSS.Application.Common.Interfaces;
+namespace DevTKSS.MyManufacturerERP.Application.Common.Interfaces;
 
 public interface IApplicationDbContext
 {

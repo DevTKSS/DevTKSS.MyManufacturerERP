@@ -1,9 +1,9 @@
-﻿using DevTKSS.Application.Common.Interfaces;
-using DevTKSS.Application.Common.Models;
-using DevTKSS.Application.Common.Security;
-using DevTKSS.Domain.Enums;
 
-namespace DevTKSS.Application.TodoLists.Queries.GetTodos;
+using DevTKSS.MyManufacturerERP.Application.Common.Interfaces;
+using DevTKSS.MyManufacturerERP.Application.Common.Mappings;
+using Mapster;
+
+namespace DevTKSS.MyManufacturerERP.Application.TodoLists.Queries.GetTodos;
 
 [Authorize]
 public record GetTodosQuery : IRequest<TodosVm>;
@@ -11,28 +11,29 @@ public record GetTodosQuery : IRequest<TodosVm>;
 public class GetTodosQueryHandler : IRequestHandler<GetTodosQuery, TodosVm>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
+    private readonly TypeAdapterConfig _mapsterConfig;
 
-    public GetTodosQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public GetTodosQueryHandler(IApplicationDbContext context, TypeAdapterConfig mapsterConfig)
     {
         _context = context;
-        _mapper = mapper;
+        _mapsterConfig = mapsterConfig;
     }
 
-    public async Task<TodosVm> Handle(GetTodosQuery request, CancellationToken cancellationToken)
+    public async ValueTask<TodosVm> Handle(GetTodosQuery request, CancellationToken cancellationToken)
     {
+        var lists = await _context.TodoLists
+            .AsNoTracking()
+            .OrderBy(t => t.Title)
+            .ProjectToTypeListAsync<TodoList, TodoListDto>(_mapsterConfig, cancellationToken);
+
         return new TodosVm
         {
-            PriorityLevels = Enum.GetValues(typeof(PriorityLevel))
+            PriorityLevels = Enum.GetValues<PriorityLevel>()
                 .Cast<PriorityLevel>()
                 .Select(p => new LookupDto { Id = (int)p, Title = p.ToString() })
                 .ToList(),
 
-            Lists = await _context.TodoLists
-                .AsNoTracking()
-                .ProjectTo<TodoListDto>(_mapper.ConfigurationProvider)
-                .OrderBy(t => t.Title)
-                .ToListAsync(cancellationToken)
+            Lists = lists
         };
     }
 }
