@@ -1,20 +1,20 @@
 ﻿<Project Sdk="Uno.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net9.0-desktop;net9.0-android;net9.0-ios;net9.0-browserwasm;net9.0</TargetFrameworks><!--;net9.0-windows10.0.26100-->
-    <UserSecretsId>73d0e72f-3b9d-4ea9-bc0e-ca05efc5cd26</UserSecretsId>
+    <TargetFrameworks>net10.0-desktop;net10.0-android;net10.0-ios;net10.0-browserwasm;$(DefaultTargetFramework)</TargetFrameworks>
+    <UserSecretsId>$(MyManufacturerERPUserSecretsId)</UserSecretsId>
     <OutputType>Exe</OutputType>
     <UnoSingleProject>true</UnoSingleProject>
     <!-- Display name -->
     <ApplicationTitle>DevTKSS.MyManufacturerERP</ApplicationTitle>
     <!-- App Identifier -->
-    <ApplicationId>com.DevTKSS.MyManufacturerERP</ApplicationId>
+    <ApplicationId>com.devtkss.mymanufacturererp</ApplicationId>
     <!-- Versions -->
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <ApplicationVersion>1</ApplicationVersion>
     <!-- Package Publisher -->
     <ApplicationPublisher>TKSS Development</ApplicationPublisher>
     <!-- Package Description -->
-    <Description>DevTKSS.MyManufacturerERP powered by Uno Platform.</Description>
+    <Description>DevTKSS MyManufacturerERP powered by Uno Platform.</Description>
     <!--
       UnoFeatures let's you quickly add and manage implicit package references based on the features you want to use.
       https://aka.platform.uno/singleproject-features
@@ -54,16 +54,12 @@
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
   </ItemGroup>
-  <!--<ItemGroup Condition="$(TargetFramework.Contains('-android'))">
-    <PackageReference Include="Xamarin.AndroidX.Browser" />
-  </ItemGroup>-->
   <ItemGroup>
-    <ProjectReference Include="..\DevTKSS.Extensions.OAuth\DevTKSS.Extensions.OAuth.csproj" />
+    <ProjectReference Include="..\Extensions\DesktopAuthenticationIntegration\DesktopAuthenticationIntegration.csproj" />
+    <ProjectReference Include="..\Extensions\OAuth\DevTKSS.Extensions.OAuth.csproj" />
+    <ProjectReference Include="..\Extensions\OAuth.Validation\DevTKSS.Extensions.OAuth.Validation.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Uno.Extensions.Validation.Fluent"/>
+    <PackageReference Include="Uno.Extensions.Validation.Fluent" />
   </ItemGroup>
-  <!--<ItemGroup>
-    <ProjectReference Include="..\Temp.Extensibility.SystemAuthBrokerServer\Temp.Extensibility.DesktopAuthBroker.csproj" />
-  </ItemGroup>-->
 </Project>

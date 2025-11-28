@@ -1,8 +1,8 @@
-using DevTKSS.Extensions.OAuth.Endpoints;
+using DesktopAuthenticationIntegration;
 
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Services;
 
-public sealed partial record EtsyOAuthService : OAuthProvider
+public sealed partial record EtsyOAuthService
 {
     [GeneratedRegex(@"^(?<userId>\d+)\.(?<token>.+)$",
         RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.NonBacktracking | RegexOptions.ExplicitCapture)]
@@ -10,19 +10,19 @@ public sealed partial record EtsyOAuthService : OAuthProvider
 
     public const string ProviderName = "EtsyOAuth";
     private readonly IServiceProvider _serviceProvider;
-    private readonly OAuthOptions _options;
+    private readonly EtsyOAuthEndpointOptions _options;
+    private readonly ILogger _logger;
     public EtsyOAuthService(
-        ILogger<EtsyOAuthService> providerLogger,
-        ILogger<OAuthProvider> baseLogger,
-        IOptionsSnapshot<OAuthOptions> Configuration,
-        IServiceProvider ServiceProvider,
-        IOAuthEndpoints AuthEndpoints,
+        ILogger logger,
+        IOptionsSnapshot<EtsyOAuthEndpointOptions> configuration,
+        IServiceProvider serviceProvider,
+        IOAuthEndpoints authEndpoints,
         ITokenCache tokenCache,
-        ISystemBrowserAuthBrokerProvider systemBrowserAuthBrokerProvider) 
-        : base(baseLogger, ServiceProvider, AuthEndpoints, tokenCache, Configuration, systemBrowserAuthBrokerProvider)
+        ISystemBrowserAuthBrokerProvider systemBrowserAuthBrokerProvider)
     {
-        _serviceProvider = ServiceProvider;
-        _options = Configuration.Value;
+        _logger = logger.ForContext<EtsyOAuthService>();
+        _serviceProvider = serviceProvider;
+        _options = configuration.Value;
     }
 
     public async ValueTask<IDictionary<string, string>?> ExchangeCodeForTokensAsync(
@@ -35,9 +35,9 @@ public sealed partial record EtsyOAuthService : OAuthProvider
         if (DoesContainUserId().Match(refreshToken!) is { Success: true } match)
         {
             var userId = match.Groups["userId"].Value;
-            var token = match.Groups["token"].Value;
-            ProviderLogger.LogInformation("Logged in as user ID: {userId}", userId);
-            tokens.AddOrReplace(InternalSettings.TokenCacheOptions.IdTokenKey, userId);
+            _logger.Information("Logged in as user ID: {userId}", userId);
+            // Store user id under configured user id token key
+            tokens.AddOrReplace(_options.UserIdTokenKey, userId);
         }
         // Then enrich with Etsy specific "me" information if available
         try
@@ -52,8 +52,7 @@ public sealed partial record EtsyOAuthService : OAuthProvider
         }
         catch (Exception ex)
         {
-            ProviderLogger.LogError(ex, "Error enriching tokens with Etsy user info");
-            // Do not fail login if enrichment fails; just return the exchanged tokens
+            _logger.Error(ex, "Error enriching tokens with Etsy user info");
         }
 
         return tokens;
@@ -68,13 +67,13 @@ public sealed partial record EtsyOAuthService : OAuthProvider
 
         if (tokens == null || !tokens.TryGetAccessToken(out var accessToken) || string.IsNullOrWhiteSpace(accessToken))
         {
-            base.ProviderLogger.LogWarning("No access token available");
+            _logger.Warning("No access token available");
             return default;
         }
-        if (InternalSettings.ClientOptions?.ClientID is not string clientID
+        if (_options.ClientId is not string clientID
             || string.IsNullOrWhiteSpace(clientID))
         {
-            base.ProviderLogger.LogError("Client ID is not configured.");
+            _logger.Error("Client ID is not configured.");
             return default;
         }
         try
@@ -82,23 +81,27 @@ public sealed partial record EtsyOAuthService : OAuthProvider
             var meResponse = await userEndpointsClient.GetMeAsync(accessToken, clientID, cancellationToken ?? CancellationToken.None);
             if (meResponse.ShopId == 0)
             {
-                base.ProviderLogger.LogWarning("No shop associated with this user.");
+                _logger.Warning("No shop associated with this user.");
                 return default;
             }
             var result = new Dictionary<string, string>
             {
-                [$"{_options.TokenCacheOptions.IdTokenKey}_{EtsyOAuthMeRequestDefaults.ShopIdKey}"] = meResponse.ShopId.ToString()
+                [$"{_options.TokenKeys.IdTokenKey}_{_options.ShopIdTokenKey}"] = meResponse.ShopId.ToString(),
+                // Store shop id under configured shop id token key
+                [_options.ShopIdTokenKey] = meResponse.ShopId.ToString(),
+                // Optionally also store user id if available
+                [_options.UserIdTokenKey] = meResponse.UserId.ToString() ?? (tokens.ContainsKey(_options.UserIdTokenKey) ? tokens[_options.UserIdTokenKey] : string.Empty)
             };
             return result;
         }
         catch (ApiException apiEx)
         {
-            base.ProviderLogger.LogError(apiEx, "API error during GetMeAsync: {StatusCode} - {Content}", apiEx.StatusCode, apiEx.Content);
+            _logger.Error(apiEx, "API error during GetMeAsync: {StatusCode} - {Content}", apiEx.StatusCode, apiEx.Content);
             return default;
         }
         catch (Exception ex)
         {
-            base.ProviderLogger.LogError(ex, "Error fetching user info");
+            _logger.Error(ex, "Error fetching user info");
             return default;
         }
     }
