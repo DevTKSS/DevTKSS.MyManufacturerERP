@@ -12,7 +12,7 @@
     <PackageReference Include="NUnit3TestAdapter" />
     <PackageReference Include="Shouldly" />
     <PackageReference Include="coverlet.collector" />
-    <PackageReference Include="GitHubActionsTestLogger"/>
+    <PackageReference Include="GitHubActionsTestLogger" />
   </ItemGroup>
 
   <ItemGroup>

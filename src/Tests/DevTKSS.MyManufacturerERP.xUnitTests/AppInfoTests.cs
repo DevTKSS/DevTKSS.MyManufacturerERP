@@ -1,3 +1,4 @@
+using DevTKSS.MyManufacturerERP.Models;
 namespace DevTKSS.MyManufacturerERP.xUnitTests;
 
 public class AppInfoTests

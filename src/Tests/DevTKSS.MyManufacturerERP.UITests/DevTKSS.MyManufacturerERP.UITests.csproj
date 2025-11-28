@@ -11,10 +11,7 @@
     <PackageReference Include="NUnit3TestAdapter" />
     <PackageReference Include="Uno.UITest.Helpers" />
     <PackageReference Include="Xamarin.UITest" />
-    <PackageReference Include="GitHubActionsTestLogger">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="GitHubActionsTestLogger"/>
   </ItemGroup>
 
   <ItemGroup>
