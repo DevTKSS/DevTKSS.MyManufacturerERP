@@ -1,13 +1,15 @@
-﻿<Project Sdk="Uno.Sdk">
+<Project Sdk="Uno.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net10.0;net10.0-desktop</TargetFrameworks>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <TargetFrameworks>$(DefaultTargetFramework)</TargetFrameworks>
+    <RootNamespace>DevTKSS.Extensions.OAuth</RootNamespace>
+    <AssemblyName>DevTKSS.Extensions.OAuth</AssemblyName>
+    <Authors>$(Authors)</Authors>
+    <OutputType>Library</OutputType>
     <UnoFeatures>
       Configuration;
-      Authentication;
       HttpRefit;
+      Authentication;
     </UnoFeatures>
   </PropertyGroup>
 
