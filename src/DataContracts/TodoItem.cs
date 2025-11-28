@@ -1,7 +1,6 @@
-using System.Text.Json.Serialization;
-
 namespace DevTKSS.MyManufacturerERP.DataContracts;
 
+[AdaptTo("[name]Dto"), GenerateMapper]
 public class TodoItem
 {
     [JsonPropertyName("id")]
@@ -9,5 +8,5 @@ public class TodoItem
     [JsonPropertyName("name")]
     public string? Name { get; set; }
     [JsonPropertyName("is_complete")]
-    public bool IsComplete { get; set; }
+    public bool IsComplete { get; set; } = false;
 }

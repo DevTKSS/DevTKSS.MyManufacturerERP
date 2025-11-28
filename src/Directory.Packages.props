@@ -11,7 +11,7 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.0" />
-    <PackageVersion Include="Yllibed.HttpServer" Version="1.0.0-dev.24" Condition="'Configuration'=='Release'" />
+    <PackageVersion Include="Yllibed.HttpServer" Version="1.0.0-dev.24" Condition="'$(Configuration)'=='Release'" />
   </ItemGroup>
 
   <ItemGroup Label="Validation">
@@ -28,7 +28,6 @@
   </ItemGroup>
   <ItemGroup Label="CA Packages">
     <PackageVersion Include="Ardalis.GuardClauses" Version="5.0.0" />
-    <PackageVersion Include="AutoMapper" Version="15.1.0" />
     <PackageVersion Include="Mediator.Abstractions" Version="3.0.1" />
     <PackageVersion Include="Mediator.SourceGenerator" Version="3.0.1" />
   </ItemGroup>
@@ -47,10 +46,7 @@
   </ItemGroup>
   <ItemGroup Label="OpenApi Packages">
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.0">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageVersion>
+    <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.0" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.11.0" />
     <PackageVersion Include="Scalar.AspNetCore.Microsoft" Version="2.10.3" />
   </ItemGroup>
@@ -79,9 +75,12 @@
     <PackageVersion Include="AspNet.Security.OAuth.Etsy" Version="10.0.1-dev" />
   </ItemGroup>
 
-  <!-- Mapster mapping packages central versions -->
   <ItemGroup Label="Mapping">
-    <PackageVersion Include="Mapster" Version="7.4.0" />
-    <PackageVersion Include="Mapster.DependencyInjection" Version="1.0.1" />
+    <PackageVersion Include="Mapster" Version="9.0.0-pre01" />
+    <PackageVersion Include="Mapster.DependencyInjection" Version="9.0.0-pre01" />
+    <PackageVersion Include="Mapster.Async" Version="9.0.0-pre01" />
+    <PackageVersion Include="Mapster.Immutable" Version="9.0.0-pre01" />
+    <PackageVersion Include="Mapster.EFCore" Version="9.0.0-pre01" />
+    <PackageVersion Include="Riok.Mapperly" Version="2.1.0" />
   </ItemGroup>
 </Project>

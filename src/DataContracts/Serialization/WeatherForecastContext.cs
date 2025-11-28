@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Text.Json.Serialization;
+using DevTKSS.MyManufacturerERP.DataContracts;
 
 namespace DevTKSS.MyManufacturerERP.DataContracts.Serialization;
 /// <summary>

@@ -4,17 +4,16 @@
       <Description>This Project is gotten from Uno.Templates with opting in to Server project to be added and is currently trying to reach any usable state for Serverside Authorization and Authentication</Description>
     <AssemblyName>DevTKSS.MyManufacturerERP.Server</AssemblyName>
     <RootNamespace>DevTKSS.MyManufacturerERP.Server</RootNamespace>
-
-    
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFrameworks>$(DefaultTargetFramework)</TargetFrameworks>
     <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
     <OpenApiDocumentsDirectory>.</OpenApiDocumentsDirectory>
-    <UserSecretsId>73d0e72f-3b9d-4ea9-bc0e-ca05efc5cd26</UserSecretsId>
+    <UserSecretsId>$(MyManufacturerERPUserSecretsId)</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-  
+    <MapsterEnabled>true</MapsterEnabled>
 </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DataContracts\DataContracts.csproj" />
     <ProjectReference Include="..\DevTKSS.MyManufacturerERP\DevTKSS.MyManufacturerERP.csproj" SetTargetFramework="TargetFramework=net9.0-browserwasm" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
@@ -22,11 +21,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="AspNet.Security.OAuth.Etsy" />
   </ItemGroup>
 
 
@@ -44,11 +41,16 @@
 
   <ItemGroup Label="Docs">
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
-    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" />
     <PackageReference Include="Scalar.AspNetCore" />
     <PackageReference Include="Scalar.AspNetCore.Microsoft" />
+  </ItemGroup>
+
+  <ItemGroup Label="Mapster">
+    <PackageReference Include="Mapster" />
+    <PackageReference Include="Mapster.DependencyInjection" />
+    <PackageReference Include="Mapster.EFCore" />
+    <PackageReference Include="Mapster.Async" />
+    <PackageReference Include="Mapster.Immutable" />
   </ItemGroup>
 </Project>

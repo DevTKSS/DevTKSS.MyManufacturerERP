@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Text.Json.Serialization;
 
 namespace DevTKSS.MyManufacturerERP.DataContracts.Serialization;
 [JsonSerializable(typeof(TodoItem))]

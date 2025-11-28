@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>DevTKSS.MyManufacturerERP.DataContracts</RootNamespace>
+    <AssemblyName>DevTKSS.MyManufacturerERP.DataContracts</AssemblyName>
+    <TargetFrameworks>net9.0;net10.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <MapsterEnabled>true</MapsterEnabled>
+    <MapsterPath>$(ProjectDir)**\mapster\**\*.g.cs</MapsterPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Mapster" />
+    <PackageReference Include="Mapster.DependencyInjection" />
+    <PackageReference Include="Mapster.Async" />
+    <PackageReference Include="Mapster.Immutable" />
+    <PackageReference Include="Mapster.EFCore" />
+  </ItemGroup>
+
+  <!--<Target Name="Mapster" AfterTargets="AfterBuild">
+    <Exec WorkingDirectory="$(ProjectDir)" Command="dotnet tool restore" />
+    <Exec WorkingDirectory="$(ProjectDir)" Command="dotnet-mapster model -a &quot;$(TargetDir)$(ProjectName).dll&quot;" />
+    <Exec WorkingDirectory="$(ProjectDir)" Command="dotnet-mapster extension -a &quot;$(TargetDir)$(ProjectName).dll&quot;" />
+    <Exec WorkingDirectory="$(ProjectDir)" Command="dotnet-mapster mapper -a &quot;$(TargetDir)$(ProjectName).dll&quot;" />
+  </Target>-->
+
+  <!-- Mapster generated files: expose as visible None items and set DependentUpon to the source file when possible -->
+  <ItemGroup Label="Include Mapster Generated Files" Condition="'$(MapsterEnabled)' == 'true' and Exists('$(BaseIntermediateOutputPath)mapster')">
+    <Compile Remove="$(MapsterPath)" />
+    <None Include="$(MapsterPath)">
+      <Link>mapster-generated/$(RecursiveDir)%(Filename)%(Extension)</Link>
+      <Visible>true</Visible>
+    </None>
+  </ItemGroup>
+
+  <!--<ItemGroup>
+    <Compile Remove="obj\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <None Remove="obj\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Riok.Mapperly" PrivateAssets="all" />
+  </ItemGroup>-->
+</Project>

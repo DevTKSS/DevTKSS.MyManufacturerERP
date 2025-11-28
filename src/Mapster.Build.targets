@@ -1,0 +1,44 @@
+<Project>
+  <!--
+    Mapster integration targets.
+  -->
+
+  <Target Name="MapsterSetup">
+    <!-- Run tool restore in repository root (parent of /src). Only report on failure to avoid noise. -->
+    <Exec WorkingDirectory="$(MSBuildThisFileDirectory).." Command="dotnet tool restore" Condition="Exists('$(MSBuildThisFileDirectory)..\.config\dotnet-tools.json')" ContinueOnError="true">
+      <Output TaskParameter="ExitCode" PropertyName="MapsterSetupExitCode" />
+    </Exec>
+    <Error Text="MapsterSetup: dotnet tool restore failed (exit code $(MapsterSetupExitCode))."
+           Condition="Exists('$(MSBuildThisFileDirectory)..\.config\dotnet-tools.json') and '$(MapsterSetupExitCode)' != '' and '$(MapsterSetupExitCode)' != '0'" />
+  </Target>
+
+  <!-- Run Mapster only when project targets net9.0 (either current TFM or TargetFrameworks contains net9.0). -->
+  <Target Name="Mapster" AfterTargets="AfterBuild"
+          Condition="'$(MapsterEnabled)' == 'true' and ( '$(TargetFramework)' == 'net9.0' or $([System.String]::Copy('$(TargetFrameworks)').Contains('net9.0')) == 'True' )" >
+
+    <Message Importance="high" Text="Mapster: starting code generation for $(MSBuildProjectName)..." />
+
+    <!-- Generate into a non-runtime-specific obj/mapster folder to allow reuse across TFMs -->
+    <Exec WorkingDirectory="$(MSBuildProjectDirectory)"
+          Command="dotnet mapster model -a &quot;$(TargetPath)&quot; -o &quot;$(BaseIntermediateOutputPath)mapster&quot; -r -N"
+          ContinueOnError="false" />
+
+    <Exec WorkingDirectory="$(MSBuildProjectDirectory)"
+          Command="dotnet mapster extension -a &quot;$(TargetPath)&quot; -o &quot;$(BaseIntermediateOutputPath)mapster&quot; -N"
+          ContinueOnError="false" />
+
+    <Exec WorkingDirectory="$(MSBuildProjectDirectory)"
+          Command="dotnet mapster mapper -a &quot;$(TargetPath)&quot; -o &quot;$(BaseIntermediateOutputPath)mapster&quot; -N"
+          ContinueOnError="false" />
+    
+    <Message Importance="high" Text="Mapster: finished generation for $(MSBuildProjectName)." />
+  </Target>
+  <ItemGroup>
+    <GeneratedMappings Include="**\\mapster\\*.g.cs" />
+  </ItemGroup>
+
+  <Target Name="CleanGenerated" BeforeTargets="Clean">
+    <Message Importance="low" Text="CleanGenerated: removing mapster generated files..." Condition="Exists('$(BaseIntermediateOutputPath)mapster')" />
+    <Delete Files="@(GeneratedMappings)" ContinueOnError="false" Condition="Exists('$(BaseIntermediateOutputPath)mapster')" />
+  </Target>
+</Project>
