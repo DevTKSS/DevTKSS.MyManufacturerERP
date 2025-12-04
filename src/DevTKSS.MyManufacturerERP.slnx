@@ -1,0 +1,35 @@
+<Solution>
+  <Folder Name="/Extensions/">
+    <Project Path="Extensions/DesktopAuthenticationIntegration/DesktopAuthenticationIntegration.csproj" />
+    <Project Path="Extensions/OAuth.Validation/DevTKSS.Extensions.OAuth.Validation.csproj" />
+    <Project Path="Extensions/OAuth/DevTKSS.Extensions.OAuth.csproj" />
+  </Folder>
+  <Folder Name="/External OpenApi Specs/">
+    <File Path="OpenApiSpecs/etsy-open-api-spec-3.0.0.json" />
+    <File Path="OpenApiSpecs/sevdesk-open-api-spec-2.0.yaml" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="../.config/dotnet-tools.json" />
+    <File Path="../.gitignore" />
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/DevTKSS.MyManufacturerERP.Tests/DevTKSS.MyManufacturerERP.Tests.csproj" />
+    <Project Path="Tests/DevTKSS.MyManufacturerERP.UITests/DevTKSS.MyManufacturerERP.UITests.csproj" />
+    <Project Path="Tests/DevTKSS.MyManufacturerERP.xUnitTests/DevTKSS.MyManufacturerERP.xUnitTests.csproj" />
+  </Folder>
+  <Folder Name="/WebAPI/">
+    <Project Path="WebApi/Application/Application.csproj" />
+    <Project Path="WebApi/Domain/Domain.csproj" />
+    <Project Path="WebApi/WebApi/WebApi.csproj" />
+  </Folder>
+  <Project Path="DataContracts/DataContracts.csproj" />
+  <Project Path="DevTKSS.MyManufacturerERP.WasmServer/DevTKSS.MyManufacturerERP.Server.csproj" />
+  <Project Path="DevTKSS.MyManufacturerERP/DevTKSS.MyManufacturerERP.csproj">
+    <Deploy />
+  </Project>
+</Solution>
