@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using DevTKSS.MyManufacturerERP.DataContracts.OAuth;
 
 namespace DevTKSS.MyManufacturerERP.WebApi.Endpoints.Authentication;
 
@@ -67,7 +68,7 @@ public static class OAuthEndpoints
     /// <summary>
     /// GET /auth/profile
     /// Returns the current authenticated user's profile information.
-    /// Available claims: user_id, shop_id, name, email, etc.
+    /// Maps claims: user_id, shop_id, primary_email, given_name, family_name, picture, sub.
     /// </summary>
     private static IResult GetProfileAsync(HttpContext context)
     {
@@ -78,14 +79,18 @@ public static class OAuthEndpoints
             return Results.Unauthorized();
         }
 
-        var profile = new
+        var profile = new UserProfileResponse
         {
             UserId = user.FindFirst("user_id")?.Value,
             ShopId = user.FindFirst("shop_id")?.Value,
+            PrimaryEmail = user.FindFirst(ClaimTypes.Email)?.Value,
+            GivenName = user.FindFirst(ClaimTypes.GivenName)?.Value,
+            Surname = user.FindFirst(ClaimTypes.Surname)?.Value,
             Name = user.FindFirst(ClaimTypes.Name)?.Value,
-            Email = user.FindFirst(ClaimTypes.Email)?.Value,
+            ProfileImageUrl = user.FindFirst("picture")?.Value ?? user.FindFirst("image_75x75_url")?.Value,
+            Subject = user.FindFirst(ClaimTypes.NameIdentifier)?.Value,
             Claims = user.Claims
-                .Select(c => new { c.Type, c.Value })
+                .Select(c => new ClaimInfo { Type = c.Type, Value = c.Value })
                 .ToList()
         };
 

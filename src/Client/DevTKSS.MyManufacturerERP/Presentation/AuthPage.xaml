@@ -14,19 +14,85 @@
   <Grid utu:SafeArea.Insets="VisibleBounds">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
-      <RowDefinition />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
+
+    <!-- Navigation Bar -->
     <utu:NavigationBar Content="{Binding Title}" />
-    <!-- Here should maybe become the WebView2 Control a place https://learn.microsoft.com/de-de/microsoft-edge/webview2/concepts/basic-authentication?tabs=csharp -->
-    <!-- Planning on how I want to set up the navigation. e.g. Nested content or another page... put the button on its side would be not pretty. -->
+
+    <!-- Main Content -->
     <StackPanel Grid.Row="1"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Width="200"
-                Spacing="16">
-      <Button Content="Connect your Etsy Data"
-          Command="{Binding ConnectToEtsy}"
-          HorizontalAlignment="Stretch" />
+                Width="300"
+                Spacing="24"
+                Padding="24">
+
+      <!-- Logo / Icon -->
+      <StackPanel HorizontalAlignment="Center"
+                  Spacing="12">
+        <TextBlock Text="🏪"
+                   FontSize="64"
+                   TextAlignment="Center"
+                   Margin="0" />
+        <TextBlock Text="Etsy Seller Dashboard"
+                   FontSize="24"
+                   FontWeight="SemiBold"
+                   TextAlignment="Center" />
+        <TextBlock Text="Connect your Etsy store to get started"
+                   FontSize="14"
+                   Opacity="0.7"
+                   TextAlignment="Center"
+                   TextWrapping="Wrap" />
+      </StackPanel>
+
+      <!-- Login Button -->
+      <Button x:Name="LoginButton"
+              Content="Connect to Etsy"
+              Command="{Binding ConnectToEtsy}"
+              HorizontalAlignment="Stretch"
+              Height="48"
+              FontSize="16"
+              FontWeight="SemiBold" />
+
+      <!-- Loading Indicator -->
+      <ProgressRing x:Name="LoadingIndicator"
+                    IsActive="{Binding IsLoading, Mode=OneWay}"
+                    HorizontalAlignment="Center"
+                    Visibility="{Binding IsLoading, Mode=OneWay}" />
+
+      <!-- Error Message -->
+      <Border x:Name="ErrorBorder"
+              Background="#FFEDE0"
+              BorderBrush="#FF9854"
+              BorderThickness="1"
+              CornerRadius="4"
+              Padding="12"
+              Visibility="{Binding ErrorMessage, Mode=OneWay, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}">
+        <TextBlock Text="{Binding ErrorMessage, Mode=OneWay}"
+                   Foreground="#FF5722"
+                   TextWrapping="Wrap"
+                   FontSize="12" />
+      </Border>
+
     </StackPanel>
+
+    <!-- Footer Info -->
+    <StackPanel Grid.Row="2"
+                HorizontalAlignment="Center"
+                Padding="24,12"
+                Spacing="8">
+      <TextBlock Text="OAuth2 Secure Authentication"
+                 FontSize="12"
+                 Opacity="0.6"
+                 TextAlignment="Center" />
+      <TextBlock Text="Your data is never stored on our servers"
+                 FontSize="11"
+                 Opacity="0.5"
+                 TextAlignment="Center"
+                 FontStyle="Italic" />
+    </StackPanel>
+
   </Grid>
 </Page>

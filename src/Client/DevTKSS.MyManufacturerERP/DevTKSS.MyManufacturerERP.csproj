@@ -1,4 +1,4 @@
-﻿<Project Sdk="Uno.Sdk">
+<Project Sdk="Uno.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net10.0-desktop;net10.0-android;net10.0-ios;net10.0-browserwasm;$(DefaultTargetFramework)</TargetFrameworks>
     <UserSecretsId>$(MyManufacturerERPUserSecretsId)</UserSecretsId>
@@ -58,6 +58,7 @@
     <ProjectReference Include="..\..\Extensions\DesktopAuthenticationIntegration\DesktopAuthenticationIntegration.csproj" />
     <ProjectReference Include="..\..\Extensions\OAuth.Validation\DevTKSS.Extensions.OAuth.Validation.csproj" />
     <ProjectReference Include="..\..\Extensions\OAuth\DevTKSS.Extensions.OAuth.csproj" />
+    <ProjectReference Include="..\..\DataContracts\DataContracts.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Uno.Extensions.Validation.Fluent" />
