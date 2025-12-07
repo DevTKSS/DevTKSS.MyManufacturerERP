@@ -2,7 +2,9 @@
 // logger configured in `AddSerilog()` below, once configuration and dependency-injection have both been
 // set up successfully.
 
+using AspNet.Security.OAuth.Etsy;
 using DevTKSS.MyManufacturerERP.WebApi;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 Log.Logger = new LoggerConfiguration()
       .WriteTo.Console()
@@ -59,8 +61,32 @@ try
     //    .AddEntityFrameworkStores<AuthDbContext>();
     #endregion
 
-    builder.Services.AddAuthentication()
-                    .AddCookie();
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = EtsyAuthenticationDefaults.AuthenticationScheme;
+    })
+    .AddCookie("cookie")
+    .AddEtsy(options =>
+    {
+        var etsyOptions = builder.Configuration.GetRequiredSection("Authentication")
+                                                                    .GetRequiredSection(EtsyAuthenticationDefaults.DisplayName)
+                                                                    .Get<EtsyAuthenticationOptions>()
+                                                                    ?? throw new InvalidOperationException("Etsy authentication options are not configured properly.");
+
+        options.ClientId = etsyOptions.ClientId;
+        options.ClientSecret = etsyOptions.ClientSecret;
+        options.CallbackPath = etsyOptions.CallbackPath;
+        options.IncludeDetailedUserInfo = etsyOptions.IncludeDetailedUserInfo;
+
+        foreach (var scope in etsyOptions.Scope)
+        {
+            options.Scope.Add(scope);
+        }
+
+        // Extract user information from Etsy user data JSON
+        // mappings already set up by default in the EtsyAuthenticationProvider
+    });
 
     var app = builder.Build();
 
@@ -114,6 +140,7 @@ try
     app.MapTodoEnpoints();
     app.MapWeatherEndpoints();
     app.MapAuthenticationEndpoints();
+    app.MapOAuthEndpoints();
 
 
     app.Run();

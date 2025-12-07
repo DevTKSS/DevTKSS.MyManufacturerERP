@@ -1,5 +1,6 @@
 // Http constants providing namespaces
 global using System.Security.Claims;
+global using Microsoft.AspNetCore.Authentication;
 // Domain slice namespaces
 global using DevTKSS.MyManufacturerERP.Domain.Entities;
 // Web slice namespaces

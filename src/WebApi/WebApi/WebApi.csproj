@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFrameworks>$(DefaultTargetFramework)</TargetFrameworks>
@@ -18,11 +18,16 @@
     <PackageReference Include="Mediator.Abstractions" />
     <PackageReference Include="Mediator.SourceGenerator" />
   </ItemGroup>
+
   <ItemGroup Label="EntityFramework">
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+  </ItemGroup>
+
+  <ItemGroup Label="OAuth2">
+    <PackageReference Include="AspNet.Security.OAuth.Etsy" />
   </ItemGroup>
 
   <ItemGroup Label="Serilog">
@@ -38,9 +43,10 @@
   </ItemGroup>
 
   <ItemGroup> 
-   <Content Include="..\AppData\*.json" CopyToOutputDirectory="PreserveNewest" LinkBase="AppData" />
+    <Content Include="..\AppData\*.json" CopyToOutputDirectory="PreserveNewest" LinkBase="AppData" />
     <ProjectReference Include="..\Application\Application.csproj" />
   </ItemGroup>
+
   <ItemGroup>
     <!-- Mapster for mapping -->
     <PackageReference Include="Mapster" />
@@ -57,4 +63,5 @@
       <Visible>true</Visible>
     </None>
   </ItemGroup>
- </Project>
+
+</Project>
