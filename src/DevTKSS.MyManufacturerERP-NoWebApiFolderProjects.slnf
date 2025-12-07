@@ -1,13 +1,13 @@
 {
   "solution": {
-    "path": "DevTKSS.MyManufacturerERP.sln",
+    "path": "../DevTKSS.MyManufacturerERP.slnx",
     "projects": [
-      "DataContracts\\DataContracts.csproj",
-      "DevTKSS.MyManufacturerERP.WasmServer\\DevTKSS.MyManufacturerERP.Server.csproj",
-      "DevTKSS.MyManufacturerERP\\DevTKSS.MyManufacturerERP.csproj",
-      "Extensions\\DesktopAuthenticationIntegration\\DesktopAuthenticationIntegration.csproj",
-      "Extensions\\OAuth.Validation\\DevTKSS.Extensions.OAuth.Validation.csproj",
-      "Extensions\\OAuth\\DevTKSS.Extensions.OAuth.csproj"
+      "src/DataContracts/DataContracts.csproj",
+      "src/DevTKSS.MyManufacturerERP.WasmServer/DevTKSS.MyManufacturerERP.Server.csproj",
+      "src/Client/DevTKSS.MyManufacturerERP/DevTKSS.MyManufacturerERP.csproj",
+      "src/Extensions/DesktopAuthenticationIntegration/DesktopAuthenticationIntegration.csproj",
+      "src/Extensions/OAuth.Validation/DevTKSS.Extensions.OAuth.Validation.csproj",
+      "src/Extensions/OAuth/DevTKSS.Extensions.OAuth.csproj"
     ]
   }
 }

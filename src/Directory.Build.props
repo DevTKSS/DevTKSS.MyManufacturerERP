@@ -1,4 +1,5 @@
 <Project>
+  <Import Project="../Directory.Build.props" />
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -18,7 +19,7 @@
   <ItemGroup>
     <PackageReference Update="Mediator.SourceGenerator"
                       PrivateAssets="all"
-                      IncludeAssets="runtime; build; native; contentfiles; analyzers" />
+                      IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
     
     <PackageReference Update="Microsoft.Extensions.ApiDescription.Server"
                       PrivateAssets="all"

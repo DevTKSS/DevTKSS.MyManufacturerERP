@@ -1,0 +1,12 @@
+<Project>
+  <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
+  <PropertyGroup>
+    <RepositoryUrl>https://github.com/DevTKSS/DevTKSS.MyManufacturerERP</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Company>TKSS Development</Company>
+    <Authors>Sonja Schweitzer</Authors>
+    <PackageProjectUrl>https://github.com/DevTKSS/DevTKSS.MyManufacturerERP</PackageProjectUrl>
+    <Copyright>Copyright (C) 2015-$([System.DateTime]::Now.ToString(`yyyy`)) TKSS Development - all rights reserved</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+</Project>

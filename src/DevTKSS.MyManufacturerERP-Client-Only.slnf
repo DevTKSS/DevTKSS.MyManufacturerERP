@@ -1,12 +1,12 @@
 {
   "solution": {
-    "path": "DevTKSS.MyManufacturerERP.sln",
+    "path": "../DevTKSS.MyManufacturerERP.slnx",
     "projects": [
-      "DevTKSS.Extensions.OAuth\\DevTKSS.Extensions.OAuth.csproj",
-      "DevTKSS.MyManufacturerERP\\DevTKSS.MyManufacturerERP.csproj",
-      "Tests\\DevTKSS.MyManufacturerERP.Tests\\DevTKSS.MyManufacturerERP.Tests.csproj",
-      "Tests\\DevTKSS.MyManufacturerERP.UITests\\DevTKSS.MyManufacturerERP.UITests.csproj",
-      "Tests\\DevTKSS.MyManufacturerERP.xUnitTests\\DevTKSS.MyManufacturerERP.xUnitTests.csproj"
+      "src\\Extensions\\DesktopAuthenticationIntegration\\DesktopAuthenticationIntegration.csproj",
+      "src\\Client\\DevTKSS.MyManufacturerERP\\DevTKSS.MyManufacturerERP.csproj",
+      "src\\Tests\\DevTKSS.MyManufacturerERP.Tests\\DevTKSS.MyManufacturerERP.Tests.csproj",
+      "src\\Tests\\DevTKSS.MyManufacturerERP.UITests\\DevTKSS.MyManufacturerERP.UITests.csproj",
+      "src\\Tests\\DevTKSS.MyManufacturerERP.xUnitTests\\DevTKSS.MyManufacturerERP.xUnitTests.csproj"
     ]
   }
 }

@@ -13,7 +13,6 @@
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.0" />
     <PackageVersion Include="Yllibed.HttpServer" Version="1.0.0-dev.24" Condition="'$(Configuration)'=='Release'" />
   </ItemGroup>
-
   <ItemGroup Label="Validation">
     <PackageVersion Include="Uno.Extensions.Validation.Fluent" Version="7.0.4" />
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
