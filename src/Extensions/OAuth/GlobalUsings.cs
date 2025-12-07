@@ -8,3 +8,6 @@ global using DevTKSS.Extensions.OAuth.Defaults;
 global using DevTKSS.Extensions.OAuth.Requests;
 global using DevTKSS.Extensions.OAuth.Responses;
 global using Refit;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("DevTKSS.MyManufacturerERP")]

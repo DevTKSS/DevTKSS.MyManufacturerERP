@@ -7,7 +7,7 @@ namespace DevTKSS.Extensions.OAuth;
 /// <summary>
 /// Helper class for Etsy OAuth2 PKCE and token handling.
 /// </summary>
-internal static partial class OAuth2Utilitys
+public static partial class OAuth2Utilitys
 {
     /// <summary>
     /// Generates a random code verifier for PKCE.
