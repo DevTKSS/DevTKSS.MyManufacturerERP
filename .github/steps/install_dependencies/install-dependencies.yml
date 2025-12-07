@@ -1,5 +1,5 @@
 name: Install Dependencies
-description: ""
+description: "Installs dependencies for the specified target platform using Uno.Check and sets up the .NET SDK and Windows SDK if needed."
 
 inputs:
   target-platform:
@@ -9,11 +9,11 @@ inputs:
   dotnet-version:
     description: 'Installs and sets the .NET SDK Version'
     required: false
-    default: '9.0.x'
+    default: '10.0.x'
   sdkVersion:
     description: 'The version of the Windows Sdk'
     required: false
-    default: '19041'
+    default: '26100'
 
 runs:
   using: "composite"

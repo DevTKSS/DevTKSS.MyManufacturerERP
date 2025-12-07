@@ -1,7 +1,17 @@
 version: 2
 updates:
 - package-ecosystem: nuget
-  directory: "/"
+  directory: "/src/"
+  schedule:
+    interval: weekly
+    time: "10:00"
+  open-pull-requests-limit: 10
+  labels:
+  - kind/dependency
+  - do-not-merge/work-in-progress
+
+- package-ecosystem: github-actions
+  directory: "/src/"
   schedule:
     interval: weekly
     time: "10:00"

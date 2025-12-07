@@ -1,0 +1,56 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <Description>This Project has been created by Uno.Templates with opting in to 'Server' Option</Description>
+    <AssemblyName>DevTKSS.MyManufacturerERP.Server</AssemblyName>
+    <RootNamespace>DevTKSS.MyManufacturerERP.Server</RootNamespace>
+    <TargetFrameworks>$(DefaultTargetFramework)</TargetFrameworks>
+    <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
+    <OpenApiDocumentsDirectory>./OpenApi/</OpenApiDocumentsDirectory>
+    <UserSecretsId>$(MyManufacturerERPUserSecretsId)</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <MapsterEnabled>true</MapsterEnabled>
+</PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\DataContracts\DataContracts.csproj" />
+    <ProjectReference Include="..\DevTKSS.MyManufacturerERP\DevTKSS.MyManufacturerERP.csproj" SetTargetFramework="TargetFramework=net9.0-browserwasm" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup Label="Identity Management">
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="AspNet.Security.OAuth.Etsy" />
+  </ItemGroup>
+
+
+    <!--<ItemGroup Label="Docker">
+        <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
+    </ItemGroup>-->
+  <ItemGroup Label="Serilog">
+     <PackageReference Include="Serilog.AspNetCore" />
+     <PackageReference Include="Serilog.Expressions" />
+  </ItemGroup>
+
+  <ItemGroup Label="Uno">
+     <PackageReference Include="Uno.Wasm.Bootstrap.Server" />
+  </ItemGroup>
+
+  <ItemGroup Label="Docs">
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" />
+    <PackageReference Include="Scalar.AspNetCore" />
+    <PackageReference Include="Scalar.AspNetCore.Microsoft" />
+  </ItemGroup>
+
+  <ItemGroup Label="Mapster">
+    <PackageReference Include="Mapster" />
+    <PackageReference Include="Mapster.DependencyInjection" />
+    <PackageReference Include="Mapster.EFCore" />
+    <PackageReference Include="Mapster.Async" />
+    <PackageReference Include="Mapster.Immutable" />
+  </ItemGroup>
+</Project>
