@@ -1,5 +1,6 @@
-
-
+using DesktopAuthenticationIntegration;
+using Uno.AuthenticationBroker;
+using DevTKSS.Extensions.OAuth;
 
 namespace DevTKSS.MyManufacturerERP;
 public partial class App : Application
@@ -32,6 +33,7 @@ public partial class App : Application
                  unoConfigBuilder
                     .EmbeddedSource<App>()
                     .Section<AppConfig>()
+                    .Section<EtsyOAuthEndpointOptions>(EtsyOAuthEndpointOptions.SectionName)
              )
              .UseLogging(configure: (context, logBuilder) =>
              {
@@ -73,10 +75,18 @@ public partial class App : Application
             {
                 services.AddValidatorsFromAssemblies(AppDomain.CurrentDomain.GetAssemblies()
                     .Where(a => a.GetName().Name?.StartsWith("DevTKSS.Extensions.") ?? false));
-                
-                // Register our custom OAuth service as the main authentication service
-                //services.AddSingleton<OAuthProvider>();
-                services.AddSingleton<EtsyOAuthService>();
+
+                // Register WebAPI OAuth client (Refit) - replaces direct Etsy integration
+                services.AddRefitClient<IWebApiOAuthEndpoints>()
+                    .ConfigureHttpClient(httpClient =>
+                    {
+                        // Point to local WebAPI
+                        #if DEBUG
+                        httpClient.BaseAddress = new Uri("http://localhost:5000");
+                        #else
+                        httpClient.BaseAddress = new Uri(builder.Configuration["WebApi:BaseUrl"] ?? "https://api.example.com");
+                        #endif
+                    });
             })
             .UseHttp((context, services) =>
             {
@@ -150,34 +160,103 @@ public partial class App : Application
 
     private async ValueTask<IDictionary<string, string>?> HandleLoginAsync(IServiceProvider serviceProvider, IDispatcher? dispatcher, IDictionary<string,string> credentials,  CancellationToken ct)
     {
-        serviceProvider.GetRequiredService<ILogger<App>>()
-            .LogInformation("Custom OAuth Login invoked.");
+        var logger = serviceProvider.GetRequiredService<ILogger<App>>();
+        logger.LogInformation("OAuth Login via WebAPI");
 
-        return await Task.FromResult<IDictionary<string, string>?>(new Dictionary<string, string>
+        try
         {
-            { "access_token", "sample_access_token" },
-            { "refresh_token", "sample_refresh_token" },
-            { "expires_in", DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds().ToString() }
-        });
+            var oauthClient = serviceProvider.GetRequiredService<IWebApiOAuthEndpoints>();
+            
+            // Call WebAPI /auth/login endpoint
+            // WebAPI will handle Etsy OAuth flow and set authentication cookie
+            var response = await oauthClient.LoginAsync(ct);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogError("WebAPI login failed with status {Status}", response.StatusCode);
+                return null;
+            }
+
+            logger.LogInformation("OAuth login successful");
+            
+            // Return tokens to Uno authentication system
+            return new Dictionary<string, string>
+            {
+                { "access_token", "authenticated-via-webapi" },
+                { "token_type", "Bearer" }
+            };
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "OAuth login failed");
+            return null;
+        }
     }
+
     private async ValueTask<IDictionary<string, string>?> HandleRefreshAsync(IServiceProvider serviceProvider, ITokenCache tokenCache, IDictionary<string, string> tokens, CancellationToken ct)
     {
-        serviceProvider.GetRequiredService<ILogger<App>>()
-            .LogInformation("Custom OAuth Refresh invoked.");
-        return await Task.FromResult<IDictionary<string, string>?>(new Dictionary<string, string>
+        var logger = serviceProvider.GetRequiredService<ILogger<App>>();
+        logger.LogInformation("Token refresh via WebAPI");
+
+        try
         {
-            { "access_token", "refreshed_access_token" },
-            { "refresh_token", "refreshed_refresh_token" },
-            { "expires_in", DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds().ToString() }
-        });
+            var oauthClient = serviceProvider.GetRequiredService<IWebApiOAuthEndpoints>();
+            
+            // Call WebAPI /auth/profile to verify current authentication
+            var profile = await oauthClient.GetProfileAsync(ct);
+            
+            logger.LogInformation("Token refresh successful - User: {UserId}", profile.UserId);
+            
+            // Tokens are still valid, return them
+            return tokens;
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            logger.LogWarning("Authentication expired, user needs to login again");
+            return null;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Token refresh failed");
+            return tokens; // Return existing tokens on error
+        }
     }
+
     private async ValueTask<bool> HandleLogoutAsync(IServiceProvider ServiceProvider, IDispatcher? dispatcher, ITokenCache tokenCache, IDictionary<string,string> tokens, CancellationToken ct)
     {
-        ServiceProvider.GetRequiredService<ILogger<App>>()
-            .LogInformation("Custom OAuth Logout invoked.");
-        await tokenCache.ClearAsync(ct);
-        return true;
+        var logger = ServiceProvider.GetRequiredService<ILogger<App>>();
+        logger.LogInformation("Logout via WebAPI");
+        
+        try
+        {
+            var oauthClient = ServiceProvider.GetRequiredService<IWebApiOAuthEndpoints>();
+            
+            // Call WebAPI /auth/logout endpoint
+            var response = await oauthClient.LogoutAsync(ct);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogWarning("WebAPI logout failed with status {Status}", response.StatusCode);
+            }
+            else
+            {
+                logger.LogInformation("WebAPI logout successful");
+            }
+            
+            // Clear local token cache regardless of WebAPI response
+            await tokenCache.ClearAsync(ct);
+            
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Logout error");
+            // Clear tokens anyway
+            await tokenCache.ClearAsync(ct);
+            return true;
+        }
     }
+
     private static void RegisterRoutes(IViewRegistry views, IRouteRegistry routes)
     {
         views.Register(
@@ -201,5 +280,4 @@ public partial class App : Application
             )
         );
     }
-
 }
