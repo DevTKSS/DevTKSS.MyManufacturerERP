@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace DesktopAuthenticationIntegration;
+namespace DevTKSS.Extensions.Uno.DesktopAuthenticationIntegration;
 
 public interface IBrowserProvider
 {
@@ -10,17 +10,18 @@ public interface IBrowserProvider
 
 public class BrowserProvider : IBrowserProvider
 {
-	private readonly ILogger _logger;
-	public BrowserProvider(ILogger logger)
-	{
-		_logger = logger;
-	}
+
+    public void OpenBrowser(Uri uri)
+    {
+        OpenBrowser(uri, null);
+    }
+
     /// <summary>
     /// Helper method to open the System browser with the provided Uri
     /// </summary>
     /// <param name="uri">The Uri to open</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="uri"/> is <see langword="null"/></exception>"
-    public void OpenBrowser(Uri uri)
+    public static void OpenBrowser(Uri uri, ILogger? logger = null)
 	{
         ArgumentNullException.ThrowIfNull(uri);
 
@@ -31,9 +32,9 @@ public class BrowserProvider : IBrowserProvider
 		}
 		catch(Exception ex)
 		{
-			if (_logger.IsEnabled(LogLevel.Error))
+			if (logger is not null && logger.IsEnabled(LogLevel.Error))
 			{
-				_logger.LogError(ex, "Failed to open URL in default browser using Process.Start. Falling back to platform specific handling.");
+				logger.LogError(ex, "Failed to open URL in default browser using Process.Start. Falling back to platform specific handling.");
 			}
 
 			// hack because of this: https://github.com/dotnet/corefx/issues/10361
@@ -50,9 +51,9 @@ public class BrowserProvider : IBrowserProvider
 				}
 				catch(Exception ex1)
 				{
-					if (_logger.IsEnabled(LogLevel.Error))
+					if (logger is not null && logger.IsEnabled(LogLevel.Error))
 					{
-						_logger.LogError(ex1, "Failed to open URL in default browser using ProcessStartInfo. Falling back to cmd.");
+						logger.LogError(ex1, "Failed to open URL in default browser using ProcessStartInfo. Falling back to cmd.");
 					}
 
 					url = url.Replace("&", "^&");

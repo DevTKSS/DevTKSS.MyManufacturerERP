@@ -1,51 +1,66 @@
-using Uno.AuthenticationBroker; // BUG: This is known to cause CS issue: https://github.com/unoplatform/uno/issues/21237
+using Uno.AuthenticationBroker;
 using Uno.Foundation.Extensibility;
+using DesktopAuthenticationIntegration;
 
-//[assembly:
-//    ApiExtension(typeof(IWebAuthenticationBrokerProvider), typeof(SystemBrowserAuthBroker))]
+// [assembly: ApiExtension(typeof(WebAuthenticationBrokerProvider), typeof(SystemBrowserAuthBroker))]
 
 namespace DesktopAuthenticationIntegration;
-public sealed class SystemBrowserAuthBroker
+public sealed class SystemBrowserAuthBroker()
     : ISystemBrowserAuthBrokerProvider // IWebAuthenticationBrokerProvider
 {
-    private readonly ILogger<SystemBrowserAuthBroker> _logger;
-    private readonly IHttpServer _server;
-    private readonly IAuthCallbackHandler _callbackHandler;
-    private readonly IBrowserProvider _browserProvider;
-    private Uri? _serverRootUri;
-    private Uri ServerRootUri
-    {
-        get
-        {
-            if (_serverRootUri is null)
-            {
-                (_serverRootUri, _) = _server.Start();
-            }
 
-            return _serverRootUri;
-        }
-    }
-    public SystemBrowserAuthBroker(
-        ILogger<SystemBrowserAuthBroker> logger,
-        IHttpServer httpServer,
-        IAuthCallbackHandler callbackHandler,
-        IBrowserProvider? browserProvider = null)
+    private IServiceProvider? serviceProvider;
+    /// <summary>
+    /// Gets or initializes the used server options.<br/>
+    /// Defaults to http://localhost:5001 binding to loopback address.
+    /// </summary>
+    /// <value>The server options.</value>
+    /// <remarks>
+    /// <see cref="ServerOptions"/> can not be configured to use HTTPS because of <see cref="Yllibed.HttpServer.Server"/> uses TCPListener which does not support HTTPS natively.
+    /// </remarks>
+    public ServerOptions ServerOptions { get; private set; } = new ServerOptions()
     {
-        _browserProvider = browserProvider ?? new BrowserProvider(logger);
-        _server = httpServer;
-        _callbackHandler = callbackHandler;
-        _logger = logger;
-        _server = httpServer;
+        Hostname4 = "localhost",
+        Port = 5001,
+        BindAddress4 = IPAddress.Loopback
+    };
+
+    private Uri? _serverRootUri;
+
+    private (Uri RootUri, IAuthCallbackHandler Handler) EnsureServerStarted(string? callbackUri = null)
+    {
+        serviceProvider = new ServiceCollection()
+            .Configure<ServerOptions>(options =>
+            {
+                options.Hostname4 = ServerOptions.Hostname4;
+                options.Port = ServerOptions.Port;
+                options.BindAddress4 = ServerOptions.BindAddress4;
+            }) 
+            .AddYllibedHttpServer(options =>
+             {
+                 options.Hostname4 = "localhost";
+                 options.Port = 5001;
+                 options.BindAddress4 = IPAddress.Loopback;
+             }).AddOAuthCallbackHandlerAndRegister(configure =>
+                configure.CallbackUri = ServerOptions.ToUri4(callbackUri ?? "/callback")?.ToString()
+             ).BuildServiceProvider();
+
+        var server = serviceProvider.GetRequiredService<Server>();
+        
+        if (_serverRootUri is null)
+        {
+            (_serverRootUri, _) = server.Start();
+        }
+       
+        var handler = serviceProvider.GetRequiredService<OAuthCallbackHandler>();
+
+        return (_serverRootUri, handler);
+        
     }
 
     public Uri GetCurrentApplicationCallbackUri()
     {
-        if( _callbackHandler.CallbackUri is null)
-        {
-            // TODO: Check if we can get the callback URI from somewhere else, e.g. from protocol if existing in the target platform.
-            throw new InvalidOperationException("The callback URI has not been set. Make sure to call AuthenticateAsync first.");
-        }
-        return new Uri(ServerRootUri, _callbackHandler.CallbackUri);
+        return new Uri(EnsureServerStarted().RootUri, "/callback");
     }
 
     public async Task<WebAuthenticationResult> AuthenticateAsync(
@@ -54,91 +69,42 @@ public sealed class SystemBrowserAuthBroker
         Uri callbackUri,
         CancellationToken ct)
     {
-        if (_logger.IsEnabled(LogLevel.Information))
-        {
-            _logger.LogInformation("Starting desktop OAuth authorization code flow.");
-        }
 
         CheckWebAuthOptionFlag(options);
 
-        if (_logger.IsEnabled(LogLevel.Trace))
-        {
-            _logger.LogTrace("Opening browser to authorization endpoint: {AuthUri}", requestUri);
-            _logger.LogTrace("Listening for callback at: {Callback}", callbackUri.ToString());
-        }
-        var startedServerRootUri = ServerRootUri;
-        var callbackHandler = new OAuthCallbackHandler(callbackUri);
+        // ensure server is started
+        var (rootUri, authCallbackHandler) = EnsureServerStarted();
 
-        _browserProvider.OpenBrowser(requestUri);
-        var result = await _callbackHandler.WaitForCallbackAsync();
-        if (_logger.IsEnabled(LogLevel.Trace))
-        {
-            _logger.LogTrace("Authentication flow completed with status: {Status}", result.ResponseStatus);
-        }
-        return result;
+        // open system browser
+        // prefer injected browser provider when available
+        BrowserProvider.OpenBrowser(requestUri);
+
+        return await authCallbackHandler.WaitForCallbackAsync();
+
     }
-public async Task<WebAuthenticationResult> AuthenticateAsync(
-        WebAuthenticationOptions options,
-        Uri requestUri,
-        CancellationToken ct)
-    {
-        if (_logger.IsEnabled(LogLevel.Trace))
-        {
-            _logger.LogTrace("Starting desktop OAuth authorization code flow.");
-        }
 
-        CheckWebAuthOptionFlag(options);
-        var startedServerRootUri = ServerRootUri;
-        using (_server.RegisterHandler(_callbackHandler))
-        {
-            _server.Start();
-            _browserProvider.OpenBrowser(requestUri);
-            var result = await _callbackHandler.WaitForCallbackAsync();
-            if (_logger.IsEnabled(LogLevel.Information))
-            {
-                _logger.LogInformation("Authentication flow completed with status: {Status}", result.ResponseStatus);
-            }
-            return result;
 
-        }
-    }
 
     private void CheckWebAuthOptionFlag(WebAuthenticationOptions options)
     {
         if (options.HasFlag(WebAuthenticationOptions.SilentMode))
         {
-            if (_logger.IsEnabled(LogLevel.Error))
-            {
-                _logger.LogError("SilentMode is not supported by this broker.");
-            }
             throw new NotSupportedException("SilentMode is not supported by this broker.");
         }
 #pragma warning disable IDE0079 // Remove unnecessary suppression of the warning.
 #pragma warning disable Uno0001 // WebAuthenticationOptions.UseTitle is not supported to be used in Uno Platform. We know about this, thats why we throw those exceptions in there.
         if (options.HasFlag(WebAuthenticationOptions.UseTitle))
         {
-            if (_logger.IsEnabled(LogLevel.Error))
-            {
-                _logger.LogError("UseTitle is not supported by this broker.");
-            }
             throw new NotSupportedException("UseTitle is not supported by this broker.");
         }
 
         if (options.HasFlag(WebAuthenticationOptions.UseHttpPost))
         {
-            if (_logger.IsEnabled(LogLevel.Error))
-            {
-                _logger.LogError("UseHttpPost is not supported by this broker.");
-            }
             throw new NotSupportedException("UseHttpPost is not supported by this broker.");
         }
 
         if (options.HasFlag(WebAuthenticationOptions.UseCorporateNetwork))
         {
-            if (_logger.IsEnabled(LogLevel.Error))
-            {
-                _logger.LogError("UseCorporateNetwork is not supported by this broker.");
-            }
             throw new NotSupportedException("UseCorporateNetwork is not supported by this broker.");
         }
 #pragma warning restore Uno0001 // WebAuthenticationOptions.UseTitle is not supported to be used in Uno Platform.

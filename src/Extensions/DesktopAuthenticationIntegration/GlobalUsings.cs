@@ -1,4 +1,9 @@
-global using Windows.Security.Authentication.Web;
+global using System.Net;
+global using DevTKSS.Extensions.Uno.DesktopAuthenticationIntegration;
+global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
+global using Windows.Security.Authentication.Web;
 global using Yllibed.HttpServer;
+global using Yllibed.HttpServer.Extensions;
 global using Yllibed.HttpServer.Handlers.Uno;
+global using Yllibed.HttpServer.Handlers.Uno.Extensions;
