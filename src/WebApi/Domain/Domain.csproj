@@ -7,7 +7,7 @@
     <NoWarn>$(NoWarn);MSG0005</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Mediator.Abstractions"/>
-    <PackageReference Include="Mediator.SourceGenerator"/>
+    <PackageReference Include="Mediator.Abstractions" />
+    <PackageReference Include="Mediator.SourceGenerator" />
   </ItemGroup>
 </Project>

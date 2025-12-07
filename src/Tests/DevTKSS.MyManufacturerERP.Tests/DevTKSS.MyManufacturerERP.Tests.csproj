@@ -4,6 +4,7 @@
     <TargetFrameworks>$(DefaultTargetFramework)</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\DevTKSS.MyManufacturerERP\DevTKSS.MyManufacturerERP.csproj" />
+    <ProjectReference Include="..\..\Client\DevTKSS.MyManufacturerERP\DevTKSS.MyManufacturerERP.csproj" />
   </ItemGroup>
 </Project>

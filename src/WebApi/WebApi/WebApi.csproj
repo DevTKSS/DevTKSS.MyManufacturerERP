@@ -39,7 +39,7 @@
 
   <ItemGroup> 
    <Content Include="..\AppData\*.json" CopyToOutputDirectory="PreserveNewest" LinkBase="AppData" />
-    <ProjectReference Include="..\Application\Application.csproj"/>
+    <ProjectReference Include="..\Application\Application.csproj" />
   </ItemGroup>
   <ItemGroup>
     <!-- Mapster for mapping -->

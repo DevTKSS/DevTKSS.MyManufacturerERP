@@ -15,6 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\DevTKSS.MyManufacturerERP\DevTKSS.MyManufacturerERP.csproj" />
+    <ProjectReference Include="..\..\Client\DevTKSS.MyManufacturerERP\DevTKSS.MyManufacturerERP.csproj" />
   </ItemGroup>
 </Project>
