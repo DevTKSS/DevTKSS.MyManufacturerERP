@@ -16,12 +16,12 @@
 
   <ItemGroup Label="Validation">
     <PackageVersion Include="Uno.Extensions.Validation.Fluent" Version="7.0.4" />
-    <PackageVersion Include="FluentValidation" Version="12.1.0" />
-    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
+    <PackageVersion Include="FluentValidation" Version="12.1.1" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
   </ItemGroup>
   <ItemGroup Label="Serilog">
     <PackageVersion Include="Serilog.Expressions" Version="5.0.0" />
-    <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
   </ItemGroup>
   <ItemGroup Condition="$(UsingUnoSdk) != 'true'">
     <PackageVersion Include="Uno.Wasm.Bootstrap.Server" Version="10.0.13" />
@@ -47,17 +47,17 @@
   <ItemGroup Label="OpenApi Packages">
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.0" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.11.0" />
-    <PackageVersion Include="Scalar.AspNetCore.Microsoft" Version="2.10.3" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.11.1" />
+    <PackageVersion Include="Scalar.AspNetCore.Microsoft" Version="2.11.1" />
   </ItemGroup>
   <ItemGroup Label="General Test Packages">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-    <PackageVersion Include="GitHubActionsTestLogger" Version="2.4.1" />
+    <PackageVersion Include="GitHubActionsTestLogger" Version="3.0.1" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup Label="xUnit Test Packages">
-    <PackageVersion Include="xunit.v3" Version="3.2.0" />
+    <PackageVersion Include="xunit.v3" Version="3.2.1" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
   </ItemGroup>
   <ItemGroup Label="NUnit Test Packages">
@@ -65,22 +65,19 @@
     <PackageVersion Include="NUnit3TestAdapter" Version="5.2.0" />
   </ItemGroup>
   <ItemGroup Label="UITests Packages">
-    <PackageVersion Include="Uno.UITest.Helpers" Version="1.1.0-dev.70" />
+    <PackageVersion Include="Uno.UITest.Helpers" Version="1.1.0-dev.92" />
     <PackageVersion Include="Xamarin.UITest" Version="4.4.2" />
   </ItemGroup>
-
   <ItemGroup Label="Local Packages" Condition="'$(Configuration)' == 'Debug'">
-    <PackageVersion Include="Yllibed.HttpServer.Handlers.Uno" Version="1.0.0-dev.42.gdc5e80f186" />
-    <PackageVersion Include="Yllibed.HttpServer" Version="1.0.0-dev.43.gc63352c1a6" />
+    <PackageVersion Include="Yllibed.HttpServer.Handlers.Uno" Version="1.0.0-dev.52.g6571324c64" />
+    <PackageVersion Include="Yllibed.HttpServer" Version="1.0.0-dev.52.g6571324c64" />
     <PackageVersion Include="AspNet.Security.OAuth.Etsy" Version="10.0.1-dev" />
   </ItemGroup>
-
   <ItemGroup Label="Mapping">
     <PackageVersion Include="Mapster" Version="9.0.0-pre01" />
     <PackageVersion Include="Mapster.DependencyInjection" Version="9.0.0-pre01" />
     <PackageVersion Include="Mapster.Async" Version="9.0.0-pre01" />
     <PackageVersion Include="Mapster.Immutable" Version="9.0.0-pre01" />
     <PackageVersion Include="Mapster.EFCore" Version="9.0.0-pre01" />
-    <PackageVersion Include="Riok.Mapperly" Version="2.1.0" />
   </ItemGroup>
 </Project>
