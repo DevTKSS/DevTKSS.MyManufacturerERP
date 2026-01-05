@@ -169,7 +169,7 @@ namespace DevTKSS.MyManufacturerERP.Clients.Etsy.Models
         public long? ShopSectionId { get; set; }
         /// <summary>When true, renews a listing for four months upon expiration.</summary>
         public bool? ShouldAutoRenew { get; set; }
-        /// <summary>A list of SKU strings for the listing. SKUs will only appear if the requesting user owns the shop and a valid matching OAuth 2 token is provided. When requested without the token it will be an empty array.</summary>
+        /// <summary>A list of SKU strings for the listing. SKUs will only appear if the requesting user owns the shop and a valid matching OAuthDefaults 2 token is provided. When requested without the token it will be an empty array.</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public List<string>? Skus { get; set; }

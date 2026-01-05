@@ -4,7 +4,7 @@ namespace DevTKSS.MyManufacturerERP.Infrastructure;
 
 public class EtsyOAuthEndpointOptions : OAuthEndpointOptions
 {
-    public const string SectionName = "EtsyOAuthEndpoint";
+    public new const string SectionName = "EtsyOAuthEndpoint";
 
     // Token key under which the authenticated user's id will be stored in the token cache/credentials
     public string UserIdTokenKey { get; init; } = "UserId";
