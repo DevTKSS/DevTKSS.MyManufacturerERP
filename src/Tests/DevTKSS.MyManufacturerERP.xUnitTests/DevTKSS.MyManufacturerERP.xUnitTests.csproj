@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>$(DefaultTargetFramework)</TargetFrameworks>
@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Client\DevTKSS.MyManufacturerERP\DevTKSS.MyManufacturerERP.csproj" />
+    <ProjectReference Include="..\..\Extensions\DesktopAuth\DevTKSS.Extensions.Uno.Authentication.Desktop.csproj" />
   </ItemGroup>
 
 </Project>
