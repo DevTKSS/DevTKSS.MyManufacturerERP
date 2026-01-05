@@ -1,9 +1,9 @@
 namespace DevTKSS.Extensions.OAuth.Defaults;
 
 /// <summary>
-/// oAuth ResponseValueCode Grant standarized keys <see href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.1"/>
+/// oAuth Authorization Code Grant standarized keys <see href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.1"/>
 /// </summary>
-public class OAuthAuthRequestDefaults
+public static class OAuthAuthorizationCodeReqestDefaults
 {
     public const string ResponseTypeKey = "response_type";
     /// <summary>

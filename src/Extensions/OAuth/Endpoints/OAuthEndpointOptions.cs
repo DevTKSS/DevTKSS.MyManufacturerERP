@@ -2,7 +2,7 @@ namespace DevTKSS.Extensions.OAuth.Endpoints;
 
 public class OAuthEndpointOptions : EndpointOptions
 {
-	public const string ConfigurationSection = "EndpointOptions";
+	public const string SectionName = "OAuthOptions";
 
 	public string? AuthorizationEndpoint { get; init; }
 	public string? UserInfoEndpoint { get; init; }
@@ -19,19 +19,12 @@ public class OAuthEndpointOptions : EndpointOptions
 
     public void Valdiate()
     {
-        if (string.IsNullOrWhiteSpace(AuthorizationEndpoint))
-            throw new ArgumentException("AuthorizationEndpoint must be provided in OAuthEndpointOptions");
-        if (string.IsNullOrWhiteSpace(TokenEndpoint))
-            throw new ArgumentException("TokenEndpoint must be provided in OAuthEndpointOptions");
-        if (string.IsNullOrWhiteSpace(UserInfoEndpoint))
-            throw new ArgumentException("UserInfoEndpoint must be provided in OAuthEndpointOptions");
-        if (string.IsNullOrWhiteSpace(ClientId))
-            throw new ArgumentException("ClientId must be provided in OAuthEndpointOptions");
+        ArgumentException.ThrowIfNullOrWhiteSpace(AuthorizationEndpoint, nameof(AuthorizationEndpoint));
+        ArgumentException.ThrowIfNullOrWhiteSpace(TokenEndpoint, nameof(TokenEndpoint));
+        ArgumentException.ThrowIfNullOrWhiteSpace(ClientId, nameof(ClientId));
         if (!UsePkce && string.IsNullOrWhiteSpace(ClientSecret))
             throw new ArgumentException("ClientSecret must be provided in OAuthEndpointOptions if Pkce is enabled");
-        if (string.IsNullOrWhiteSpace(RedirectUri))
-            throw new ArgumentException("RedirectUri must be provided in OAuthEndpointOptions");
-        if (Scopes == null || Scopes.Length == 0)
-            throw new ArgumentException("At least one Scope must be provided in OAuthEndpointOptions");
+        ArgumentException.ThrowIfNullOrWhiteSpace(RedirectUri, nameof(RedirectUri));
+        ArgumentOutOfRangeException.ThrowIfZero(Scopes?.Length ?? 0, nameof(Scopes));
     }
 }

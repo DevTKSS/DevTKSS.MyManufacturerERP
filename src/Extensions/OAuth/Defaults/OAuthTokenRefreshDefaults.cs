@@ -5,7 +5,6 @@ namespace DevTKSS.Extensions.OAuth.Defaults;
 public class OAuthTokenRefreshDefaults
 {
     public const string GrantTypeKey = "grant_type";
-    public const string AuthorizationCode = "authorization_code";
     public const string AccessTokenKey = "access_token";
     public const string TokenTypeKey = "token_type";
     public const string RefreshToken = "refresh_token";
