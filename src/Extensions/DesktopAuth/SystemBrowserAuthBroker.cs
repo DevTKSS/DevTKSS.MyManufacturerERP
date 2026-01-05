@@ -1,12 +1,13 @@
 using Uno.AuthenticationBroker;
 using Uno.Foundation.Extensibility;
-using DesktopAuthenticationIntegration;
+using Windows.System;
 
-// [assembly: ApiExtension(typeof(WebAuthenticationBrokerProvider), typeof(SystemBrowserAuthBroker))]
+[assembly: ApiExtension(typeof(WebAuthenticationBrokerProvider), typeof(SystemBrowserAuthBroker), operatingSystemCondition: "Windows")]
 
-namespace DesktopAuthenticationIntegration;
+namespace DevTKSS.Extensions.Uno.Authentication.Desktop;
+
 public sealed class SystemBrowserAuthBroker()
-    : ISystemBrowserAuthBrokerProvider // IWebAuthenticationBrokerProvider
+    : IWebAuthenticationBrokerProvider //ISystemBrowserAuthBrokerProvider  
 {
 
     private IServiceProvider? serviceProvider;
@@ -18,12 +19,25 @@ public sealed class SystemBrowserAuthBroker()
     /// <remarks>
     /// <see cref="ServerOptions"/> can not be configured to use HTTPS because of <see cref="Yllibed.HttpServer.Server"/> uses TCPListener which does not support HTTPS natively.
     /// </remarks>
-    public ServerOptions ServerOptions { get; private set; } = new ServerOptions()
+    public ServerOptions ServerOptions
     {
-        Hostname4 = "localhost",
-        Port = 5001,
-        BindAddress4 = IPAddress.Loopback
-    };
+        get
+        {
+            field ??= new ServerOptions()
+            {
+                Hostname4 = "localhost",
+                Port = 5001,
+                BindAddress4 = IPAddress.Loopback
+            };
+            return field;
+        }
+        private set
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            field = value;
+        }
+    }
+
 
     private Uri? _serverRootUri;
 
@@ -35,27 +49,20 @@ public sealed class SystemBrowserAuthBroker()
                 options.Hostname4 = ServerOptions.Hostname4;
                 options.Port = ServerOptions.Port;
                 options.BindAddress4 = ServerOptions.BindAddress4;
-            }) 
-            .AddYllibedHttpServer(options =>
-             {
-                 options.Hostname4 = "localhost";
-                 options.Port = 5001;
-                 options.BindAddress4 = IPAddress.Loopback;
-             }).AddOAuthCallbackHandlerAndRegister(configure =>
-                configure.CallbackUri = ServerOptions.ToUri4(callbackUri ?? "/callback")?.ToString()
-             ).BuildServiceProvider();
+            })
+            .AddYllibedHttpServer()
+            .AddOAuthCallbackHandlerAndRegister(configure =>
+            {
+               configure.CallbackUri = ServerOptions.ToUri4(callbackUri ?? "/callback")?.ToString();
+            })
+            .BuildServiceProvider();
 
         var server = serviceProvider.GetRequiredService<Server>();
-        
-        if (_serverRootUri is null)
-        {
-            (_serverRootUri, _) = server.Start();
-        }
-       
+        (_serverRootUri, _) = server.Start();
+
         var handler = serviceProvider.GetRequiredService<OAuthCallbackHandler>();
 
         return (_serverRootUri, handler);
-        
     }
 
     public Uri GetCurrentApplicationCallbackUri()
@@ -77,7 +84,12 @@ public sealed class SystemBrowserAuthBroker()
 
         // open system browser
         // prefer injected browser provider when available
-        BrowserProvider.OpenBrowser(requestUri);
+        // BrowserProvider.OpenBrowser(requestUri); // BUG: no process started
+
+        if(!await Launcher.LaunchUriAsync(requestUri))
+        {
+            throw new Exception("Failed to launch system browser for authentication.");
+        }
 
         return await authCallbackHandler.WaitForCallbackAsync();
 

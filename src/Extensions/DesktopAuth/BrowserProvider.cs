@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace DevTKSS.Extensions.Uno.DesktopAuthenticationIntegration;
+namespace DevTKSS.Extensions.Uno.Authentication.Desktop;
 
 public interface IBrowserProvider
 {
@@ -58,10 +58,9 @@ public class BrowserProvider : IBrowserProvider
 
 					url = url.Replace("&", "^&");
 
-					var psi = new ProcessStartInfo("cmd", $"/c start {url}") 
+					var psi = new ProcessStartInfo("cmd", $"/c start {url}")  // BUG: this is somehow not working on Desktop Target executed on Windows. (Doing nothing) Needs to get checked.
 					{ 
-						CreateNoWindow = true,
-						UseShellExecute = true
+						CreateNoWindow = true
 					};
 
 					Process.Start(psi);
@@ -82,8 +81,7 @@ public class BrowserProvider : IBrowserProvider
 				throw;
 			}
 		}
-		
 
-	}
+    }
 
 }

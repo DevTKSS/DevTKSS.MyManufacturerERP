@@ -1,19 +1,22 @@
 <Project Sdk="Uno.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(DefaultTargetFramework)</TargetFrameworks>
+    <TargetFrameworks>net10.0-desktop;$(DefaultTargetFramework)</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>DevTKSS.Extensions.Uno.DesktopAuthenticationIntegration</RootNamespace>
-    <AssemblyName>DevTKSS.Extensions.Uno.DesktopAuthenticationIntegration</AssemblyName>
+    <RootNamespace>DevTKSS.Extensions.Uno.Authentication.Desktop</RootNamespace>
+    <AssemblyName>DevTKSS.Extensions.Uno.Authentication.Desktop</AssemblyName>
     <Authors>$(Authors)</Authors>
     <UnoFeatures>
       Authentication;
       Logging;
+      WebView;
     </UnoFeatures>
   </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Yllibed.HttpServer" />
     <PackageReference Include="Yllibed.HttpServer.Handlers.Uno" />
   </ItemGroup>
+
 </Project>

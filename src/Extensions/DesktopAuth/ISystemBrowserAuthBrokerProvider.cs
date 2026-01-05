@@ -1,4 +1,4 @@
-namespace DesktopAuthenticationIntegration;
+namespace DevTKSS.Extensions.Uno.Authentication.Desktop;
 
 public interface ISystemBrowserAuthBrokerProvider
 {

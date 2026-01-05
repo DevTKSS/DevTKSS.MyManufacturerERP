@@ -5,7 +5,8 @@
       "src/DataContracts/DataContracts.csproj",
       "src/DevTKSS.MyManufacturerERP.WasmServer/DevTKSS.MyManufacturerERP.Server.csproj",
       "src/Client/DevTKSS.MyManufacturerERP/DevTKSS.MyManufacturerERP.csproj",
-      "src/Extensions/DesktopAuthenticationIntegration/DesktopAuthenticationIntegration.csproj",
+      "src/Extensions/DesktopAuth/DevTKSS.Extensions.Uno.Authentication.Desktop.csproj",
+      "src/Extensions/DesktopAuth.UI/DevTKSS.Extensions.Uno.Authentication.Desktop.UI.csproj",
       "src/Extensions/OAuth.Validation/DevTKSS.Extensions.OAuth.Validation.csproj",
       "src/Extensions/OAuth/DevTKSS.Extensions.OAuth.csproj"
     ]

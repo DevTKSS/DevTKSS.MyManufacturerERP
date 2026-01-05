@@ -1,5 +1,5 @@
 global using System.Net;
-global using DevTKSS.Extensions.Uno.DesktopAuthenticationIntegration;
+global using DevTKSS.Extensions.Uno.Authentication.Desktop;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using Windows.Security.Authentication.Web;

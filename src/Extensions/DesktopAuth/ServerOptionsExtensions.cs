@@ -1,4 +1,4 @@
-namespace DevTKSS.Extensions.Uno.DesktopAuthenticationIntegration;
+namespace DevTKSS.Extensions.Uno.Authentication.Desktop;
 
 internal static class ServerOptionsExtensions
 {

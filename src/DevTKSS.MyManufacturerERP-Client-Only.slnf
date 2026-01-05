@@ -2,7 +2,8 @@
   "solution": {
     "path": "../DevTKSS.MyManufacturerERP.slnx",
     "projects": [
-      "src\\Extensions\\DesktopAuthenticationIntegration\\DesktopAuthenticationIntegration.csproj",
+      "src\\Extensions\\DesktopAuth\\DevTKSS.Extensions.Uno.Authentication.Desktop.csproj",
+      "src\\Extensions\\DesktopAuth.UI\\DevTKSS.Extensions.Uno.Authentication.Desktop.UI.csproj",
       "src\\Client\\DevTKSS.MyManufacturerERP\\DevTKSS.MyManufacturerERP.csproj",
       "src\\Tests\\DevTKSS.MyManufacturerERP.Tests\\DevTKSS.MyManufacturerERP.Tests.csproj",
       "src\\Tests\\DevTKSS.MyManufacturerERP.UITests\\DevTKSS.MyManufacturerERP.UITests.csproj",
