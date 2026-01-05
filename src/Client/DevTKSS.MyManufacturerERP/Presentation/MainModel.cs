@@ -16,7 +16,7 @@ public partial record MainModel
 
     public async Task GoToWebView()
     {
-        await _navigator.NavigateViewModelAsync<WebViewBrowserModel>(this, data: "https://www.google.com/");
+        await _navigator.NavigateViewModelAsync<AuthModel>(this, data: "https://www.google.com/");
     }
 
     public async ValueTask LogoutFromEtsy(CancellationToken token)

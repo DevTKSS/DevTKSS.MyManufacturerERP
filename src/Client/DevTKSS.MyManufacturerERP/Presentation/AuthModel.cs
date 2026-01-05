@@ -20,18 +20,18 @@ public partial record AuthModel
     }
 
     public string Title { get; } = "Login";
-    public IState<string> CurrentUri => State<string>.Value(this, () => "https://example.com/login");
+    public IState<string> CurrentUri => State<string>.Empty(this);
 
     public IState<bool> IsLoading => State<bool>.Value(this, () => false);
 
     public IState<string?> ErrorMessage => State<string?>.Value(this, () => null);
 
     /// <summary>
-    /// Initiates OAuth login flow with Etsy via WebAPI.
+    /// Initiates OAuthDefaults login flow with Etsy via WebAPI.
     /// This method:
     /// 1. Calls IAuthenticationService.LoginAsync() which triggers HandleLoginAsync
     /// 2. HandleLoginAsync calls WebAPI /auth/login endpoint
-    /// 3. WebAPI redirects to Etsy OAuth login page
+    /// 3. WebAPI redirects to Etsy OAuthDefaults login page
     /// 4. User authenticates with Etsy
     /// 5. Etsy redirects back to WebAPI /auth/callback/etsy
     /// 6. WebAPI sets authentication cookie and redirects back to client
@@ -41,24 +41,23 @@ public partial record AuthModel
     {
         try
         {
-            _logger.LogInformation("Starting OAuth login flow with Etsy");
+            _logger.LogInformation("Starting OAuthDefaults login flow with Etsy");
             
             var success = await _authenticationService.LoginAsync(_dispatcher);
-            
             if (success)
             {
-                _logger.LogInformation("OAuth login successful, navigating to main page");
+                _logger.LogInformation("OAuthDefaults login successful, navigating to main page");
                 await _navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.ClearBackStack);
             }
             else
             {
-                _logger.LogWarning("OAuth login failed or was cancelled");
+                _logger.LogWarning("OAuthDefaults login failed or was cancelled");
                 // Error will be displayed in the UI via ErrorMessage state
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception during OAuth login flow");
+            _logger.LogError(ex, "Exception during OAuthDefaults login flow");
             // Set error message for UI display
         }
     }

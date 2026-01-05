@@ -1,0 +1,17 @@
+<ContentDialog
+    x:Class="DevTKSS.MyManufacturerERP.Presentation.Dialogs.AuthenticationDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:DevTKSS.MyManufacturerERP.Presentation.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="TITLE"
+    Style="{ThemeResource DefaultContentDialogStyle}"
+    PrimaryButtonText="Start Authentication Flow"
+    PrimaryButtonCommand="{Binding ExecutePrimaryCommandAsync}">
+	<Grid>
+    <WebView2 x:Name="webView"
+              Source="{Binding CurrentUri, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch"/>
+  </Grid>
+</ContentDialog>

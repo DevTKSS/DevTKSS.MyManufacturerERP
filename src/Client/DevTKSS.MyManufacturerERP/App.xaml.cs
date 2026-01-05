@@ -1,6 +1,4 @@
-using DesktopAuthenticationIntegration;
-using Uno.AuthenticationBroker;
-using DevTKSS.Extensions.OAuth;
+
 
 namespace DevTKSS.MyManufacturerERP;
 public partial class App : Application
@@ -22,18 +20,26 @@ public partial class App : Application
         var builder = /*await*/ this.CreateBuilder(args)
 
           // Add navigation support for toolkit controls such as TabBar and NavigationView
-
           .UseToolkitNavigation()
           .Configure(host => host
 #if DEBUG
              // Switch to Development environment when running in DEBUG
              .UseEnvironment(Environments.Development)
 #endif
-             .UseConfiguration(configure: unoConfigBuilder =>
+             .UseConfiguration(
+              configureAppConfiguration: (context, configBuilder) =>
+              {
+                  configBuilder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+                  configBuilder.AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+              },
+              configure: unoConfigBuilder =>
                  unoConfigBuilder
                     .EmbeddedSource<App>()
                     .Section<AppConfig>()
+                    // Note: "Web" section is loaded automatically by Web Authentication Provider
                     .Section<EtsyOAuthEndpointOptions>(EtsyOAuthEndpointOptions.SectionName)
+                    .Section<OAuthEndpointOptions>(OAuthEndpointOptions.SectionName)
+                    .Section<ServerOptions>()
              )
              .UseLogging(configure: (context, logBuilder) =>
              {
@@ -66,9 +72,9 @@ public partial class App : Application
 
              }, enableUnoLogging: true)
              .UseSerilog(consoleLoggingEnabled: true, fileLoggingEnabled: true)
-            .UseValidation(configure:(validatorBuilder) => validatorBuilder
-                .Validator<OAuthEndpointOptions,OAuthEndpointOptionsValidator>())
-            
+            .UseValidation(configure: (validatorBuilder) => validatorBuilder
+                .Validator<OAuthEndpointOptions, OAuthEndpointOptionsValidator>())
+
             // Enable localization (see appsettings.json for supported languages)
             .UseLocalization()
             .ConfigureServices((context, services) =>
@@ -77,15 +83,10 @@ public partial class App : Application
                     .Where(a => a.GetName().Name?.StartsWith("DevTKSS.Extensions.") ?? false));
 
                 // Register WebAPI OAuth client (Refit) - replaces direct Etsy integration
-                services.AddRefitClient<IWebApiOAuthEndpoints>()
+                services.AddRefitClient<IOAuthEndpoints>()
                     .ConfigureHttpClient(httpClient =>
                     {
-                        // Point to local WebAPI
-                        #if DEBUG
-                        httpClient.BaseAddress = new Uri("http://localhost:5000");
-                        #else
-                        httpClient.BaseAddress = new Uri(builder.Configuration["WebApi:BaseUrl"] ?? "https://api.example.com");
-                        #endif
+                        httpClient.BaseAddress = new Uri("https://openapi.etsy.com/v3");
                     });
             })
             .UseHttp((context, services) =>
@@ -98,40 +99,102 @@ public partial class App : Application
 
             .UseAuthentication(authBuilder =>
             {
-                authBuilder.AddCustom(authBuilder =>
+#if DESKTOP
+                authBuilder.AddCustom(customBuilder =>
                 {
-                    authBuilder.Login(HandleLoginAsync);
-                    authBuilder.Refresh(HandleRefreshAsync);
-                    authBuilder.Logout(HandleLogoutAsync);
-                });
-                #region Web Auth configuration
-                // reference used: https://github.com/unoplatform/uno.extensions/blob/main/testing/TestHarness/TestHarness/Ext/Authentication/Web/WebAuthenticationHostInit.cs
-                //authBuilder.AddWeb<IEtsyOAuthEndpoints>(configureWeb =>
-                //configureWeb
-                //    .AccessTokenKey(OAuthTokenRefreshDefaults.AccessTokenKey)
-                //    .RefreshTokenKey(OAuthTokenRefreshDefaults.RefreshToken)
-                //    .PrepareLoginCallbackUri(
-                //        async(service,serviceProvider,tokencache,loginCallbackUri,ct)
-                //        => loginCallbackUri!)
+                    customBuilder.Login(HandleLoginAsync);
+                    customBuilder.Refresh(HandleRefreshAsync);
+                    customBuilder.Logout(HandleLogoutAsync);
+                }, name: "Custom");
+#elif BROWSERWASM
+                // Web Authentication Provider for WebAssembly
+                authBuilder.AddWeb(configure: configureWeb =>
+                    configureWeb
+                    .AccessTokenKey("access_token")
+                    .RefreshTokenKey("refresh_token")
+                    .PrepareLoginCallbackUri(async (service, serviceProvider, tokenCache, loginCallbackUri, ct) =>
+                    {
+                        // Use WebAssembly-specific callback URI
+                        return await Task.FromResult(new Uri("http://localhost:3000/auth/callback").ToString());
+                    })
+                    .PrepareLoginStartUri(async (sp, credentials, ct) =>
+                    {
+                        // Use configured login URI from appsettings
+                        return new Uri(sp.GetRequiredService<IConfiguration>().GetSection("Web").GetValue<string>("LoginStartUri") ?? "http://localhost:5000/auth/login").ToString();
+                    })
+                    .PostLogin(async (serviceProvider, tokenCache, possiblyNullCredentialsDictionary, tokensDictionary, cancellationToken) =>
+                    {
+                        var logger = serviceProvider.GetRequiredService<ILogger<App>>();
+                        logger.LogInformation("Web authentication completed successfully");
+                        return tokensDictionary;
+                    })
+                    .Refresh(async (serviceProvider, tokenCache, tokens, ct) =>
+                    {
+                        var logger = serviceProvider.GetRequiredService<ILogger<App>>();
+                        logger.LogInformation("Refreshing tokens via Web");
+                        var options = serviceProvider.GetRequiredService<IOptions<OAuthEndpointOptions>>().Value;
+                        if (options.ClientId is not { } clientId)
+                        {
+                            logger.LogError("OAuth ClientId is not configured, cannot refresh tokens");
+                            throw new InvalidOperationException("OAuth ClientId is not configured");
+                        }
+                        var tokenOptions = serviceProvider.GetRequiredService<IOptions<TokenKeyOptions>>()?.Value;
+                        var oauthClient = serviceProvider.GetRequiredService<IOAuthEndpoints>();
+                        try
+                        {
+                            var profile = await oauthClient.AuthenticateAsync(new AuthorizationCodeRequest()
+                            {
+                                ResponseType = OAuthAuthorizationCodeReqestDefaults.CodeKey,
+                                ClientId = options.ClientId,
+                                RedirectUri = options.RedirectUri!,
+                                Scope = options.Scopes.JoinBy(" "),
+                                State = _state,
+                                CodeChallenge = _challenge,
+                                CodeChallengeMethod = OAuthPkceDefaults.CodeChallengeMethodS256
+                            },ct);
+                            logger.LogInformation("Token refresh successful");
+                            return tokens;
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.LogError(ex, "Token refresh failed");
+                            return null;
+                        }
+                    })
+              , name: "Web");
+#endif
+             }
+             
+#region Web Auth configuration (commented reference)
+                    // reference used: https://github.com/unoplatform/uno.extensions/blob/main/testing/TestHarness/TestHarness/Ext/Authentication/Web/WebAuthenticationHostInit.cs
+                    //authBuilder.AddWeb<IEtsyOAuthEndpoints>(configureWeb =>
+                    //configureWeb
+                    //    .AccessTokenKey(OAuthTokenRefreshDefaults.AccessTokenKey)
+                    //    .RefreshTokenKey(OAuthTokenRefreshDefaults.RefreshToken)
+                    //    .PrepareLoginCallbackUri(
+                    //        async(service,serviceProvider,tokencache,loginCallbackUri,ct)
+                    //        => loginCallbackUri!)
 
-                //    .PrepareLoginStartUri(async (sp, tokens, credentials, loginStartUri, ct)
-                //        => await CreateLoginStartUri(sp, tokens, credentials, loginStartUri, ct))
+                    //    .PrepareLoginStartUri(async (sp, tokens, credentials, loginStartUri, ct)
+                    //        => await CreateLoginStartUri(sp, tokens, credentials, loginStartUri, ct))
 
-                //    .PostLogin(async(authService, serviceProvider,tokenCache, credentials, redirectUri, tokens,cancellationToken)
-                //        => await ProcessPostLoginAsync(authService, serviceProvider,tokenCache,credentials,redirectUri,tokens, cancellationToken))
+                    //    .PostLogin(async(authService, serviceProvider,tokenCache, credentials, redirectUri, tokens,cancellationToken)
+                    //        => await ProcessPostLoginAsync(authService, serviceProvider,tokenCache,credentials,redirectUri,tokens, cancellationToken))
 
-                //    .Refresh(async (authService, serviceProvider, tokenCache, tokens, cancellationToken) =>
-                //        await RefreshTokensAsync(authService, serviceProvider, tokenCache, tokens, cancellationToken))
+                    //    .Refresh(async (authService, serviceProvider, tokenCache, tokens, cancellationToken) =>
+                    //        await RefreshTokensAsync(authService, serviceProvider, tokenCache, tokens, cancellationToken))
 
-                //    ,name: "EtsyOAuth"),
-                //},
-                //    configureAuthorization: builder =>
-                //    {
-                //        builder.AuthorizationHeader(scheme: "Bearer");
-                //    }
-                #endregion
-            },configureAuth =>
-                configureAuth.AuthorizationHeader(scheme: "Bearer")
+                    //    ,name: "EtsyOAuth"),
+                    //},
+                    //    configureAuthorization: builder =>
+                    //    {
+                    //        builder.AuthorizationHeader(scheme: "Bearer");
+                    //    }
+#endregion
+            , configure =>
+                 configure
+                    .Cookies(accessTokenCookie: "access_token", refreshTokenCookie: "refresh_token")
+                    .AuthorizationHeader(scheme: "Bearer")
             )
             .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
         );
@@ -157,69 +220,77 @@ public partial class App : Application
             }
         });
     }
-
-    private async ValueTask<IDictionary<string, string>?> HandleLoginAsync(IServiceProvider serviceProvider, IDispatcher? dispatcher, IDictionary<string,string> credentials,  CancellationToken ct)
+    string _state = string.Empty;
+    string _challenge = string.Empty;
+    private async ValueTask<IDictionary<string, string>?> HandleLoginAsync(IServiceProvider serviceProvider, IDispatcher? dispatcher, IDictionary<string, string> credentials, CancellationToken ct)
     {
         var logger = serviceProvider.GetRequiredService<ILogger<App>>();
         logger.LogInformation("Starting OAuth login flow");
 
         try
         {
-            var oauthClient = serviceProvider.GetRequiredService<IWebApiOAuthEndpoints>();
+            var oauthClient = serviceProvider.GetRequiredService<IOAuthEndpoints>();
+            var options = serviceProvider.GetRequiredService<IOptions<OAuthEndpointOptions>>().Value;
+            var tokenOptions = serviceProvider.GetRequiredService<IOptions<TokenKeyOptions>>()?.Value;
+            logger.LogInformation("Calling authorization endpoint to initiate OAuth flow");
             
-            logger.LogInformation("Calling WebAPI /auth/login endpoint to initiate OAuth flow");
-            
+            if (options.ClientId is not { } clientId)
+            {
+                logger.LogError("OAuth ClientId is not configured, cannot refresh tokens");
+                throw new InvalidOperationException("OAuth ClientId is not configured");
+            }
+
+            _state = OAuth2Utilitys.GenerateCodeVerifier();
+            _challenge = OAuth2Utilitys.GenerateCodeChallenge(_state);
             // Call WebAPI /auth/login endpoint
             // WebAPI will redirect to Etsy OAuth login page
-            var response = await oauthClient.LoginAsync(ct);
-            
-            logger.LogInformation("WebAPI response status: {Status}", response.StatusCode);
-            
+            var response = await oauthClient.AuthenticateAsync(new AuthorizationCodeRequest()
+            {
+                ResponseType = OAuthDefaults.Values.Code,
+                ClientId = options.ClientId,
+                RedirectUri = options.RedirectUri!,
+                Scope = options.Scopes.JoinBy(" "),
+                State = _state,
+                CodeChallenge = _challenge,
+                CodeChallengeMethod = OAuthDefaults.Values.S256
+            }, ct);
+
+            logger.LogInformation("Opening OAuth login page: {Source}", options.AuthorizationEndpoint);
+
+            // TODO: Open the OAuth login page for interactive oAuth flow and wait for the user to complete the OAuth flow
+            // For Desktop (macOS/Linux): Opens system browser
+            // For Desktop (Windows): Opens WebView2AuthenticationPage in Dialog or new Window
+            // For Mobile (iOS/Android): Opens in-app browser
+            // For WebAssembly: ???
+           
+            logger.LogInformation("Authentication response status: {Status}", response.StatusCode);
+
             if (!response.IsSuccessStatusCode)
             {
-                logger.LogError("WebAPI /auth/login failed with status {Status}", response.StatusCode);
-                return null;
+                if (logger.IsEnabled(LogLevel.Error))
+                {
+                    logger.LogError("Authentication failed with status {Status}", response.StatusCode);
+                }
+                return default;
             }
 
-            // Extract the redirect location from the response
-            // The WebAPI returns a redirect to the Etsy OAuth page
-            var loginUrl = response.Headers.Location?.ToString();
-            
-            if (string.IsNullOrEmpty(loginUrl))
-            {
-                logger.LogWarning("WebAPI did not provide a redirect location for OAuth");
-                // Fallback: Use WebAPI base URL as callback
-                loginUrl = "http://localhost:5000";
-            }
+            // TODO: Extract authorization code from redirect URI
 
-            logger.LogInformation("Opening OAuth login page: {Url}", loginUrl);
+            // TODO: Validate state and code returned from OAuth provider
 
-            // Open the OAuth login page in the default browser
-            // For Desktop (Windows/macOS/Linux): Opens system browser
-            // For Mobile (iOS/Android): Opens in-app browser
-            // For WebAssembly: Not applicable as it runs in the browser already
-            #if !WINDOWS_UWP && !HAS_UNO_WASM
-            try
-            {
-                await Windows.System.Launcher.LaunchUriAsync(new Uri(loginUrl));
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Failed to launch browser for OAuth");
-                // On some platforms, we might need a fallback
-                throw;
-            }
-            #endif
+            // TODO: Exchange authorization code for access and refresh tokens
 
-            logger.LogInformation("OAuth browser launched successfully");
-            
-            // Wait for the user to complete the OAuth flow
-            // In a real scenario, we'd check if authentication was successful
-            // For now, return a token to indicate the flow was initiated
+            // TODO: Depending on the OAuth provider, extract IdToken from Response/possible needs to be parsed. See EtsyOAuthProvider using UserID
+
+            // TODO: If provided, loop through tokenOptions.AdditionalTokenKeys to extract additional tokens
+
+            // TODO: Return tokens which will be automatically stored internally from Uno.Extensions.Authentication ITokenCache
             return new Dictionary<string, string>
             {
-                { "access_token", "oauth-in-progress" },
-                { "token_type", "Bearer" }
+                { tokenOptions?.AccessTokenKey ?? OAuthTokenRefreshDefaults.AccessTokenKey, accessToken },
+                { tokenOptions?.RefreshTokenKey ?? OAuthTokenRefreshDefaults.RefreshToken, refreshToken },
+                { OAuthTokenRefreshDefaults.ExpiresInKey, expiresInToken }
+
             };
         }
         catch (Exception ex)
@@ -231,17 +302,38 @@ public partial class App : Application
 
     private async ValueTask<IDictionary<string, string>?> HandleRefreshAsync(IServiceProvider serviceProvider, ITokenCache tokenCache, IDictionary<string, string> tokens, CancellationToken ct)
     {
-        var logger = serviceProvider.GetRequiredService<ILogger<App>>();
-        logger.LogInformation("Token refresh via WebAPI");
-
+        var logger = serviceProvider.GetRequiredService<ILogger<IOAuthEndpoints>>();
+        var options = serviceProvider.GetRequiredService<IOptions<EtsyOAuthEndpointOptions>>().Value;
+        var tokenOptions = serviceProvider.GetRequiredService<IOptions<TokenKeyOptions>>()?.Value;
+        var oauthClient = serviceProvider.GetRequiredService<IOAuthEndpoints>();
+        logger.LogInformation("Token refresh flow started");
+        if (!tokens.TryGetValue(tokenOptions?.RefreshTokenKey ?? OAuthDefaults.Keys.RefreshToken, out var rt))
+        {
+            logger.LogWarning("No refresh token available, user needs to login again");
+            return default;
+        }
+        if (options.ClientId is not { } clientId)
+        {
+            logger.LogError("OAuth ClientId is not configured, cannot refresh tokens");
+            throw new InvalidOperationException("OAuth ClientId is not configured");
+        }
         try
         {
-            var oauthClient = serviceProvider.GetRequiredService<IWebApiOAuthEndpoints>();
-            
-            // Call WebAPI /auth/profile to verify current authentication
-            var profile = await oauthClient.GetProfileAsync(ct);
-            
-            logger.LogInformation("Token refresh successful - User: {UserId}", profile.UserId);
+
+            // Call Refresh Token endpoint to verify current authentication
+            var tokenResponse = await oauthClient.RefreshTokenAsync(refreshTokenRequest:
+                new RefreshTokenRequest()
+                {
+                    GrantType = OAuthDefaults.Values.RefreshToken,
+                    ClientId = options.ClientId,
+                    RefreshToken = rt
+                }, ct);
+
+            // TODO: E.g. EtsyOAuthProvider uses user_id as IdToken which can be gotten from AccessToken/RefreshToken [user_id].[rest of AccessToken] or from /users/me endpoint by providing the AccessToken. /users/{user_id} instead returns human readable Id information like primary_email and first_name last_name
+            var etsyClient = serviceProvider.GetRequiredService<IEtsyUserEndpoints>();
+            var meResponse = await etsyClient.GetMeAsync(bearerToken: tokenResponse.RefreshToken!, apiKey: options.ClientId!, cancellationToken: ct);
+
+            logger.LogInformation("Token refresh successful - User: '{UserId}' with ShopId: '{ShopId}'", meResponse.UserId, meResponse.ShopId);
             
             // Tokens are still valid, return them
             return tokens;
@@ -260,26 +352,26 @@ public partial class App : Application
 
     private async ValueTask<bool> HandleLogoutAsync(IServiceProvider ServiceProvider, IDispatcher? dispatcher, ITokenCache tokenCache, IDictionary<string,string> tokens, CancellationToken ct)
     {
-        var logger = ServiceProvider.GetRequiredService<ILogger<App>>();
-        logger.LogInformation("Logout via WebAPI");
+        var logger = ServiceProvider.GetRequiredService<ILogger<IOAuthEndpoints>>();
+        var oauthClient = ServiceProvider.GetRequiredService<IOAuthEndpoints>();
+
+        logger.LogInformation("Logout starting");
         
         try
         {
-            var oauthClient = ServiceProvider.GetRequiredService<IWebApiOAuthEndpoints>();
+            // Call logout endpoint if provider has one
+            //var response = await oauthClient.LogoutAsync(ct);
             
-            // Call WebAPI /auth/logout endpoint
-            var response = await oauthClient.LogoutAsync(ct);
+            //if (!response.IsSuccessStatusCode)
+            //{
+            //    logger.LogWarning("logout failed with status {Status}", response.StatusCode);
+            //}
+            //else
+            //{
+            //    logger.LogInformation("logout successful");
+            //}
             
-            if (!response.IsSuccessStatusCode)
-            {
-                logger.LogWarning("WebAPI logout failed with status {Status}", response.StatusCode);
-            }
-            else
-            {
-                logger.LogInformation("WebAPI logout successful");
-            }
-            
-            // Clear local token cache regardless of WebAPI response
+            // Clear local token cache regardless of response
             await tokenCache.ClearAsync(ct);
             
             return true;
@@ -300,7 +392,7 @@ public partial class App : Application
             new ViewMap<AuthPage, AuthModel>(),
             new ViewMap<MainPage, MainModel>(),
             new DataViewMap<SecondPage, SecondModel, Entity>(),
-            new ViewMap<WebViewBrowserPage, WebViewBrowserModel>()
+            new ViewMap<AuthenticationDialog, AuthDialogModel>()
         );
 
         routes.Register(
@@ -311,7 +403,7 @@ public partial class App : Application
                     new ("Main", View: views.FindByViewModel<MainModel>(), IsDefault:true),
                     new ("Second", View: views.FindByViewModel<SecondModel>()),
                     new ("Auth", View: views.FindByViewModel<AuthModel>()),
-                    new ("WebViewRouter", View: views.FindByViewModel<WebViewBrowserModel>())
+                    new ("AuthDialog", View: views.FindByViewModel<AuthModel>())
                 ]
             )
         );
