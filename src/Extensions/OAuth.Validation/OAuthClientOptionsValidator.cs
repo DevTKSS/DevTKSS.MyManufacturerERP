@@ -1,10 +1,8 @@
-
-using static DevTKSS.Extensions.OAuth.Validation.UriValidationUtility;
 namespace DevTKSS.Extensions.OAuth.Validation;
 
-public class OAuthEndpointOptionsValidator : AbstractValidator<OAuthEndpointOptions>
+public class OAuthClientOptionsValidator : AbstractValidator<OAuthClientOptions>
 {
-    public OAuthEndpointOptionsValidator()
+    public OAuthClientOptionsValidator()
     {
 
         RuleFor(x => x.AuthorizationEndpoint)

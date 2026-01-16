@@ -1,4 +1,5 @@
-
+using DevTKSS.Extensions.OAuth.UI.Http;
+using DevTKSS.Extensions.OAuth.UI.Navigation;
 
 namespace DevTKSS.MyManufacturerERP;
 public partial class App : Application
@@ -9,7 +10,9 @@ public partial class App : Application
     /// </summary>
     public App()
     {
+#pragma warning disable IDE0003 // Remove qualification
         this.InitializeComponent();
+#pragma warning restore IDE0003 // Remove qualification
     }
 
     public Window? MainWindow { get; private set; }
@@ -27,18 +30,13 @@ public partial class App : Application
              .UseEnvironment(Environments.Development)
 #endif
              .UseConfiguration(
-              configureAppConfiguration: (context, configBuilder) =>
-              {
-                  configBuilder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-                  configBuilder.AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true);
-              },
               configure: unoConfigBuilder =>
                  unoConfigBuilder
                     .EmbeddedSource<App>()
                     .Section<AppConfig>()
-                    // Note: "Web" section is loaded automatically by Web Authentication Provider
+                    // Note: "Web" section is loaded automatically by Web Authentication Providers
                     .Section<EtsyOAuthEndpointOptions>(EtsyOAuthEndpointOptions.SectionName)
-                    .Section<OAuthEndpointOptions>(OAuthEndpointOptions.SectionName)
+                    .Section<OAuthClientOptions>(OAuthClientOptions.SectionName)
                     .Section<ServerOptions>()
              )
              .UseLogging(configure: (context, logBuilder) =>
@@ -73,7 +71,8 @@ public partial class App : Application
              }, enableUnoLogging: true)
              .UseSerilog(consoleLoggingEnabled: true, fileLoggingEnabled: true)
             .UseValidation(configure: (validatorBuilder) => validatorBuilder
-                .Validator<OAuthEndpointOptions, OAuthEndpointOptionsValidator>())
+                .Validator<OAuthClientOptions, OAuthClientOptionsValidator>()
+                .Validator<OAuthOptions,OAuthOptionsValidator>())
 
             // Enable localization (see appsettings.json for supported languages)
             .UseLocalization()
@@ -82,12 +81,10 @@ public partial class App : Application
                 services.AddValidatorsFromAssemblies(AppDomain.CurrentDomain.GetAssemblies()
                     .Where(a => a.GetName().Name?.StartsWith("DevTKSS.Extensions.") ?? false));
 
-                // Register WebAPI OAuth client (Refit) - replaces direct Etsy integration
-                services.AddRefitClient<IOAuthEndpoints>()
-                    .ConfigureHttpClient(httpClient =>
-                    {
-                        httpClient.BaseAddress = new Uri("https://openapi.etsy.com/v3");
-                    });
+                services.AddHttpClient<IOAuthTokenClient, OAuthTokenHttpClient>();
+#if DESKTOP
+                services.AddSingleton<IOAuthNavigationService, OAuthNavigationService>();
+#endif
             })
             .UseHttp((context, services) =>
             {
@@ -102,56 +99,93 @@ public partial class App : Application
 #if DESKTOP
                 authBuilder.AddCustom(customBuilder =>
                 {
-                    customBuilder.Login(HandleLoginAsync);
+                    customBuilder.Login(HandleLoginCallbackAsync);
                     customBuilder.Refresh(HandleRefreshAsync);
                     customBuilder.Logout(HandleLogoutAsync);
                 }, name: "Custom");
 #elif BROWSERWASM
-                // Web Authentication Provider for WebAssembly
+                // Web Authentication Providers for WebAssembly
                 authBuilder.AddWeb(configure: configureWeb =>
                     configureWeb
-                    .AccessTokenKey("access_token")
-                    .RefreshTokenKey("refresh_token")
+                    .AccessTokenKey(OAuthDefaults.Keys.AccessToken)
+                    .RefreshTokenKey(OAuthDefaults.Keys.RefreshToken)
                     .PrepareLoginCallbackUri(async (service, serviceProvider, tokenCache, loginCallbackUri, ct) =>
                     {
-                        // Use WebAssembly-specific callback URI
-                        return await Task.FromResult(new Uri("http://localhost:3000/auth/callback").ToString());
+                        // Use WebAssembly-specific callback URI // Ignore async, no await, NO Task.FromResult!!!
+                        return new Uri("http://localhost:3000/auth/callback").OriginalString;
                     })
                     .PrepareLoginStartUri(async (sp, credentials, ct) =>
                     {
                         // Use configured login URI from appsettings
-                        return new Uri(sp.GetRequiredService<IConfiguration>().GetSection("Web").GetValue<string>("LoginStartUri") ?? "http://localhost:5000/auth/login").ToString();
+                        var redirectUri = new Uri(sp.GetRequiredService<IConfiguration>()
+                                         .GetSection("Web")
+                                         .GetValue<string>("LoginStartUri") ?? "http://localhost:5000/auth/login").OriginalString;
+                        var options = sp.GetRequiredService<IOptions<OAuthClientOptions>>().Value;
+                        if (options is not { ClientId: not null, RedirectUri: not null, Scopes: not null and { Length: > 0 } })
+                        {
+                            throw new InvalidOperationException("OAuth ClientId, RedirectUri, or Scopes not configured");
+                        }
+                        var state = OAuth2Utilitys.GenerateState();
+                        var codeVerifier = OAuth2Utilitys.GenerateCodeVerifier();
+                        var challenge = OAuth2Utilitys.GenerateCodeChallenge(codeVerifier);
+
+                        credentials ??= new Dictionary<string, string>();
+                        credentials.AddOrReplace(OAuthDefaults.Keys.State, state);
+                        credentials.AddOrReplace(OAuthDefaults.Keys.Pkce.CodeVerifier, codeVerifier);
+                        var authRequest = new AuthorizationCodeRequest()
+                        {
+                            ClientId = options.ClientId!,
+                            RedirectUri = options.RedirectUri!,
+                            Scope = options.Scopes.JoinBy(" "),
+                            State = state,
+                            CodeChallenge = challenge,
+                        }.ToDictionary();
+
+                        return new UriBuilder(redirectUri).AppendQueryParameters(authRequest).Uri.OriginalString;
+
                     })
-                    .PostLogin(async (serviceProvider, tokenCache, possiblyNullCredentialsDictionary, tokensDictionary, cancellationToken) =>
+                    .PostLogin(async (serviceProvider, tokenCache, credentials, tokens, cancellationToken) =>
                     {
-                        var logger = serviceProvider.GetRequiredService<ILogger<App>>();
+                        var logger = serviceProvider.GetRequiredService<ILogger<IOAuthTokenClient>>();
+                        // TODO: Implement processing of redirect URI to extract tokens
+                        credentials?.Clear();
                         logger.LogInformation("Web authentication completed successfully");
-                        return tokensDictionary;
+                        return tokens;
                     })
                     .Refresh(async (serviceProvider, tokenCache, tokens, ct) =>
                     {
-                        var logger = serviceProvider.GetRequiredService<ILogger<App>>();
+                        var logger = serviceProvider.GetRequiredService<ILogger<IOAuthTokenClient>>();
                         logger.LogInformation("Refreshing tokens via Web");
-                        var options = serviceProvider.GetRequiredService<IOptions<OAuthEndpointOptions>>().Value;
+                        var options = serviceProvider.GetRequiredService<IOptions<OAuthClientOptions>>().Value;
                         if (options.ClientId is not { } clientId)
                         {
                             logger.LogError("OAuth ClientId is not configured, cannot refresh tokens");
                             throw new InvalidOperationException("OAuth ClientId is not configured");
                         }
-                        var tokenOptions = serviceProvider.GetRequiredService<IOptions<TokenKeyOptions>>()?.Value;
-                        var oauthClient = serviceProvider.GetRequiredService<IOAuthEndpoints>();
+
+                        var oauthClient = serviceProvider.GetRequiredService<IOAuthTokenClient>();
                         try
                         {
-                            var profile = await oauthClient.AuthenticateAsync(new AuthorizationCodeRequest()
+                            if (!tokens.TryGetRefreshToken(out var rt) || string.IsNullOrWhiteSpace(rt))
                             {
-                                ResponseType = OAuthAuthorizationCodeReqestDefaults.CodeKey,
-                                ClientId = options.ClientId,
-                                RedirectUri = options.RedirectUri!,
-                                Scope = options.Scopes.JoinBy(" "),
-                                State = _state,
-                                CodeChallenge = _challenge,
-                                CodeChallengeMethod = OAuthPkceDefaults.CodeChallengeMethodS256
-                            },ct);
+                                logger.LogWarning("No refresh token available");
+                                return null;
+                            }
+
+                            var tokenResponse = await oauthClient.RefreshTokenAsync(new RefreshTokenRequest
+                            {
+                                ClientId = clientId,
+                                RefreshToken = rt,
+                            }, ct);
+
+                            if (tokenResponse is not TokenResponse { AccessToken: not null, RefreshToken: not null, ExpiresIn: > 0, TokenType: OAuthDefaults.Values.Bearer } response)
+                            {
+                                logger.LogError("Token refresh response missing required tokens");
+                                return null;
+                            }
+
+                            tokens.AddOrReplace(response.ToDictionary(false));
+
                             logger.LogInformation("Token refresh successful");
                             return tokens;
                         }
@@ -171,14 +205,14 @@ public partial class App : Application
                     //configureWeb
                     //    .AccessTokenKey(OAuthTokenRefreshDefaults.AccessTokenKey)
                     //    .RefreshTokenKey(OAuthTokenRefreshDefaults.RefreshToken)
-                    //    .PrepareLoginCallbackUri(
+                    //    .PrepareLoginCallbackUriAsync(
                     //        async(service,serviceProvider,tokencache,loginCallbackUri,ct)
                     //        => loginCallbackUri!)
 
-                    //    .PrepareLoginStartUri(async (sp, tokens, credentials, loginStartUri, ct)
+                    //    .PrepareLoginStartUriAsync(async (sp, tokens, credentials, loginStartUri, ct)
                     //        => await CreateLoginStartUri(sp, tokens, credentials, loginStartUri, ct))
 
-                    //    .PostLogin(async(authService, serviceProvider,tokenCache, credentials, redirectUri, tokens,cancellationToken)
+                    //    .PostLoginAsync(async(authService, serviceProvider,tokenCache, credentials, redirectUri, tokens,cancellationToken)
                     //        => await ProcessPostLoginAsync(authService, serviceProvider,tokenCache,credentials,redirectUri,tokens, cancellationToken))
 
                     //    .Refresh(async (authService, serviceProvider, tokenCache, tokens, cancellationToken) =>
@@ -220,18 +254,16 @@ public partial class App : Application
             }
         });
     }
-    string _state = string.Empty;
-    string _challenge = string.Empty;
-    private async ValueTask<IDictionary<string, string>?> HandleLoginAsync(IServiceProvider serviceProvider, IDispatcher? dispatcher, IDictionary<string, string> credentials, CancellationToken ct)
+
+    private async ValueTask<IDictionary<string, string>?> HandleLoginCallbackAsync(IServiceProvider serviceProvider, IDispatcher? dispatcher, IDictionary<string, string> credentials, CancellationToken ct)
     {
-        var logger = serviceProvider.GetRequiredService<ILogger<App>>();
+        var logger = serviceProvider.GetRequiredService<ILogger<IOAuthTokenClient>>();
         logger.LogInformation("Starting OAuth login flow");
 
         try
         {
-            var oauthClient = serviceProvider.GetRequiredService<IOAuthEndpoints>();
-            var options = serviceProvider.GetRequiredService<IOptions<OAuthEndpointOptions>>().Value;
-            var tokenOptions = serviceProvider.GetRequiredService<IOptions<TokenKeyOptions>>()?.Value;
+            var oauthClient = serviceProvider.GetRequiredService<IOAuthTokenClient>();
+            var options = serviceProvider.GetRequiredService<IOptions<OAuthClientOptions>>().Value;
             logger.LogInformation("Calling authorization endpoint to initiate OAuth flow");
             
             if (options.ClientId is not { } clientId)
@@ -240,39 +272,23 @@ public partial class App : Application
                 throw new InvalidOperationException("OAuth ClientId is not configured");
             }
 
-            _state = OAuth2Utilitys.GenerateCodeVerifier();
-            _challenge = OAuth2Utilitys.GenerateCodeChallenge(_state);
-            // Call WebAPI /auth/login endpoint
-            // WebAPI will redirect to Etsy OAuth login page
-            var response = await oauthClient.AuthenticateAsync(new AuthorizationCodeRequest()
-            {
-                ResponseType = OAuthDefaults.Values.Code,
-                ClientId = options.ClientId,
-                RedirectUri = options.RedirectUri!,
-                Scope = options.Scopes.JoinBy(" "),
-                State = _state,
-                CodeChallenge = _challenge,
-                CodeChallengeMethod = OAuthDefaults.Values.S256
-            }, ct);
+            var state = OAuth2Utilitys.GenerateState();
+            var codeVerifier = OAuth2Utilitys.GenerateCodeVerifier();
+            var challenge = OAuth2Utilitys.GenerateCodeChallenge(codeVerifier);
 
-            logger.LogInformation("Opening OAuth login page: {Source}", options.AuthorizationEndpoint);
+            //var tokenResponse = await oauthClient.ExchangeCodeAsync(new AccessTokenRequest
+            //{
+            //    ClientId = clientId,
+            //    RedirectUri = options.RedirectUri!,
+            //    Code = authorizationCode,
+            //    CodeVerifier = codeVerifier,
+            //}, ct);
 
-            // TODO: Open the OAuth login page for interactive oAuth flow and wait for the user to complete the OAuth flow
-            // For Desktop (macOS/Linux): Opens system browser
-            // For Desktop (Windows): Opens WebView2AuthenticationPage in Dialog or new Window
-            // For Mobile (iOS/Android): Opens in-app browser
-            // For WebAssembly: ???
-           
-            logger.LogInformation("Authentication response status: {Status}", response.StatusCode);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                if (logger.IsEnabled(LogLevel.Error))
-                {
-                    logger.LogError("Authentication failed with status {Status}", response.StatusCode);
-                }
-                return default;
-            }
+            //if (tokenResponse is not TokenResponse { AccessToken: not null, RefreshToken: not null, ExpiresIn: > 0, TokenType: OAuthDefaults.Values.Bearer } response)
+            //{
+            //    logger.LogError("Token exchange response missing required tokens");
+            //    return default;
+            //}
 
             // TODO: Extract authorization code from redirect URI
 
@@ -285,13 +301,8 @@ public partial class App : Application
             // TODO: If provided, loop through tokenOptions.AdditionalTokenKeys to extract additional tokens
 
             // TODO: Return tokens which will be automatically stored internally from Uno.Extensions.Authentication ITokenCache
-            return new Dictionary<string, string>
-            {
-                { tokenOptions?.AccessTokenKey ?? OAuthTokenRefreshDefaults.AccessTokenKey, accessToken },
-                { tokenOptions?.RefreshTokenKey ?? OAuthTokenRefreshDefaults.RefreshToken, refreshToken },
-                { OAuthTokenRefreshDefaults.ExpiresInKey, expiresInToken }
-
-            };
+           // return response.ToDictionary(false);
+           return default;
         }
         catch (Exception ex)
         {
@@ -302,12 +313,11 @@ public partial class App : Application
 
     private async ValueTask<IDictionary<string, string>?> HandleRefreshAsync(IServiceProvider serviceProvider, ITokenCache tokenCache, IDictionary<string, string> tokens, CancellationToken ct)
     {
-        var logger = serviceProvider.GetRequiredService<ILogger<IOAuthEndpoints>>();
+        var logger = serviceProvider.GetRequiredService<ILogger<IOAuthTokenClient>>();
         var options = serviceProvider.GetRequiredService<IOptions<EtsyOAuthEndpointOptions>>().Value;
-        var tokenOptions = serviceProvider.GetRequiredService<IOptions<TokenKeyOptions>>()?.Value;
-        var oauthClient = serviceProvider.GetRequiredService<IOAuthEndpoints>();
+        var oauthClient = serviceProvider.GetRequiredService<IOAuthTokenClient>();
         logger.LogInformation("Token refresh flow started");
-        if (!tokens.TryGetValue(tokenOptions?.RefreshTokenKey ?? OAuthDefaults.Keys.RefreshToken, out var rt))
+        if (!tokens.TryGetValue(options.TokenKeys.RefreshTokenKey, out var rt))
         {
             logger.LogWarning("No refresh token available, user needs to login again");
             return default;
@@ -319,23 +329,22 @@ public partial class App : Application
         }
         try
         {
+            var tokenResponse = await oauthClient.RefreshTokenAsync(new RefreshTokenRequest()
+            {
+                ClientId = options.ClientId,
+                RefreshToken = rt
+            }, ct);
 
-            // Call Refresh Token endpoint to verify current authentication
-            var tokenResponse = await oauthClient.RefreshTokenAsync(refreshTokenRequest:
-                new RefreshTokenRequest()
-                {
-                    GrantType = OAuthDefaults.Values.RefreshToken,
-                    ClientId = options.ClientId,
-                    RefreshToken = rt
-                }, ct);
+            if (tokenResponse is not TokenResponse { AccessToken: not null, RefreshToken: not null, ExpiresIn: > 0, TokenType: OAuthDefaults.Values.Bearer } response)
+            {
+                logger.LogError("Token refresh response missing required tokens");
+                return default;
+            }
 
-            // TODO: E.g. EtsyOAuthProvider uses user_id as IdToken which can be gotten from AccessToken/RefreshToken [user_id].[rest of AccessToken] or from /users/me endpoint by providing the AccessToken. /users/{user_id} instead returns human readable Id information like primary_email and first_name last_name
-            var etsyClient = serviceProvider.GetRequiredService<IEtsyUserEndpoints>();
-            var meResponse = await etsyClient.GetMeAsync(bearerToken: tokenResponse.RefreshToken!, apiKey: options.ClientId!, cancellationToken: ct);
+            tokens[options.TokenKeys.AccessTokenKey] = response.AccessToken;
+            tokens[options.TokenKeys.RefreshTokenKey] = response.RefreshToken;
+            tokens[options.TokenKeys.ExpiresInKey] = DateTime.Now.AddSeconds(response.ExpiresIn).ToString("g");
 
-            logger.LogInformation("Token refresh successful - User: '{UserId}' with ShopId: '{ShopId}'", meResponse.UserId, meResponse.ShopId);
-            
-            // Tokens are still valid, return them
             return tokens;
         }
         catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
@@ -346,14 +355,13 @@ public partial class App : Application
         catch (Exception ex)
         {
             logger.LogError(ex, "Token refresh failed");
-            return tokens; // Return existing tokens on error
+            return tokens;
         }
     }
 
     private async ValueTask<bool> HandleLogoutAsync(IServiceProvider ServiceProvider, IDispatcher? dispatcher, ITokenCache tokenCache, IDictionary<string,string> tokens, CancellationToken ct)
     {
-        var logger = ServiceProvider.GetRequiredService<ILogger<IOAuthEndpoints>>();
-        var oauthClient = ServiceProvider.GetRequiredService<IOAuthEndpoints>();
+        var logger = ServiceProvider.GetRequiredService<ILogger<IOAuthTokenClient>>();
 
         logger.LogInformation("Logout starting");
         

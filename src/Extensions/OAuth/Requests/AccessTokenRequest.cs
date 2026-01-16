@@ -3,7 +3,7 @@ namespace DevTKSS.Extensions.OAuth.Requests;
 public record AccessTokenRequest
 {
     [JsonPropertyName(OAuthDefaults.Keys.GrantType)]
-    public string GrantType { get; set; } = OAuthDefaults.Values.RefreshToken;
+    public string GrantType { get; set; } = OAuthDefaults.Values.AuthorizationCode;
 
     [JsonPropertyName(OAuthDefaults.Keys.ClientId)]
     public required string ClientId { get; set; }
@@ -16,4 +16,16 @@ public record AccessTokenRequest
 
     [JsonPropertyName(OAuthDefaults.Keys.Pkce.CodeVerifier)]
     public required string CodeVerifier { get; set; }
+
+    public IDictionary<string, string> ToDictionary()
+    {
+        return new Dictionary<string, string>
+        {
+            [OAuthDefaults.Keys.GrantType] = GrantType,
+            [OAuthDefaults.Keys.ClientId] = ClientId,
+            [OAuthDefaults.Keys.RedirectUri] = RedirectUri,
+            [OAuthDefaults.Keys.Code] = Code,
+            [OAuthDefaults.Keys.Pkce.CodeVerifier] = CodeVerifier,
+        };
+    }
 }

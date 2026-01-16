@@ -1,25 +1,28 @@
-using Uno.AuthenticationBroker;
-using Uno.Foundation.Extensibility;
-using Windows.System;
+// [assembly: ApiExtension(typeof(WebAuthenticationBrokerProvider), typeof(SystemBrowserAuthBroker), operatingSystemCondition: "Windows")]
 
-[assembly: ApiExtension(typeof(WebAuthenticationBrokerProvider), typeof(SystemBrowserAuthBroker), operatingSystemCondition: "Windows")]
 
-namespace DevTKSS.Extensions.Uno.Authentication.Desktop;
+// [assembly: ApiExtension(typeof(WebAuthenticationBrokerProvider), typeof(SystemBrowserAuthBroker), operatingSystemCondition: "Windows")]
+
+using DevTKSS.Extensions.OAuth.Providers;
+
+namespace DevTKSS.Extensions.OAuth.UI.Desktop;
 
 public sealed class SystemBrowserAuthBroker()
-    : IWebAuthenticationBrokerProvider //ISystemBrowserAuthBrokerProvider  
+    : ISystemBrowserAuthBrokerProvider   //IWebAuthenticationBrokerProvider 
 {
+    private readonly IHttpServer? _server;
+    private readonly IAuthCallbackHandler? _callbackHandler;
 
-    private IServiceProvider? serviceProvider;
     /// <summary>
     /// Gets or initializes the used server options.<br/>
     /// Defaults to http://localhost:5001 binding to loopback address.
     /// </summary>
     /// <value>The server options.</value>
     /// <remarks>
-    /// <see cref="ServerOptions"/> can not be configured to use HTTPS because of <see cref="Yllibed.HttpServer.Server"/> uses TCPListener which does not support HTTPS natively.
+    /// 1. <see cref="ServerOptions"/> can not be configured to use HTTPS because of <see cref="Yllibed.HttpServer.Server"/> uses TCPListener which does not support HTTPS natively.<br/>
+    /// 2. If you not use DI but want to configure the <see cref="ServerOptions"/>, you must do this before the first call to <see cref="AuthenticateAsync"/> or <see cref="GetCurrentApplicationCallbackUri"/>.
     /// </remarks>
-    public ServerOptions ServerOptions
+    private ServerOptions ServerOptions
     {
         get
         {
@@ -31,45 +34,77 @@ public sealed class SystemBrowserAuthBroker()
             };
             return field;
         }
-        private set
-        {
-            ArgumentNullException.ThrowIfNull(value);
-            field = value;
-        }
+        set;
     }
-
-
+    private AuthCallbackHandlerOptions CallbackHandlerOptions
+    {
+        get
+        {
+            field ??= new AuthCallbackHandlerOptions()
+            {
+                CallbackUri = ServerOptions.ToUri4("/callback")?.ToString()
+            };
+            return field;
+        }
+        set;
+    }
+    public void Configure(
+        Action<ServerOptions>? configureServer = default,
+        Action<AuthCallbackHandlerOptions>? configureCallback = default)
+    {
+        configureServer?.Invoke(ServerOptions);
+        configureCallback?.Invoke(CallbackHandlerOptions);
+    }
     private Uri? _serverRootUri;
 
-    private (Uri RootUri, IAuthCallbackHandler Handler) EnsureServerStarted(string? callbackUri = null)
+    [ActivatorUtilitiesConstructor]
+    public SystemBrowserAuthBroker(
+        IHttpServer server,
+        IAuthCallbackHandler callbackHandler) 
+        : this()
     {
-        serviceProvider = new ServiceCollection()
-            .Configure<ServerOptions>(options =>
-            {
-                options.Hostname4 = ServerOptions.Hostname4;
-                options.Port = ServerOptions.Port;
-                options.BindAddress4 = ServerOptions.BindAddress4;
-            })
-            .AddYllibedHttpServer()
-            .AddOAuthCallbackHandlerAndRegister(configure =>
-            {
-               configure.CallbackUri = ServerOptions.ToUri4(callbackUri ?? "/callback")?.ToString();
-            })
-            .BuildServiceProvider();
+        _server = server;
+        _callbackHandler = callbackHandler;
+    }
+    private (Uri RootUri, IAuthCallbackHandler Handler) EnsureServerStarted()
+    {
+        if (_server is null || _callbackHandler is null)
+        { 
+            var serviceProvider = new ServiceCollection()
+               .Configure<ServerOptions>(options =>
+               {
+                   options.Hostname4 = ServerOptions.Hostname4;
+                   options.Port = ServerOptions.Port;
+                   options.BindAddress4 = ServerOptions.BindAddress4;
+               })
+               .AddYllibedHttpServer()
+               .AddOAuthCallbackHandlerAndRegister(configure =>
+               {
+                   configure.CallbackUri = CallbackHandlerOptions.CallbackUri;
+               })
+               .BuildServiceProvider();
 
-        var server = serviceProvider.GetRequiredService<Server>();
-        (_serverRootUri, _) = server.Start();
+            var server = serviceProvider.GetRequiredService<IHttpServer>();
 
-        var handler = serviceProvider.GetRequiredService<OAuthCallbackHandler>();
+            (_serverRootUri, _) = server.Start();
 
-        return (_serverRootUri, handler);
+            var handler = serviceProvider.GetRequiredService<IAuthCallbackHandler>();
+            return (_serverRootUri, handler);
+        }
+        
+        (_serverRootUri, _) = _server.Start();
+
+        return (_serverRootUri, _callbackHandler);
     }
 
     public Uri GetCurrentApplicationCallbackUri()
     {
         return new Uri(EnsureServerStarted().RootUri, "/callback");
     }
-
+   
+    /// <remarks>
+    /// <paramref name="ct"/> not gets used by now.
+    /// </remarks>
     public async Task<WebAuthenticationResult> AuthenticateAsync(
         WebAuthenticationOptions options,
         Uri requestUri,
@@ -79,23 +114,29 @@ public sealed class SystemBrowserAuthBroker()
 
         CheckWebAuthOptionFlag(options);
 
+        if (callbackUri is not null)
+        {
+            if (callbackUri.IsAbsoluteUri
+                && callbackUri.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase)
+                && callbackUri.HostNameType is UriHostNameType.Dns or UriHostNameType.IPv4 or UriHostNameType.IPv6)
+            {
+                ServerOptions.Hostname4 = callbackUri.Host;
+                ServerOptions.Port = callbackUri.IsDefaultPort ? ServerOptions.Port : (ushort)callbackUri.Port;
+                ServerOptions.BindAddress4 = IPAddress.Loopback;
+
+                CallbackHandlerOptions.CallbackUri = callbackUri.OriginalString;
+            }
+        }
+
         // ensure server is started
         var (rootUri, authCallbackHandler) = EnsureServerStarted();
 
         // open system browser
-        // prefer injected browser provider when available
-        // BrowserProvider.OpenBrowser(requestUri); // BUG: no process started
-
-        if(!await Launcher.LaunchUriAsync(requestUri))
-        {
-            throw new Exception("Failed to launch system browser for authentication.");
-        }
+        BrowserProvider.OpenBrowser(requestUri);// BUG: no process started
 
         return await authCallbackHandler.WaitForCallbackAsync();
 
     }
-
-
 
     private void CheckWebAuthOptionFlag(WebAuthenticationOptions options)
     {

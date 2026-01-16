@@ -7,7 +7,7 @@ public static class AuthDictionaryExtensions
     #region Error Responses
     public static bool TryGetErrorDescription(this IDictionary<string, string> credentials,[NotNullWhen(true)] out string? errorDescription)
     {
-        if (credentials.TryGetValue(OAuthErrorResponseDefaults.ErrorDescriptionKey, out var errorDescriptionValue))
+        if (credentials.TryGetValue(OAuthDefaults.Keys.Error.Description, out var errorDescriptionValue))
         {
             errorDescription = errorDescriptionValue;
             return true;
@@ -17,7 +17,7 @@ public static class AuthDictionaryExtensions
     }
     public static bool TryGetErrorUri(this IDictionary<string, string> credentials,[NotNullWhen(true)] out string? errorUri)
     {
-        if (credentials.TryGetValue(OAuthErrorResponseDefaults.ErrorUriKey, out var errorUriValue))
+        if (credentials.TryGetValue(OAuthDefaults.Keys.Error.Uri, out var errorUriValue))
         {
             errorUri = errorUriValue;
             return true;
@@ -27,7 +27,7 @@ public static class AuthDictionaryExtensions
     }
     public static bool TryGetErrorCode(this IDictionary<string, string> credentials,[NotNullWhen(true)] out string? errorCode)
     {
-        if (credentials.TryGetValue(OAuthErrorResponseDefaults.ErrorKey, out var errorVal))
+        if (credentials.TryGetValue(OAuthDefaults.Keys.Error.Key, out var errorVal))
         {
             errorCode = errorVal;
             return true;
@@ -38,14 +38,24 @@ public static class AuthDictionaryExtensions
 
     public static bool IsErrorResponse(this IDictionary<string, string> credentials)
     {
-        return credentials.ContainsKey(OAuthErrorResponseDefaults.ErrorKey);
+        return credentials.ContainsKey(OAuthDefaults.Keys.Error.Key);
     }
     #endregion
 
     #region Auth Requests
+    public static bool TryGetAuthorizationCode(this IDictionary<string, string> credentials,[NotNullWhen(true)] out string? authorizationCode)
+    {
+        if (credentials.TryGetValue(OAuthDefaults.Values.AuthorizationCode, out var codeValue))
+        {
+            authorizationCode = codeValue;
+            return true;
+        }
+        authorizationCode = null;
+        return false;
+    }
     public static bool TryGetState(this IDictionary<string, string> credentials,[NotNullWhen(true)] out string? state)
     {
-        if (credentials.TryGetValue(OAuthAuthorizationCodeReqestDefaults.StateKey, out var stateValue))
+        if (credentials.TryGetValue(OAuthDefaults.Keys.State, out var stateValue))
         {
             state = stateValue;
             return true;
@@ -56,7 +66,7 @@ public static class AuthDictionaryExtensions
 
     public static bool TryGetCode(this IDictionary<string, string> credentials,[NotNullWhen(true)] out string? code)
     {
-        if (credentials.TryGetValue(OAuthAuthorizationCodeReqestDefaults.CodeKey, out var codeValue))
+        if (credentials.TryGetValue(OAuthDefaults.Keys.Code, out var codeValue))
         {
             code = codeValue;
             return true;
@@ -66,7 +76,7 @@ public static class AuthDictionaryExtensions
     }
     public static bool TryGetCodeVerifier(this IDictionary<string, string> credentials,[NotNullWhen(true)] out string? codeVerifier)
     {
-        if (credentials.TryGetValue(OAuthPkceDefaults.CodeVerifierKey, out var codeVerifierValue))
+        if (credentials.TryGetValue(OAuthDefaults.Keys.Pkce.CodeVerifier, out var codeVerifierValue))
         {
             codeVerifier = codeVerifierValue;
             return true;

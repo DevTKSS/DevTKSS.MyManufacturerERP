@@ -57,7 +57,7 @@ public static partial class OAuth2Utilitys
 
     #region Query Parameter Parsing
     // Regex source generator: parses key=value pairs in a query string. Last value wins on duplicates.
-    [GeneratedRegex(@"([^?&=]+)=([^&]*)", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture)]
+    [GeneratedRegex(@"(?<key>[^?&=]+)=(?<value>[^&]*)", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture)]
     private static partial Regex QueryParameterRegex();
 
 
@@ -66,20 +66,32 @@ public static partial class OAuth2Utilitys
     /// </summary>
     /// <param name="uri">The <see cref="Uri"/> from which to extract query parameters.</param>
     /// <returns>A <see cref="IDictionary{TKey, TValue}"/> containing the query parameters as key-value pairs.</returns>
-    public static IDictionary<string, string> GetParameters(this Uri uri)
+    public static IDictionary<string, string> GetQueryParameters(Uri uri)
     {
+        return GetQueryParameters(uri.OriginalString);
+    }
+    /// <summary>
+    /// Parses the query parameters from the given <paramref name="uriString"/> into a dictionary.
+    /// </summary>
+    /// <param name="uriString">The Uri as <see cref="string"/> from which to extract query parameters.</param>
+    /// <returns>A <see cref="IDictionary{TKey, TValue}"/> containing the query parameters as key-value pairs.</returns>
+    /// <exception cref="ArgumentNullException">If the </exception>
+    public static IDictionary<string, string> GetQueryParameters(string uriString)
+    {
+        if (string.IsNullOrWhiteSpace(uriString))
+        {
+            return new Dictionary<string,string>();
+        }
         return QueryParameterRegex()
-            .Matches(uri.Query)
-            .Cast<Match>()
+            .Matches(uriString)
             .Select(m => new KeyValuePair<string, string>(
-                System.Web.HttpUtility.UrlDecode(m.Groups[1].Value),
-                System.Web.HttpUtility.UrlDecode(m.Groups[2].Value))
-            )
+                System.Web.HttpUtility.UrlDecode(m.Groups["key"].Value),
+                System.Web.HttpUtility.UrlDecode(m.Groups["value"].Value)))
             .GroupBy(kv => kv.Key, StringComparer.Ordinal)
             .ToDictionary(
-            g => g.Key,
-            g => g.Last().Value
-            , StringComparer.Ordinal);
+                g => g.Key,
+                g => g.Last().Value,
+                StringComparer.Ordinal);
     }
     #endregion
 }

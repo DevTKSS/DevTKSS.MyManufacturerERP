@@ -10,4 +10,14 @@ public record RefreshTokenRequest
 
     [JsonPropertyName(OAuthDefaults.Keys.RefreshToken)]
     public required string RefreshToken { get; set; }
+
+    public IDictionary<string, string> ToDictionary()
+    {
+        return new Dictionary<string, string>
+        {
+            [OAuthDefaults.Keys.GrantType] = GrantType,
+            [OAuthDefaults.Keys.ClientId] = ClientId,
+            [OAuthDefaults.Keys.RefreshToken] = RefreshToken,
+        };
+    }
 }

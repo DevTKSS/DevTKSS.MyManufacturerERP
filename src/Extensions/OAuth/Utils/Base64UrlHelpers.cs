@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace DevTKSS.Extensions.OAuth;
+namespace DevTKSS.Extensions.OAuth.Utils;
 
 internal static class Base64UrlHelpers
 {
@@ -14,7 +14,7 @@ internal static class Base64UrlHelpers
     }
     public static string? Encode([NotNullIfNotNull(nameof(arg))]string arg)
     {
-        if (arg == null)
+        if (arg is null)
             return null;
         return Encode(System.Text.Encoding.UTF8.GetBytes(arg));
     }
