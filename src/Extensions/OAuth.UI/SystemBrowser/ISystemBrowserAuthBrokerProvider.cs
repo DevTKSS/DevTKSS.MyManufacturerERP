@@ -1,5 +1,5 @@
 
-namespace DevTKSS.Extensions.OAuth.UI.Desktop;
+namespace DevTKSS.Extensions.OAuth.UI.SystemBrowser;
 
 public interface ISystemBrowserAuthBrokerProvider
 {

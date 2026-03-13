@@ -1,14 +1,9 @@
 // [assembly: ApiExtension(typeof(WebAuthenticationBrokerProvider), typeof(SystemBrowserAuthBroker), operatingSystemCondition: "Windows")]
-
-
-// [assembly: ApiExtension(typeof(WebAuthenticationBrokerProvider), typeof(SystemBrowserAuthBroker), operatingSystemCondition: "Windows")]
-
-using DevTKSS.Extensions.OAuth.Providers;
-
-namespace DevTKSS.Extensions.OAuth.UI.Desktop;
+// NOTE: The File extension is set to .Desktop.cs to only include it in Desktop builds but making it available to the non Desktop limited OAuthNavigationService
+namespace DevTKSS.Extensions.OAuth.UI.SystemBrowser;
 
 public sealed class SystemBrowserAuthBroker()
-    : ISystemBrowserAuthBrokerProvider   //IWebAuthenticationBrokerProvider 
+    : ISystemBrowserAuthBrokerProvider   // IWebAuthenticationBrokerProvider  // TODO: Implement the original Uno Interface if anyone knows, how to successfully set the ApiExtension attribute correctly! Docs are not matching even the API!
 {
     private readonly IHttpServer? _server;
     private readonly IAuthCallbackHandler? _callbackHandler;
@@ -48,7 +43,7 @@ public sealed class SystemBrowserAuthBroker()
         }
         set;
     }
-    public void Configure(
+    public void Configure( // TODO: potentially obsolete, check if we have a different option while staying with a new() ctor
         Action<ServerOptions>? configureServer = default,
         Action<AuthCallbackHandlerOptions>? configureCallback = default)
     {
