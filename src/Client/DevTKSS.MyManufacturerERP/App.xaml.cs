@@ -1,6 +1,3 @@
-using DevTKSS.Extensions.OAuth.UI.Http;
-using DevTKSS.Extensions.OAuth.UI.Navigation;
-
 namespace DevTKSS.MyManufacturerERP;
 public partial class App : Application
 {
@@ -255,7 +252,7 @@ public partial class App : Application
         });
     }
 
-    private async ValueTask<IDictionary<string, string>?> HandleLoginCallbackAsync(IServiceProvider serviceProvider, IDispatcher? dispatcher, IDictionary<string, string> credentials, CancellationToken ct)
+    private static async ValueTask<IDictionary<string, string>?> HandleLoginCallbackAsync(IServiceProvider serviceProvider, IDispatcher? dispatcher, IDictionary<string, string> credentials, CancellationToken ct)
     {
         var logger = serviceProvider.GetRequiredService<ILogger<IOAuthTokenClient>>();
         logger.LogInformation("Starting OAuth login flow");
@@ -311,7 +308,7 @@ public partial class App : Application
         }
     }
 
-    private async ValueTask<IDictionary<string, string>?> HandleRefreshAsync(IServiceProvider serviceProvider, ITokenCache tokenCache, IDictionary<string, string> tokens, CancellationToken ct)
+    private static async ValueTask<IDictionary<string, string>?> HandleRefreshAsync(IServiceProvider serviceProvider, ITokenCache tokenCache, IDictionary<string, string> tokens, CancellationToken ct)
     {
         var logger = serviceProvider.GetRequiredService<ILogger<IOAuthTokenClient>>();
         var options = serviceProvider.GetRequiredService<IOptions<EtsyOAuthEndpointOptions>>().Value;
@@ -331,7 +328,7 @@ public partial class App : Application
         {
             var tokenResponse = await oauthClient.RefreshTokenAsync(new RefreshTokenRequest()
             {
-                ClientId = options.ClientId,
+                ClientId = clientId,
                 RefreshToken = rt
             }, ct);
 
@@ -359,7 +356,7 @@ public partial class App : Application
         }
     }
 
-    private async ValueTask<bool> HandleLogoutAsync(IServiceProvider ServiceProvider, IDispatcher? dispatcher, ITokenCache tokenCache, IDictionary<string,string> tokens, CancellationToken ct)
+    private static async ValueTask<bool> HandleLogoutAsync(IServiceProvider ServiceProvider, IDispatcher? dispatcher, ITokenCache tokenCache, IDictionary<string,string> tokens, CancellationToken ct)
     {
         var logger = ServiceProvider.GetRequiredService<ILogger<IOAuthTokenClient>>();
 

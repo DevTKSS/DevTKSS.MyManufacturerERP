@@ -26,7 +26,7 @@
                   wv:WebView2Extensions.NavigationStartingCommand="{Binding NavigationStartedAsync}"
                   wv:WebView2Extensions.NavigationCompletedCommand="{Binding NavigationCompletedAsync}"
                   wv:WebView2Extensions.IsNavigating="{Binding IsNavigating}"
-                  Source="{Binding Source}" />
+                  Source="{Binding CurrentUrl}" />
 
     </Grid>
 </Page>
