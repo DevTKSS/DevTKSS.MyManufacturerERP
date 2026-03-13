@@ -1,18 +1,37 @@
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Services;
 
-public sealed partial record EtsyOAuthService
+public sealed partial record EtsyOAuthService : OAuthProvider
 {
     [GeneratedRegex(@"^(?<userId>\d+)\.(?<token>.+)$",
-        RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.NonBacktracking | RegexOptions.ExplicitCapture)]
+        RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.ExplicitCapture)]
     public static partial Regex DoesContainUserId();
 
     public const string ProviderName = "EtsyOAuth";
 
-    public async ValueTask<IDictionary<string, string>?> ExchangeCodeForTokensAsync(
+    public EtsyOAuthService(
+        ILogger<OAuthProvider> logger,
+        ITokenCache tokens,
+        IServiceProvider serviceProvider,
+        IOAuthTokenClient tokenClient,
+        ISystemBrowserAuthBrokerProvider systemBrowser,
+        IOptionsMonitor<OAuthOptions> optionsMonitor,
+        [ServiceKey] string name = ProviderName)
+        : base(logger, tokens, serviceProvider, tokenClient, systemBrowser, optionsMonitor, name) // TODO: Prefer reducing the number of parameters by using the IServiceProvider?
+    {
+
+    }
+
+
+
+#pragma warning disable IDE0060 // remove Arguments tokenCache, redirectUri from public shipped API - this shall be called from a delegate, which requieres this signature, but we don't need them in this exact service, so disabling just the pragma warnings
+    public static async ValueTask<IDictionary<string, string>?> ExchangeCodeForTokensAsync(
         IServiceProvider serviceProvider,
         ITokenCache tokenCache,
         IDictionary<string, string> tokens,
+        IDictionary<string, string>? credentials,
+        string? redirectUri,
         CancellationToken cancellationToken)
+#pragma warning restore IDE0060 // remove Arguments tokenCache, redirectUri from public shipped API
     {
         var options = serviceProvider.GetRequiredService<IOptions<EtsyOAuthEndpointOptions>>().Value;
         var logger = serviceProvider.GetRequiredService<ILogger>().ForContext<EtsyOAuthService>();
@@ -43,14 +62,14 @@ public sealed partial record EtsyOAuthService
         return tokens;
     }
 
-    public async ValueTask<IDictionary<string, string>?> GetMeAsync(
+    public static async ValueTask<IDictionary<string, string>?> GetMeAsync(
       IServiceProvider serviceProvider,
       IDictionary<string, string> tokens,
       CancellationToken? cancellationToken = default)
     {
         var options = serviceProvider.GetRequiredService<IOptions<EtsyOAuthEndpointOptions>>().Value;
         var logger = serviceProvider.GetRequiredService<ILogger>().ForContext<EtsyOAuthService>();
-        var userEndpointsClient = serviceProvider.GetRequiredService<IEtsyUserEndpoints>();
+        var userEndpointsClient = serviceProvider.GetRequiredService<IEtsyEndpoints>();
 
         if (tokens == null || !tokens.TryGetAccessToken(out var accessToken) || string.IsNullOrWhiteSpace(accessToken))
         {
