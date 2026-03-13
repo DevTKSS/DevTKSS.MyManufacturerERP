@@ -18,7 +18,7 @@ public class BrowserProvider : IBrowserProvider
     /// </summary>
     /// <param name="uri">The Uri to open</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="uri"/> is <see langword="null"/></exception>"
-    public static void OpenBrowser(Uri uri, ILogger? logger = null)
+    public static void OpenBrowser(Uri uri, ILogger? logger = null) // NOTE: Reference used from suggestion in: https://github.com/unoplatform/uno.extensions/issues/2640
 	{
         ArgumentNullException.ThrowIfNull(uri);
 
