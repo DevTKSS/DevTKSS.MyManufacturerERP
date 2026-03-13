@@ -1,6 +1,3 @@
-using DevTKSS.Extensions.OAuth.UI.Navigation;
-using Microsoft.Extensions.Configuration;
-
 namespace DevTKSS.Extensions.OAuth.UI.Desktop;
 /// <summary>
 /// Service for handling OAuth authentication flows (desktop loopback via system browser).
@@ -12,19 +9,17 @@ public record OAuthProvider : BaseAuthenticationProvider
     private readonly IOptionsMonitor<OAuthOptions> _optionsMonitor;
     private readonly ILogger _logger;
     private readonly IOAuthTokenClient _client;
-    private readonly ISystemBrowserAuthBrokerProvider _systemBrowser;
-    private readonly IOAuthNavigationService _navigation;
+    private readonly ISystemBrowserAuthBrokerProvider _systemBrowser; // TODO: Abstract this to similar approach like IBrowser, but without Duende Reference, IAuthNavigationService should potentially become the handler of doing the UI parts. But across Uno, the (static) WebAuthenticationBrowserProvider.AuthenticateAsync coming from Microsoft is the regular go to.
     private readonly ITokenCache _tokenCache;
     private readonly IServiceProvider _serviceProvider;
     public OAuthSettings? AuthSettings { get; init; }
-
+    // NOTE: Replicates WebAuthenticationProvider from Uno, but extending / fitting to oAuth2 interactive flow capabilities. https://github.com/unoplatform/uno.extensions/blob/main/src/Uno.Extensions.Authentication.UI/Web/WebAuthenticationProvider.cs
     public OAuthProvider(
         ILogger<OAuthProvider> logger, 
         ITokenCache tokens,
         IServiceProvider serviceProvider,
         IOAuthTokenClient tokenClient,
         ISystemBrowserAuthBrokerProvider systemBrowser,
-        IOAuthNavigationService navigation,
         IOptionsMonitor<OAuthOptions> optionsMonitor,
         [ServiceKey] string name = DefaultName)
         : base(logger,name,tokens)
@@ -33,7 +28,6 @@ public record OAuthProvider : BaseAuthenticationProvider
         _logger = logger;
         _serviceProvider = serviceProvider;
         _systemBrowser = systemBrowser;
-        _navigation = navigation;
         _tokenCache = tokens;
         Name = name;
         
