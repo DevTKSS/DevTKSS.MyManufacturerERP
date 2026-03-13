@@ -2,10 +2,6 @@
 // logger configured in `AddSerilog()` below, once configuration and dependency-injection have both been
 // set up successfully.
 
-using AspNet.Security.OAuth.Etsy;
-using DevTKSS.MyManufacturerERP.WebApi;
-using Microsoft.AspNetCore.Authentication.Cookies;
-
 Log.Logger = new LoggerConfiguration()
       .WriteTo.Console()
       .CreateBootstrapLogger();
@@ -39,10 +35,10 @@ try
             options.LowercaseUrls = true);
 
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-    builder.Services.AddOpenApi(options =>
-    {
-        options.AddScalarTransformers();
-    });
+    //builder.Services.AddOpenApi(options =>
+    //{
+    //    options.AddScalarTransformers();
+    //});
 
     #region Add DbContext Services
     builder.Services.AddDbContext<DbContext>(x =>
@@ -66,7 +62,7 @@ try
         options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = EtsyAuthenticationDefaults.AuthenticationScheme;
     })
-    .AddCookie("cookie")
+    .AddCookie()
     .AddEtsy(options =>
     {
         var etsyOptions = builder.Configuration.GetRequiredSection("Authentication")
@@ -87,7 +83,7 @@ try
         // Extract user information from Etsy user data JSON
         // mappings already set up by default in the EtsyAuthenticationProvider
     });
-
+    builder.Services.AddAuthorization();
     var app = builder.Build();
 
     if (app.Environment.IsDevelopment())
@@ -116,26 +112,27 @@ try
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
     {
-        app.MapOpenApi();
-        app.MapScalarApiReference(options =>
-        {
-            options
-                .WithTitle("MyManufacturerERP API Reference")
-                .WithTheme(ScalarTheme.Saturn)
-                .WithClassicLayout()
-                .HideDarkModeToggle()
-                .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
-                .WithDocumentDownloadType(DocumentDownloadType.Json);
-        });
+        // TODO: Make the Open API spec work again, currently blocked from src gen possibly related to Mediator usage
+        //app.MapOpenApi();
+        //app.MapScalarApiReference(options =>
+        //{
+        //    options
+        //        .WithTitle("MyManufacturerERP API Reference")
+        //        .WithTheme(ScalarTheme.Saturn)
+        //        .WithClassicLayout()
+        //        .HideDarkModeToggle()
+        //        .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+        //        .WithDocumentDownloadType(DocumentDownloadType.Json);
+        //});
     }
-    app.Map("/api", (HttpContext context) => context.Response.Redirect("/scalar/v1"))
-        .WithName("ApiReference")
-        .WithDisplayName("Api Reference")
-        .WithDescription("Redirects to the Scalar API Reference documentation.");
+    //app.Map("/api", (HttpContext context) => context.Response.Redirect("/scalar/v1"))
+    //    .WithName("ApiReference")
+    //    .WithDisplayName("Api Reference")
+    //    .WithDescription("Redirects to the Scalar API Reference documentation.");
 
-    app.MapGet("/error", () => "An unexpected Error occured!")
-        .AllowAnonymous()
-        .WithName("Error");
+    //app.MapGet("/error", () => "An unexpected Error occured!")
+    //    .AllowAnonymous()
+    //    .WithName("Error");
 
     app.MapTodoEnpoints();
     app.MapWeatherEndpoints();

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Uno.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net10.0;net10.0-ios;net10.0-android;net10.0-browserwasm;net10.0-desktop</TargetFrameworks>
+    <TargetFrameworks>net10.0;net10.0-desktop</TargetFrameworks>
     <UnoSingleProject>true</UnoSingleProject>
     <OutputType>Library</OutputType>
     <!-- Ensures the .xr.xml files are generated in a proper layout folder -->
@@ -43,7 +43,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\OAuth.UI\DevTKSS.Extensions.OAuth.UI.csproj" />
     <ProjectReference Include="..\OAuth\DevTKSS.Extensions.OAuth.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Views\WebView2AuthenticationPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
 </Project>

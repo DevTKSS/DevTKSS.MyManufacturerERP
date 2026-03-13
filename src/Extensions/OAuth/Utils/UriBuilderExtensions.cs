@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
-using System.Text.RegularExpressions;
+
 
 namespace DevTKSS.Extensions.OAuth;
 
@@ -12,7 +8,6 @@ internal static partial class UriBuilderExtensions
 
     [GeneratedRegex(@"^(?!\s*$)(?!.*\p{Cc})(?:[^%]|%(?:[0-9A-Fa-f]{2}))*$", RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex IsValidQueryComponent();
-
 
     private static string? NormalizeAndEncodeQueryParameter(this string? input)
     {
@@ -78,21 +73,37 @@ internal static partial class UriBuilderExtensions
     }
 
     /// <summary>
-    /// Returns a https URL including an explicit port only when it is not the default https port (443).
+    /// Ensures the returned <see cref="UriBuilder"/> uses the HTTPS scheme and only sets an explicit port, when it is not the default HTTPS port (443).
     /// </summary>
-    internal static string GetHttpsUriWithOptionalPort(string uri, int port)
+    /// <param name="builder">The existing <see cref="UriBuilder"/> instance to update.</param>
+    /// <param name="uri">
+    /// The URI used to create the <see cref="UriBuilder"/> when <paramref name="builder"/> is <see langword="null"/>.
+    /// </param>
+    /// <param name="port">The HTTPS port to apply; ignored when it equals 443.</param>
+    /// <returns>The updated (or newly created) <see cref="UriBuilder"/> instance.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="builder"/> is <see langword="null"/> and <paramref name="uri"/> is missing.</exception>
+    /// <exception cref="UriFormatException">Thrown when <paramref name="builder"/> is <see langword="null"/> and <paramref name="uri"/> is not a valid URI.</exception>
+    internal static UriBuilder SetHttpsUriWithOptionalPort(this UriBuilder? builder, string? uri = default, int port = DefaultHttpsPort)
     {
-        //No need to set port if it equals 443 as it is the default https port
-        if (port != DefaultHttpsPort)
+        if (builder is null)
         {
-            var builder = new UriBuilder(uri)
+            if (string.IsNullOrWhiteSpace(uri))
             {
-                Port = port
-            };
-            return builder.Uri.AbsoluteUri;
+                throw new ArgumentNullException(nameof(uri), "Either provide a valid Uri or an existing UriBuilder instance.");
+            }
+            builder = new UriBuilder(uri);
         }
 
-        return uri;
+        if (!builder.Uri.AbsoluteUri.StartsWith(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+        {
+            builder.Scheme = Uri.UriSchemeHttps;
+        }
+        // No need to set port if it equals 443 as it is the default https port
+        if (port != DefaultHttpsPort)
+        {
+            builder.Port = port;
+        }
+        return builder;
     }
 
 

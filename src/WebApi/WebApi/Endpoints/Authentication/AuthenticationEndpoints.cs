@@ -1,7 +1,3 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.AspNetCore.Authentication.OAuth.Claims;
-
 namespace DevTKSS.MyManufacturerERP.WebApi.Endpoints.Authentication;
 
 public static class AuthenticationEndpoints
@@ -32,7 +28,7 @@ public static class AuthenticationEndpoints
         return group;
     }
 
-    // Simulate the OAuth2 Authorization Endpoint
+    // TODO: Correctly Implement the OAuth2 Authorization Endpoint
     private static IResult Authorize(HttpContext context)
     {
         // TODO: Validate client_id, redirect_uri, scope, state, etc.
@@ -40,7 +36,7 @@ public static class AuthenticationEndpoints
         var redirectUri = query["redirect_uri"].ToString();
         var state = query["state"].ToString();
 
-        // Simulate user login and consent
+        // TODO: Implement user login and consent
         var code = Guid.NewGuid().ToString("N"); // In production, store and associate with user/session
 
         // Build redirect URI with code and state
@@ -52,7 +48,7 @@ public static class AuthenticationEndpoints
         return Results.Redirect(uriBuilder.ToString());
     }
 
-    // Simulate the OAuth2 Token Endpoint
+    // TODO: Correctly Implement the OAuth2 Token Endpoint
     private static async Task<Results<Ok<object>, BadRequest>> Token(HttpContext context)
     {
         // Parse the request body as AccessTokenRequest
@@ -62,7 +58,7 @@ public static class AuthenticationEndpoints
 
         // TODO: Validate code, client_id, redirect_uri, code_verifier, etc.
 
-        // Simulate token response
+        // TODO: Implement token response
         var tokenResponse = new
         {
             access_token = Guid.NewGuid().ToString("N"),
@@ -74,7 +70,7 @@ public static class AuthenticationEndpoints
         return TypedResults.Ok((object)tokenResponse);
     }
 
-    // Simulate the OAuth2 UserInfo Endpoint
+    // TODO: Correctly Implement OAuth2 UserInfo Endpoint
     private static Task<Results<Ok<object>, UnauthorizedHttpResult>> GetMe(HttpContext context)
     {
         var user = context.User;

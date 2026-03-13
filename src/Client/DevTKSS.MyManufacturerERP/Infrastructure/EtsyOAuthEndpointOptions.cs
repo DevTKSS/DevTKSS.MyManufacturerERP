@@ -2,7 +2,7 @@ using System;
 
 namespace DevTKSS.MyManufacturerERP.Infrastructure;
 
-public class EtsyOAuthEndpointOptions : OAuthEndpointOptions
+public class EtsyOAuthEndpointOptions : OAuthClientOptions
 {
     public new const string SectionName = "EtsyOAuthEndpoint";
 

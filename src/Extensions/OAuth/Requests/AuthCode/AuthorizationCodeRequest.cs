@@ -2,6 +2,7 @@ namespace DevTKSS.Extensions.OAuth.Requests;
 
 public record AuthorizationCodeRequest
 {
+    public static AuthCodeRequestBuilder WithBuilder() => AuthCodeRequestBuilder.Empty();
     /// <summary>
     /// Value MUST be set to <see cref="OAuthDefaults.Values.Code">code</see>.
     /// </summary>
@@ -52,23 +53,4 @@ public record AuthorizationCodeRequest
 
     [JsonPropertyName(OAuthDefaults.Keys.Pkce.CodeChallengeMethod)]
     public string CodeChallengeMethod { get; set; } = OAuthDefaults.Values.S256;
- 
-    /// <summary>
-    /// Converts this request to a dictionary suitable for query parameters.
-    /// </summary>
-    /// <returns>A dictionary representing the query parameters for this request.</returns>
-    public IDictionary<string, string> ToDictionary()
-    {
-       return new Dictionary<string, string>
-        {
-            [OAuthDefaults.Keys.ResponseType] = ResponseType,
-            [OAuthDefaults.Keys.ClientId] = ClientId,
-            [OAuthDefaults.Keys.RedirectUri] = RedirectUri,
-            [OAuthDefaults.Keys.Scope] = Scope,
-            [OAuthDefaults.Keys.State] = State,
-            [OAuthDefaults.Keys.Pkce.CodeChallenge] = CodeChallenge,
-            [OAuthDefaults.Keys.Pkce.CodeChallengeMethod] = CodeChallengeMethod
-        };
-    }
-
 }

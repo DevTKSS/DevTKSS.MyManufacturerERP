@@ -1,6 +1,6 @@
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Serialization;
 
-[JsonSerializable(typeof(OAuthEndpointOptions))]
+[JsonSerializable(typeof(OAuthClientOptions))]
 [JsonSerializable(typeof(UserMeResponse))]
 [JsonSerializable(typeof(UserDetailsResponse))]
 [JsonSerializable(typeof(PingResponse))]

@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
+using DevTKSS.Extensions.OAuth.Defaults;
 
 namespace DevTKSS.Extensions.OAuth;
 
@@ -80,18 +81,42 @@ public static partial class OAuth2Utilitys
     {
         if (string.IsNullOrWhiteSpace(uriString))
         {
-            return new Dictionary<string,string>();
+            return new Dictionary<string, string>();
         }
         return QueryParameterRegex()
             .Matches(uriString)
             .Select(m => new KeyValuePair<string, string>(
                 System.Web.HttpUtility.UrlDecode(m.Groups["key"].Value),
                 System.Web.HttpUtility.UrlDecode(m.Groups["value"].Value)))
-            .GroupBy(kv => kv.Key, StringComparer.Ordinal)
+            .DistinctBy(kv => kv.Key, StringComparer.Ordinal)
             .ToDictionary(
                 g => g.Key,
-                g => g.Last().Value,
+                g => g.Value,
                 StringComparer.Ordinal);
+    }
+    #endregion
+
+    #region Redirect URI Extraction
+    [GeneratedRegex(@$"(?:^|[?&]){OAuthDefaults.Keys.RedirectUri}=(?<{OAuthDefaults.Keys.RedirectUri}>[^&#]+)",
+     RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture)]
+    public static partial Regex RedirectUriRegex();
+
+    /// <summary>
+    /// Extracts the configured <see cref="OAuthDefaults.Keys.RedirectUri"/> value from an URI string.
+    /// The input must contain exactly one occurrence of the parameter.
+    /// </summary>
+    /// <param name="uriString">The URI string containing query parameters.</param>
+    /// <returns>The decoded redirect URI value if exactly one match is present</returns>
+    /// <exception cref="ArgumentException">If the provided string does not contain exactly one <see cref="OAuthDefaults.Keys.RedirectUri"/> matching parameter.</exception>
+    public static string GetRedirectUri(this string uriString)
+    {
+        if (string.IsNullOrWhiteSpace(uriString)
+            || RedirectUriRegex().Matches(uriString) is not MatchCollection { Count: < 1 or > 1 } matches)
+        {
+            throw new ArgumentException($"The provided string must contain exactly one redirect_uri parameter.", nameof(uriString));
+        }
+
+        return matches[0].Groups[OAuthDefaults.Keys.RedirectUri].Value;
     }
     #endregion
 }

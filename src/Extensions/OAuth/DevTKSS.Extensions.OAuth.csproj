@@ -9,6 +9,7 @@
     <UnoFeatures>
       Configuration;
       HttpRefit;
+      Authentication;
     </UnoFeatures>
   </PropertyGroup>
 
