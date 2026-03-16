@@ -49,25 +49,26 @@ public record OAuthProvider : BaseAuthenticationProvider
         }
         new OAuthOptionsValidator().ValidateAndThrow(options);
     }
+    private OAuthSettings? _internalSettings;
     private OAuthSettings InternalSettings
     {
         get
         {
-            if (field is null)
+            if (_internalSettings is null)
             {
-                field = InternalSettings ?? new OAuthSettings();
+                _internalSettings = AuthSettings ?? new OAuthSettings();
                 var config = AuthOptions;
                 if (config is not null)
                 {
-                    field = field with
+                    _internalSettings = _internalSettings with
                     {
-                        LoginStartUri = !string.IsNullOrWhiteSpace(config.LoginStartUri) ? config.LoginStartUri : field.LoginStartUri,
-                        LoginCallbackUri = !string.IsNullOrWhiteSpace(config.LoginCallbackUri) ? config.LoginCallbackUri : field.LoginCallbackUri,
-                        Options = config.Options ?? field.Options
+                        LoginStartUri = !string.IsNullOrWhiteSpace(config.LoginStartUri) ? config.LoginStartUri : _internalSettings.LoginStartUri,
+                        LoginCallbackUri = !string.IsNullOrWhiteSpace(config.LoginCallbackUri) ? config.LoginCallbackUri : _internalSettings.LoginCallbackUri,
+                        Options = config.Options ?? _internalSettings.Options
                     };
                 }
             }
-            return field;
+            return _internalSettings;
         }
     }
     #endregion
@@ -161,7 +162,7 @@ public record OAuthProvider : BaseAuthenticationProvider
             authCodeParams = new AuthorizationCodeRequest()
             {
                 ClientId = InternalSettings.Options!.ClientId!,
-                RedirectUri = loginStartUri,
+                RedirectUri = InternalSettings.Options.RedirectUri ?? InternalSettings.LoginCallbackUri ?? loginStartUri,
                 Scope = InternalSettings.Options.Scopes.JoinBy(" "),
                 State = state,
                 CodeChallenge = codeChallenge
@@ -220,8 +221,7 @@ public record OAuthProvider : BaseAuthenticationProvider
             return default;
         }
 
-        // If the response contains an error, log and return early
-        if (queryParams.TryGetErrorCode(out var error) || string.IsNullOrWhiteSpace(error))
+        if (queryParams.TryGetErrorCode(out var error) && !string.IsNullOrWhiteSpace(error))
         {
             queryParams.TryGetErrorDescription(out var errorDescription);
             queryParams.TryGetErrorUri(out var errorUri);
@@ -234,7 +234,7 @@ public record OAuthProvider : BaseAuthenticationProvider
             return default;
         }
 
-        if (queryParams.TryGetCode(out var authCode) || string.IsNullOrWhiteSpace(authCode))
+        if (!queryParams.TryGetCode(out var authCode) || string.IsNullOrWhiteSpace(authCode))
         {
             if (_logger.IsEnabled(LogLevel.Warning))
             {
@@ -260,12 +260,6 @@ public record OAuthProvider : BaseAuthenticationProvider
             }
             return default;
         }
-        if (!credentials.TryGetAuthorizationCode(out var authorizationCode) || string.IsNullOrWhiteSpace(authorizationCode))
-        {
-            _logger.LogError("Authorization code not provided.");
-            return default;
-        }
-
         // Extract and validate the returned state
         if (!queryParams.TryGetState(out var returnedState) || string.IsNullOrWhiteSpace(returnedState) || state != returnedState)
         {
@@ -279,8 +273,8 @@ public record OAuthProvider : BaseAuthenticationProvider
         var tokenResponse = await _client.ExchangeCodeAsync(new AccessTokenRequest
         {
             ClientId = InternalSettings!.Options!.ClientId!,
-            RedirectUri = redirectUri!,
-            Code = authorizationCode,
+            RedirectUri = InternalSettings.Options.RedirectUri ?? redirectUri!,
+            Code = authCode,
             CodeVerifier = codeVerifier
         }, cancellationToken);
 

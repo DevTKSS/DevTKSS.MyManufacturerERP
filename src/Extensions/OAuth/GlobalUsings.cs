@@ -10,3 +10,4 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("DevTKSS.Extensions.Uno.Authentication.Desktop")]
 [assembly: InternalsVisibleTo("DevTKSS.Extensions.OAuth.UI")]
 [assembly: InternalsVisibleTo("DevTKSS.Extensions.OAuth.UI.Desktop")]
+[assembly: InternalsVisibleTo("DevTKSS.Extensions.Uno.Authentication.Desktop.UI")]

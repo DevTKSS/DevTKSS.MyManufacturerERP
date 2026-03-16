@@ -34,6 +34,7 @@ public partial class App : Application
                     // Note: "Web" section is loaded automatically by Web Authentication Providers
                     .Section<EtsyOAuthEndpointOptions>(EtsyOAuthEndpointOptions.SectionName)
                     .Section<OAuthClientOptions>(OAuthClientOptions.SectionName)
+                    .Section<SevDeskClientOptions>(SevDeskClientOptions.SectionName)
                     .Section<ServerOptions>()
              )
              .UseLogging(configure: (context, logBuilder) =>
@@ -80,8 +81,20 @@ public partial class App : Application
 
                 services.AddHttpClient<IOAuthTokenClient, OAuthTokenHttpClient>();
 #if DESKTOP
+                services.AddSingleton<ISystemBrowserAuthBrokerProvider, SystemBrowserAuthBroker>();
                 services.AddSingleton<IOAuthNavigationService, OAuthNavigationService>();
 #endif
+                services.AddRefitClient<IEtsyEndpoints>()
+                    .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://openapi.etsy.com"));
+
+                services.AddTransient<SevDeskApiKeyHandler>();
+                services.AddRefitClient<ISevDeskEndpoints>()
+                    .ConfigureHttpClient((sp, c) =>
+                    {
+                        var sevDeskOptions = sp.GetRequiredService<IOptions<SevDeskClientOptions>>().Value;
+                        c.BaseAddress = new Uri(sevDeskOptions.Url ?? "https://my.sevdesk.de/api/v1");
+                    })
+                    .AddHttpMessageHandler<SevDeskApiKeyHandler>();
             })
             .UseHttp((context, services) =>
             {
@@ -261,45 +274,66 @@ public partial class App : Application
         {
             var oauthClient = serviceProvider.GetRequiredService<IOAuthTokenClient>();
             var options = serviceProvider.GetRequiredService<IOptions<OAuthClientOptions>>().Value;
-            logger.LogInformation("Calling authorization endpoint to initiate OAuth flow");
-            
-            if (options.ClientId is not { } clientId)
+
+            if (options.ClientId is not { Length: > 0 })
             {
-                logger.LogError("OAuth ClientId is not configured, cannot refresh tokens");
+                logger.LogError("OAuth ClientId is not configured");
                 throw new InvalidOperationException("OAuth ClientId is not configured");
             }
 
-            var state = OAuth2Utilitys.GenerateState();
-            var codeVerifier = OAuth2Utilitys.GenerateCodeVerifier();
-            var challenge = OAuth2Utilitys.GenerateCodeChallenge(codeVerifier);
+            var state = await oauthClient.GetAuthorizeStateAsync();
+            var webAuthRequest = await oauthClient.GetWebAuthRequestAsync(state);
+            if (webAuthRequest is null)
+            {
+                logger.LogError("Failed to build authorization request");
+                return default;
+            }
 
-            //var tokenResponse = await oauthClient.ExchangeCodeAsync(new AccessTokenRequest
-            //{
-            //    ClientId = clientId,
-            //    RedirectUri = options.RedirectUri!,
-            //    Code = authorizationCode,
-            //    CodeVerifier = codeVerifier,
-            //}, ct);
+            credentials.AddOrReplace(OAuthDefaults.Keys.State, state.State);
+            credentials.AddOrReplace(OAuthDefaults.Keys.Pkce.CodeVerifier, state.CodeVerifier);
 
-            //if (tokenResponse is not TokenResponse { AccessToken: not null, RefreshToken: not null, ExpiresIn: > 0, TokenType: OAuthDefaults.Values.Bearer } response)
-            //{
-            //    logger.LogError("Token exchange response missing required tokens");
-            //    return default;
-            //}
+            // Try NavigationService (Dialog/WebView2) on desktop, fall back to SystemBrowser
+            string? callbackResult = null;
+#if DESKTOP
+            var navService = serviceProvider.GetService<IOAuthNavigationService>();
+            if (navService is not null && dispatcher is not null)
+            {
+                // SystemBrowser-based flow via OAuthNavigationService
+                var systemBrowser = serviceProvider.GetService<ISystemBrowserAuthBrokerProvider>();
+                if (systemBrowser is not null)
+                {
+                    var authResult = await systemBrowser.AuthenticateAsync(
+                        WebAuthenticationOptions.None,
+                        new Uri(webAuthRequest.StartUrl),
+                        new Uri(webAuthRequest.CallbackUrl),
+                        ct);
+                    callbackResult = authResult?.ResponseData;
+                }
+            }
+#endif
 
-            // TODO: Extract authorization code from redirect URI
+            if (string.IsNullOrWhiteSpace(callbackResult))
+            {
+                logger.LogWarning("No callback result received from authentication flow");
+                return default;
+            }
 
-            // TODO: Validate state and code returned from OAuth provider
+            var tokenResponse = await oauthClient.ExchangeCodeAsync(state, callbackResult, ct);
 
-            // TODO: Exchange authorization code for access and refresh tokens
+            if (tokenResponse is not TokenResponse { AccessToken: not null, RefreshToken: not null, ExpiresIn: > 0, TokenType: OAuthDefaults.Values.Bearer } response)
+            {
+                logger.LogError("Token exchange response missing required tokens");
+                return default;
+            }
 
-            // TODO: Depending on the OAuth provider, extract IdToken from Response/possible needs to be parsed. See EtsyOAuthProvider using UserID
+            var tokens = response.ToDictionary(false);
 
-            // TODO: If provided, loop through tokenOptions.AdditionalTokenKeys to extract additional tokens
+            // Enrich with Etsy-specific tokens (UserId/ShopId parsed from Etsy's token format)
+            var tokenCache = serviceProvider.GetRequiredService<ITokenCache>();
+            var enriched = await EtsyOAuthService.ExchangeCodeForTokensAsync(
+                serviceProvider, tokenCache, tokens, credentials, null, ct);
 
-            // TODO: Return tokens which will be automatically stored internally from Uno.Extensions.Authentication ITokenCache
-           // return response.ToDictionary(false);
-           return default;
+            return enriched ?? tokens;
         }
         catch (Exception ex)
         {
@@ -311,15 +345,16 @@ public partial class App : Application
     private static async ValueTask<IDictionary<string, string>?> HandleRefreshAsync(IServiceProvider serviceProvider, ITokenCache tokenCache, IDictionary<string, string> tokens, CancellationToken ct)
     {
         var logger = serviceProvider.GetRequiredService<ILogger<IOAuthTokenClient>>();
-        var options = serviceProvider.GetRequiredService<IOptions<EtsyOAuthEndpointOptions>>().Value;
+        var options = serviceProvider.GetRequiredService<IOptions<OAuthClientOptions>>().Value;
         var oauthClient = serviceProvider.GetRequiredService<IOAuthTokenClient>();
         logger.LogInformation("Token refresh flow started");
-        if (!tokens.TryGetValue(options.TokenKeys.RefreshTokenKey, out var rt))
+
+        if (!tokens.TryGetValue(options.TokenKeys.RefreshTokenKey, out var rt) || string.IsNullOrWhiteSpace(rt))
         {
             logger.LogWarning("No refresh token available, user needs to login again");
             return default;
         }
-        if (options.ClientId is not { } clientId)
+        if (options.ClientId is not { Length: > 0 } clientId)
         {
             logger.LogError("OAuth ClientId is not configured, cannot refresh tokens");
             throw new InvalidOperationException("OAuth ClientId is not configured");
@@ -408,7 +443,7 @@ public partial class App : Application
                     new ("Main", View: views.FindByViewModel<MainModel>(), IsDefault:true),
                     new ("Second", View: views.FindByViewModel<SecondModel>()),
                     new ("Auth", View: views.FindByViewModel<AuthModel>()),
-                    new ("AuthDialog", View: views.FindByViewModel<AuthModel>())
+                    new ("AuthDialog", View: views.FindByViewModel<AuthDialogModel>())
                 ]
             )
         );

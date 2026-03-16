@@ -16,6 +16,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Client\DevTKSS.MyManufacturerERP\DevTKSS.MyManufacturerERP.csproj" />
+    <ProjectReference Include="..\..\Extensions\OAuth\DevTKSS.Extensions.OAuth.csproj" />
+    <ProjectReference Include="..\..\Extensions\OAuth.Validation\DevTKSS.Extensions.OAuth.Validation.csproj" />
   </ItemGroup>
 
 </Project>

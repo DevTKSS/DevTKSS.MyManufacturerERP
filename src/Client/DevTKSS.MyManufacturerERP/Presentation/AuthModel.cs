@@ -39,27 +39,39 @@ public partial record AuthModel
     /// </summary>
     public async ValueTask ConnectToEtsy(CancellationToken token = default)
     {
+        await IsLoading.UpdateAsync(_ => true, token);
+        await ErrorMessage.UpdateAsync(_ => null, token);
+
         try
         {
-            _logger.Information("Starting OAuthDefaults login flow with Etsy");
+            _logger.Information("Starting OAuth login flow with Etsy");
 
             var success = await _authenticationService.LoginAsync(_dispatcher, null, "Custom", token);
 
             if (success)
             {
-                _logger.Information("OAuthDefaults login successful, navigating to main page");
+                _logger.Information("OAuth login successful, navigating to main page");
                 await _navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.ClearBackStack);
             }
             else
             {
-                _logger.Warning("OAuthDefaults login failed or was cancelled");
-                // Error will be displayed in the UI via ErrorMessage state
+                _logger.Warning("OAuth login failed or was cancelled");
+                await ErrorMessage.UpdateAsync(_ => "Login failed or was cancelled. Please try again.", token);
             }
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.Information("OAuth login was cancelled by user");
+            await ErrorMessage.UpdateAsync(_ => "Login was cancelled.", token);
         }
         catch (Exception ex)
         {
-            _logger.Error(ex, "Exception during OAuthDefaults login flow");
-            // Set error message for UI display
+            _logger.Error(ex, "Exception during OAuth login flow");
+            await ErrorMessage.UpdateAsync(_ => $"An error occurred: {ex.Message}", token);
+        }
+        finally
+        {
+            await IsLoading.UpdateAsync(_ => false, token);
         }
     }
 }

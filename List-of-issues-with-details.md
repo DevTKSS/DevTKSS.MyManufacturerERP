@@ -26,7 +26,7 @@
 
 ### Authentication & Server Issues
 
-- [Setting up Ports and `launchSettings.json` for https and `CSRF`](./docs/setting-up-launchsettings.md)
+- [Connecting client and server projects (ports, HTTPS, CSRF)](./docs/connecting-client-and-server-projects.md)
 - Missing Identity API endpoints in Endpoint Explorer
 - Delegate signature mismatch in Uno Platform authentication [CS1593 error](#uno-platform-documentation-problems)
   -> Commented out now until some fix is known

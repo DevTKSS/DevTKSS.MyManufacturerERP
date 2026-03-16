@@ -97,7 +97,37 @@ public sealed class OAuthTokenHttpClient
         return null;
     }
 
-    public async ValueTask<TokenResponse?> ExchangeCodeAsync(CancellationToken cancellationToken = default) // TODO: move to private accessor and implement properly
+    public Task<AuthorizationState> GetAuthorizeStateAsync(IDictionary<string, string>? extraParameters = null)
+    {
+        _state = new AuthorizationState();
+        return Task.FromResult(_state);
+    }
+
+    public Task<WebAuthRequest?> GetWebAuthRequestAsync(AuthorizationState state, IDictionary<string, string>? extraParameters = null)
+    {
+        if (_options is null)
+        {
+            if (_logger.IsEnabled(LogLevel.Warning))
+            {
+                _logger.LogWarning("OAuth client options are not configured; cannot build web auth request.");
+            }
+            return Task.FromResult<WebAuthRequest?>(default);
+        }
+
+        if (string.IsNullOrWhiteSpace(_options.AuthorizationEndpoint) || string.IsNullOrWhiteSpace(_options.RedirectUri))
+        {
+            if (_logger.IsEnabled(LogLevel.Warning))
+            {
+                _logger.LogWarning("AuthorizationEndpoint or RedirectUri is not configured; cannot build web auth request.");
+            }
+            return Task.FromResult<WebAuthRequest?>(default);
+        }
+
+        var request = _options.ToWebAuthRequest(state);
+        return Task.FromResult<WebAuthRequest?>(request);
+    }
+
+    public async ValueTask<TokenResponse?> ExchangeCodeAsync(AuthorizationState state, string callbackResult, CancellationToken cancellationToken = default)
     {
         if (_options is null)
         {
@@ -108,16 +138,7 @@ public sealed class OAuthTokenHttpClient
             return default;
         }
 
-        var redirectUri = _options.RedirectUri;
-        if (string.IsNullOrWhiteSpace(redirectUri))
-        {
-            if (_logger.IsEnabled(LogLevel.Warning))
-            {
-                _logger.LogWarning("RedirectUri is not configured; cannot exchange authorization code.");
-            }
-            return default;
-        }
-        if (!TryValidateCallback(redirectUri, out var parameters))
+        if (!TryValidateCallback(callbackResult, out var parameters))
         {
             if (_logger.IsEnabled(LogLevel.Warning))
             {
@@ -126,7 +147,7 @@ public sealed class OAuthTokenHttpClient
             return default;
         }
 
-        if (!parameters.TryGetState(out var returnedState) || !string.Equals(returnedState, _state.State, StringComparison.Ordinal))
+        if (!parameters.TryGetState(out var returnedState) || !string.Equals(returnedState, state.State, StringComparison.Ordinal))
         {
             if (_logger.IsEnabled(LogLevel.Warning))
             {
@@ -144,8 +165,13 @@ public sealed class OAuthTokenHttpClient
             return default;
         }
 
-        var builder = new UriBuilder(_options.AuthorizationEndpoint!).AppendQueryParameters(authCodeParams); // TODO: This has been reverted. Check how to update properly to refactoring changes.
-        return builder.Uri.ToString();
+        return await ExchangeCodeAsync(new AccessTokenRequest
+        {
+            ClientId = _options.ClientId!,
+            RedirectUri = _options.RedirectUri!,
+            Code = code,
+            CodeVerifier = state.CodeVerifier
+        }, cancellationToken);
     }
 
     public async ValueTask<TokenResponse?> ExchangeCodeAsync(AccessTokenRequest request, CancellationToken cancellationToken = default)

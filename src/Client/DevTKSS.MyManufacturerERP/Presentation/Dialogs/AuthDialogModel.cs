@@ -24,7 +24,11 @@ internal partial record AuthDialogModel
 
     public async Task ExecutePrimaryCommandAsync()
     {
-        
+        var currentUri = await CurrentUri.Value();
+        if (currentUri is not null && IsRedirectMatch(currentUri))
+        {
+            await _navigator.NavigateBackWithResultAsync(this, data: currentUri.OriginalString);
+        }
     }
 
     public async Task FinishAuthentication()

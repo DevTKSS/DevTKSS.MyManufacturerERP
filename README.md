@@ -44,8 +44,10 @@ While developing this, I collected a knowledge base of resources, articles and d
 
 You can find this knowledge base here:
 
-- [Additional References](./docs/Additional-References-Readme.md)
+- [Knowledge Base and References](./docs/knowledge-base-and-references.md)
+- [Authentication Flows](./docs/authentication-flows.md)
 - [Connecting client and server projects](./docs/connecting-client-and-server-projects.md)
+- [Testing Guide](./docs/testing-guide.md)
 
 ## Known Current Issues
 

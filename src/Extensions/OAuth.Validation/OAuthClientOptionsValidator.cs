@@ -22,12 +22,6 @@ public class OAuthClientOptionsValidator : AbstractValidator<OAuthClientOptions>
             .NotEmpty().WithMessage("TokenEndpoint must not be empty.")
             .Must(BeAValidUrl).WithMessage("TokenEndpoint must be a valid URL.");
 
-        RuleFor(x=> x.TokenEndpoint)
-            .Cascade(CascadeMode.Stop)
-            .Must(BeAValidUrl)
-            .When(x => !string.IsNullOrWhiteSpace(x.TokenEndpoint))
-            .WithMessage("TokenEndpoint must be a valid URL.");
-
         RuleFor(x=> x.ClientId)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("ClientId must not be empty.");
@@ -35,7 +29,7 @@ public class OAuthClientOptionsValidator : AbstractValidator<OAuthClientOptions>
         RuleFor(x=> x.ClientSecret)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("ClientSecret must not be empty.")
-            .When(x => x.UsePkce == true);
+            .When(x => !x.UsePkce);
 
         RuleFor(x => x.RedirectUri)
             .Cascade(CascadeMode.Stop)

@@ -84,6 +84,22 @@ try
         // mappings already set up by default in the EtsyAuthenticationProvider
     });
     builder.Services.AddAuthorization();
+
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(policy =>
+        {
+            policy.WithOrigins(
+                    "http://localhost:5001",
+                    "https://localhost:5001",
+                    "http://localhost:3000",
+                    "https://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
+    });
+
     var app = builder.Build();
 
     if (app.Environment.IsDevelopment())
@@ -97,7 +113,10 @@ try
 
     app.UseSerilogRequestLogging();
 
-    app.UseDeveloperExceptionPage();
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
 
     app.UseForwardedHeaders();
 

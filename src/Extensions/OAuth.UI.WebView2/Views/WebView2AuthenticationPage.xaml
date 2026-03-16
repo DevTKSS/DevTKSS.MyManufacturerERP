@@ -13,8 +13,7 @@
         </Grid.RowDefinitions>
 
         <ProgressRing Grid.Row="0"
-                      IsActive="{Binding ElementName=WebView, Path=(wv:WebView2Extensions.IsNavigating)}"
-                      Visibility="{Binding ElementName=WebView, Path=(wv:WebView2Extensions.IsNavigating),Converter={StaticResource FalseToCollapsedConverter}}"
+                      IsActive="{Binding ElementName=webView, Path=(wv:WebView2Extensions.IsNavigating)}"
                       HorizontalAlignment="Center"
                       VerticalAlignment="Center"
                       Width="50"
@@ -22,11 +21,10 @@
 
         <WebView2 x:Name="webView"
                   Grid.Row="1"
-                  wv:WebView2Extensions.DocumentTitle="{Binding Title}"
+                  wv:WebView2Extensions.DocumentTitle="{Binding Title, Mode=TwoWay}"
                   wv:WebView2Extensions.NavigationStartingCommand="{Binding NavigationStartedAsync}"
                   wv:WebView2Extensions.NavigationCompletedCommand="{Binding NavigationCompletedAsync}"
-                  wv:WebView2Extensions.IsNavigating="{Binding IsNavigating}"
-                  Source="{Binding CurrentUrl}" />
+                  Source="{Binding CurrentUrl, Mode=TwoWay}" />
 
     </Grid>
 </Page>

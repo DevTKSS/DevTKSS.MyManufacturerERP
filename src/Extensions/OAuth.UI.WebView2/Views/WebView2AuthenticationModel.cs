@@ -83,15 +83,8 @@ public partial record WebView2AuthenticationModel
             return;
         }
 
-        if (_request.StartUrl is { State: not null } expectedState // TODO: the Model should not have to know or care about the state, handle in Navigation service or even better the AuthClient!
-            && !string.Equals(expectedState.State, callbackState, StringComparison.Ordinal))
-        {
-            _logger.LogInformation("OAuth callback state mismatch.");
-            return;
-        }
-
-
-        await _navigator.NavigateBackWithResultAsync(this, data: arg, cancellation: ct);
+        // State validation is handled by the OAuthTokenClient/NavigationService after the callback result is returned
+        await _navigator.NavigateBackWithResultAsync(this, data: arg.OriginalString, cancellation: ct);
         await ReadyToClose.UpdateAsync(_ => true, ct);
     } 
     private bool IsRedirectMatch(Uri? destination) => _request.IsRedirectMatch(destination); // TODO: Implement this as extension in the Request?

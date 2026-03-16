@@ -45,7 +45,7 @@ public static class AuthDictionaryExtensions
     #region Auth Requests
     public static bool TryGetAuthorizationCode(this IDictionary<string, string> credentials,[NotNullWhen(true)] out string? authorizationCode)
     {
-        if (credentials.TryGetValue(OAuthDefaults.Values.AuthorizationCode, out var codeValue))
+        if (credentials.TryGetValue(OAuthDefaults.Keys.Code, out var codeValue))
         {
             authorizationCode = codeValue;
             return true;

@@ -5,7 +5,7 @@ namespace DevTKSS.MyManufacturerERP.WebApi.Endpoints.Authentication;
 
 /// <summary>
 /// OAuth2 authentication endpoints for Etsy integration.
-/// Handles login, logout, and user profile information.
+/// Handles login, logout, token exchange, and user profile information.
 /// </summary>
 public static class OAuthEndpoints
 {
@@ -32,6 +32,12 @@ public static class OAuthEndpoints
             .WithDescription("Returns the current authenticated user's information")
             .RequireAuthorization();
 
+        group.MapPost("/token", (Delegate)ExchangeTokenAsync)
+            .WithName("PostOAuthToken")
+            .WithSummary("Exchange cookie session for bearer tokens")
+            .WithDescription("Returns bearer tokens for an authenticated cookie session. Used by native clients to bridge cookie-based and token-based auth.")
+            .RequireAuthorization();
+
         group.MapGet("/callback/etsy", (Delegate)HandleCallbackAsync)
             .WithName("GetOAuthCallback")
             .WithSummary("OAuth Callback Handler")
@@ -40,41 +46,28 @@ public static class OAuthEndpoints
             .ExcludeFromDescription();
     }
 
-    /// <summary>
-    /// GET /auth/login
-    /// Initiates OAuth2 authentication flow.
-    /// Redirects user to Etsy login page.
-    /// </summary>
-    private static IResult LoginAsync(HttpContext context)
+    private static IResult LoginAsync(HttpContext context, string? returnUrl = null)
     {
         var properties = new AuthenticationProperties
         {
-            RedirectUri = "/" // Redirect to home after login
+            RedirectUri = "/auth/callback/etsy",
+            Items = { ["returnUrl"] = returnUrl ?? "/" }
         };
 
         return Results.Challenge(properties, ["Etsy"]);
     }
 
-    /// <summary>
-    /// GET /auth/logout
-    /// Signs out the user and clears authentication cookies.
-    /// </summary>
     private static async Task<IResult> LogoutAsync(HttpContext context)
     {
-        await context.SignOutAsync("cookie");
+        await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return Results.Redirect("/");
     }
 
-    /// <summary>
-    /// GET /auth/profile
-    /// Returns the current authenticated user's profile information.
-    /// Maps claims: user_id, shop_id, primary_email, given_name, family_name, picture, sub.
-    /// </summary>
     private static IResult GetProfileAsync(HttpContext context)
     {
         var user = context.User;
 
-        if (!user.Identity?.IsAuthenticated ?? false)
+        if (user.Identity?.IsAuthenticated != true)
         {
             return Results.Unauthorized();
         }
@@ -98,15 +91,48 @@ public static class OAuthEndpoints
     }
 
     /// <summary>
+    /// POST /auth/token
+    /// Bridge endpoint: converts a cookie-authenticated session into bearer tokens
+    /// that native/desktop clients can use for subsequent API calls.
+    /// </summary>
+    private static async Task<IResult> ExchangeTokenAsync(HttpContext context)
+    {
+        var result = await context.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        if (!result.Succeeded || result.Principal is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        var accessToken = result.Properties?.GetTokenValue("access_token");
+        var refreshToken = result.Properties?.GetTokenValue("refresh_token");
+        var expiresAt = result.Properties?.GetTokenValue("expires_at");
+
+        if (string.IsNullOrWhiteSpace(accessToken))
+        {
+            return Results.Problem(
+                detail: "No access token found in the authentication session. Ensure the OAuth provider stores tokens.",
+                statusCode: StatusCodes.Status502BadGateway);
+        }
+
+        var tokenResponse = new
+        {
+            access_token = accessToken,
+            refresh_token = refreshToken ?? string.Empty,
+            token_type = "Bearer",
+            expires_at = expiresAt ?? string.Empty,
+            user_id = result.Principal.FindFirst("user_id")?.Value ?? result.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
+        };
+
+        return Results.Ok(tokenResponse);
+    }
+
+    /// <summary>
     /// GET /auth/callback/etsy
-    /// Handles the OAuth2 callback from Etsy.
-    /// This is called automatically by the authentication middleware.
+    /// Handles the OAuth2 callback from Etsy, signs in via cookie, and
+    /// redirects back to the client with a session indicator.
     /// </summary>
     private static async Task<IResult> HandleCallbackAsync(HttpContext context)
     {
-        // The authentication middleware handles this automatically.
-        // If we get here with no errors, authentication was successful.
-
         var result = await context.AuthenticateAsync("Etsy");
 
         if (!result.Succeeded)
@@ -114,10 +140,23 @@ public static class OAuthEndpoints
             return Results.Unauthorized();
         }
 
-        // Sign in with cookie
-        await context.SignInAsync("cookie", result.Principal, result.Properties);
+        var cookieOptions = new AuthenticationProperties
+        {
+            IsPersistent = true,
+            ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
+        };
 
-        // Redirect to home or client app
-        return Results.Redirect("/");
+        if (result.Properties is not null)
+        {
+            cookieOptions.StoreTokens(result.Properties.GetTokens());
+        }
+
+        await context.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            result.Principal!,
+            cookieOptions);
+
+        var returnUrl = result.Properties?.Items["returnUrl"] ?? "/";
+        return Results.Redirect(returnUrl);
     }
 }
