@@ -1,4 +1,4 @@
-namespace DevTKSS.Extensions.OAuth.UI.Desktop;
+namespace DevTKSS.Extensions.OAuth.UI.Uno;
 
 public static class OAuthAuthenticationBuilderExtensions
 {
