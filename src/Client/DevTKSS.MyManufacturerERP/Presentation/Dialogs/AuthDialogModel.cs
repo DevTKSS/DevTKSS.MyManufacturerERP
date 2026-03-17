@@ -1,6 +1,3 @@
-using DevTKSS.Extensions.OAuth.Utils;
-using Windows.System;
-
 namespace DevTKSS.MyManufacturerERP.Presentation.Dialogs;
 
 internal partial record AuthDialogModel

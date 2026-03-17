@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace DevTKSS.Extensions.OAuth.Utils;
 
 /// <summary>

@@ -1,7 +1,4 @@
-using Uno.UI.Extensions;
-
 namespace DevTKSS.Extensions.OAuth.UI.Http;
-
 public sealed class OAuthTokenHttpClient
     : IOAuthTokenClient,
      IAuthenticationTokenProvider // Interface from Uno.Extensions.Http called in their Hostbuilder providing integration into the HttpClient pipeline for automatic token injection into outgoing requests

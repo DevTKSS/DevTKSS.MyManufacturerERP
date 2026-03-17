@@ -1,4 +1,4 @@
-﻿<Project Sdk="Uno.Sdk">
+<Project Sdk="Uno.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net10.0-desktop;$(DefaultTargetFramework)</TargetFrameworks>
     <UnoSingleProject>true</UnoSingleProject>
@@ -43,4 +43,11 @@
     <ProjectReference Include="..\OAuth.Validation\DevTKSS.Extensions.OAuth.Validation.csproj" />
     <ProjectReference Include="..\OAuth\DevTKSS.Extensions.OAuth.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Yllibed.HttpServer" />
+    <PackageReference Include="Yllibed.HttpServer.Handlers.Uno" />
+  </ItemGroup>
 </Project>
+<!-- verifyed the localhost url to be correctly solving the Authentication in the ASP.NET Core aspnet-contrib PR, which uses MVC for the Testing Client, to be working, but for re-trying auth,-->

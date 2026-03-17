@@ -8,8 +8,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NoWarn>$(NoWarn);IDE0130</NoWarn>
-    <RootNamespace>DevTKSS.Extensions.Uno.Authentication.Desktop.UI</RootNamespace>
-    <AssemblyName>DevTKSS.Extensions.Uno.Authentication.Desktop.UI</AssemblyName>
+    <RootNamespace>DevTKSS.Extensions.OAuth.UI.WebView</RootNamespace>
+    <AssemblyName>DevTKSS.Extensions.OAuth.UI.WebView</AssemblyName>
 
     <!--
       UnoFeatures let's you quickly add and manage implicit package references based on the features you want to use.
@@ -45,13 +45,6 @@
   <ItemGroup>
     <ProjectReference Include="..\OAuth.UI\DevTKSS.Extensions.OAuth.UI.csproj" />
     <ProjectReference Include="..\OAuth\DevTKSS.Extensions.OAuth.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="Views\WebView2AuthenticationPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
 
 </Project>

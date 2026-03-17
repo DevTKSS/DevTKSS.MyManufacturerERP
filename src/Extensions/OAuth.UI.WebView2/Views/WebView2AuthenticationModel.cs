@@ -1,4 +1,4 @@
-namespace DevTKSS.Extensions.Uno.Authentication.Desktop.UI;
+namespace DevTKSS.Extensions.OAuth.UI.WebView.Views;
 
 public partial record WebView2AuthenticationModel
 {

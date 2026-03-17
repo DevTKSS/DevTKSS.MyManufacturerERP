@@ -1,6 +1,6 @@
 using Microsoft.Web.WebView2.Core;
 
-namespace DevTKSS.Extensions.Uno.Authentication.Desktop.UI;
+namespace DevTKSS.Extensions.OAuth.UI.WebView;
 
 public static partial class WebView2Extensions
 {

@@ -1,6 +1,4 @@
-using Microsoft.UI.Xaml.Controls;
-
-namespace DevTKSS.Extensions.Uno.Authentication.Desktop.UI;
+namespace DevTKSS.Extensions.OAuth.UI.WebView.Views;
 
 public sealed partial class WebView2AuthenticationPage : Page
 {
