@@ -1,4 +1,4 @@
-namespace DevTKSS.Extensions.OAuth.UI.Desktop;
+namespace DevTKSS.Extensions.OAuth.UI;
 /// <summary>
 /// Service for handling OAuth authentication flows (desktop loopback via system browser).
 /// </summary>

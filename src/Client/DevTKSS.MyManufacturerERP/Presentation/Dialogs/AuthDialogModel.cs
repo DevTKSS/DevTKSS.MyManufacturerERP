@@ -1,7 +1,3 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using DevTKSS.Extensions.OAuth.Utils;
-
 namespace DevTKSS.MyManufacturerERP.Presentation.Dialogs;
 
 internal partial class AuthDialogModel : ObservableObject

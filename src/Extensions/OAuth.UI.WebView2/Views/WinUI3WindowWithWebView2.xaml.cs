@@ -1,7 +1,5 @@
 using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
-
-namespace DevTKSS.Extensions.Uno.Authentication.Desktop.UI;
+namespace DevTKSS.Extensions.OAuth.UI.WebView.Views;
 
 /// <summary>
 /// Desktop authentication window hosting a WebView2.
