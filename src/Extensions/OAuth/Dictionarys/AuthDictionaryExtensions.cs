@@ -43,15 +43,10 @@ public static class AuthDictionaryExtensions
     #endregion
 
     #region Auth Requests
+    [Obsolete("Use TryGetCode instead. Both look up the 'code' query parameter (RFC 6749 §4.1.2).")]
     public static bool TryGetAuthorizationCode(this IDictionary<string, string> credentials,[NotNullWhen(true)] out string? authorizationCode)
     {
-        if (credentials.TryGetValue(OAuthDefaults.Keys.Code, out var codeValue))
-        {
-            authorizationCode = codeValue;
-            return true;
-        }
-        authorizationCode = null;
-        return false;
+        return credentials.TryGetCode(out authorizationCode);
     }
     public static bool TryGetState(this IDictionary<string, string> credentials,[NotNullWhen(true)] out string? state)
     {

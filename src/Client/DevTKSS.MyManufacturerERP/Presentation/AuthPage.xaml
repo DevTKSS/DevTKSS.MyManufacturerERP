@@ -50,7 +50,7 @@
       <!-- Login Button -->
       <Button x:Name="LoginButton"
               Content="Connect to Etsy"
-              Command="{Binding ConnectToEtsy}"
+              Command="{Binding ConnectToEtsyCommand}"
               HorizontalAlignment="Stretch"
               Height="48"
               FontSize="16"

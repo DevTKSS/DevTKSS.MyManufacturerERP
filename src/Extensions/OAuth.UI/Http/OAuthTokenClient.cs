@@ -68,42 +68,13 @@ public sealed class OAuthTokenHttpClient
         }
         return accessToken;
     }
-    public async Task<WebAuthRequest?> GetAuthRequestAsync(IDictionary<string, string>? extraParameters = null) // TODO: Potentially set to private triggered from GetAccessToken?
-    {
-        if (_options is null)
-        {
-            if (_logger.IsEnabled(LogLevel.Warning))
-            {
-                _logger.LogWarning("OAuth client options are not configured; cannot build web auth request.");
-            }
-            return default;
-        }
-
-        if (string.IsNullOrWhiteSpace(_options.RedirectUri))
-        {
-            if (_logger.IsEnabled(LogLevel.Warning))
-            {
-                _logger.LogWarning("RedirectUri is not configured; cannot build web auth request.");
-            }
-            return default;
-        }
-
-        var request = _options.ToWebAuthRequest(); // TODO: Decide where to store/how to handle AuthorizationState
-        if (extraParameters is not { Count: > 0 })
-        {
-            return new WebAuthRequest(request.StartUrl, _options.RedirectUri);
-        }
-
-        return null;
-    }
-
-    public Task<AuthorizationState> GetAuthorizeStateAsync(IDictionary<string, string>? extraParameters = null)
+    public ValueTask<AuthorizationState> GetAuthorizeStateAsync(IDictionary<string, string>? extraParameters = null)
     {
         _state = new AuthorizationState();
-        return Task.FromResult(_state);
+        return ValueTask.FromResult(_state);
     }
 
-    public Task<WebAuthRequest?> GetWebAuthRequestAsync(AuthorizationState state, IDictionary<string, string>? extraParameters = null)
+    public ValueTask<WebAuthRequest?> GetWebAuthRequestAsync(AuthorizationState state, IDictionary<string, string>? extraParameters = null)
     {
         if (_options is null)
         {
@@ -111,7 +82,7 @@ public sealed class OAuthTokenHttpClient
             {
                 _logger.LogWarning("OAuth client options are not configured; cannot build web auth request.");
             }
-            return Task.FromResult<WebAuthRequest?>(default);
+            return ValueTask.FromResult<WebAuthRequest?>(default);
         }
 
         if (string.IsNullOrWhiteSpace(_options.AuthorizationEndpoint) || string.IsNullOrWhiteSpace(_options.RedirectUri))
@@ -120,11 +91,11 @@ public sealed class OAuthTokenHttpClient
             {
                 _logger.LogWarning("AuthorizationEndpoint or RedirectUri is not configured; cannot build web auth request.");
             }
-            return Task.FromResult<WebAuthRequest?>(default);
+            return ValueTask.FromResult<WebAuthRequest?>(default);
         }
 
         var request = _options.ToWebAuthRequest(state);
-        return Task.FromResult<WebAuthRequest?>(request);
+        return ValueTask.FromResult<WebAuthRequest?>(request);
     }
 
     public async ValueTask<TokenResponse?> ExchangeCodeAsync(AuthorizationState state, string callbackResult, CancellationToken cancellationToken = default)

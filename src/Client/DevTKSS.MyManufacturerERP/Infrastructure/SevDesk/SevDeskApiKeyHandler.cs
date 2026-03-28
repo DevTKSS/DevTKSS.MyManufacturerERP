@@ -17,17 +17,15 @@ public sealed class SevDeskApiKeyHandler : DelegatingHandler
         _logger = logger;
     }
 
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(_options.ApiKey))
         {
-            _logger.LogWarning("SevDesk API key is not configured; requests will likely fail.");
-        }
-        else
-        {
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(_options.ApiKey);
+            throw new InvalidOperationException("SevDesk API key is not configured. Set the API key via user-secrets or appsettings.");
         }
 
-        return await base.SendAsync(request, cancellationToken);
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(_options.ApiKey);
+
+        return base.SendAsync(request, cancellationToken);
     }
 }

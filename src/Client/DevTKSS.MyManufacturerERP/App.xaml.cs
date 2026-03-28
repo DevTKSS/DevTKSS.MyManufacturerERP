@@ -32,8 +32,8 @@ public partial class App : Application
                     .EmbeddedSource<App>()
                     .Section<AppConfig>()
                     // Note: "Web" section is loaded automatically by Web Authentication Providers
-                    .Section<EtsyOAuthEndpointOptions>(EtsyOAuthEndpointOptions.SectionName)
                     .Section<OAuthClientOptions>(OAuthClientOptions.SectionName)
+                    .Section<EtsyOAuthEndpointOptions>(OAuthClientOptions.SectionName)
                     .Section<SevDeskClientOptions>(SevDeskClientOptions.SectionName)
                     .Section<ServerOptions>()
              )

@@ -49,26 +49,27 @@ public record OAuthProvider : BaseAuthenticationProvider
         }
         new OAuthOptionsValidator().ValidateAndThrow(options);
     }
-    private OAuthSettings? _internalSettings;
     private OAuthSettings InternalSettings
     {
         get
         {
-            if (_internalSettings is null)
+            if (field is null)
             {
-                _internalSettings = AuthSettings ?? new OAuthSettings();
+                field = AuthSettings ?? new OAuthSettings();
                 var config = AuthOptions;
                 if (config is not null)
                 {
-                    _internalSettings = _internalSettings with
+                    field = field with
                     {
-                        LoginStartUri = !string.IsNullOrWhiteSpace(config.LoginStartUri) ? config.LoginStartUri : _internalSettings.LoginStartUri,
-                        LoginCallbackUri = !string.IsNullOrWhiteSpace(config.LoginCallbackUri) ? config.LoginCallbackUri : _internalSettings.LoginCallbackUri,
-                        Options = config.Options ?? _internalSettings.Options
+                        LoginStartUri = !string.IsNullOrWhiteSpace(config.LoginStartUri)
+                            ? config.LoginStartUri : field.LoginStartUri,
+                        LoginCallbackUri = !string.IsNullOrWhiteSpace(config.LoginCallbackUri)
+                            ? config.LoginCallbackUri : field.LoginCallbackUri,
+                        Options = config.Options ?? field.Options
                     };
                 }
             }
-            return _internalSettings;
+            return field;
         }
     }
     #endregion
@@ -162,7 +163,7 @@ public record OAuthProvider : BaseAuthenticationProvider
             authCodeParams = new AuthorizationCodeRequest()
             {
                 ClientId = InternalSettings.Options!.ClientId!,
-                RedirectUri = InternalSettings.Options.RedirectUri ?? InternalSettings.LoginCallbackUri ?? loginStartUri,
+                RedirectUri = InternalSettings.Options!.RedirectUri ?? InternalSettings.LoginCallbackUri!,
                 Scope = InternalSettings.Options.Scopes.JoinBy(" "),
                 State = state,
                 CodeChallenge = codeChallenge
@@ -234,7 +235,7 @@ public record OAuthProvider : BaseAuthenticationProvider
             return default;
         }
 
-        if (!queryParams.TryGetCode(out var authCode) || string.IsNullOrWhiteSpace(authCode))
+        if (!queryParams.TryGetCode(out var authorizationCode) || string.IsNullOrWhiteSpace(authorizationCode))
         {
             if (_logger.IsEnabled(LogLevel.Warning))
             {
@@ -273,8 +274,8 @@ public record OAuthProvider : BaseAuthenticationProvider
         var tokenResponse = await _client.ExchangeCodeAsync(new AccessTokenRequest
         {
             ClientId = InternalSettings!.Options!.ClientId!,
-            RedirectUri = InternalSettings.Options.RedirectUri ?? redirectUri!,
-            Code = authCode,
+            RedirectUri = InternalSettings.Options!.RedirectUri ?? InternalSettings.LoginCallbackUri!,
+            Code = authorizationCode,
             CodeVerifier = codeVerifier
         }, cancellationToken);
 

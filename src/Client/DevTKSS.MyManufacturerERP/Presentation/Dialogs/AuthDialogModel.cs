@@ -1,15 +1,16 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using DevTKSS.Extensions.OAuth.Utils;
-using Windows.System;
 
 namespace DevTKSS.MyManufacturerERP.Presentation.Dialogs;
 
-internal partial record AuthDialogModel
+internal partial class AuthDialogModel : ObservableObject
 {
     private readonly INavigator _navigator;
     private readonly IDispatcher _dispatcher;
     private readonly WebAuthRequest _request;
+
     public AuthDialogModel(
-        
         INavigator navigator,
         IDispatcher dispatcher,
         WebAuthRequest request)
@@ -17,37 +18,22 @@ internal partial record AuthDialogModel
         _dispatcher = dispatcher;
         _navigator = navigator;
         _request = request;
+        _currentUri = BuildStartUri();
     }
-    
-    public IState<Uri> CurrentUri => State<Uri>.Value(this, () => BuildStartUri())
-                                               .ForEach(CurrentUriChanged);
 
-    public async Task ExecutePrimaryCommandAsync()
+    [ObservableProperty]
+    private Uri? _currentUri;
+
+    partial void OnCurrentUriChanged(Uri? value)
     {
-        var currentUri = await CurrentUri.Value();
-        if (currentUri is not null && IsRedirectMatch(currentUri))
+        if (value is not null && IsRedirectMatch(value))
         {
-            await _navigator.NavigateBackWithResultAsync(this, data: currentUri.OriginalString);
+            _ = HandleRedirectAsync(value);
         }
     }
 
-    public async Task FinishAuthentication()
+    private async Task HandleRedirectAsync(Uri destination)
     {
-        await _navigator.NavigateBackWithResultAsync(this, data: new { Success = true });
-    }
-
-    internal async ValueTask CurrentUriChanged(Uri? destination, CancellationToken cancellationToken)
-    {
-        if (destination is null)
-        {
-            return;
-        }
-
-        if (!IsRedirectMatch(destination))
-        {
-            return;
-        }
-
         var queryParameters = OAuth2Utilitys.GetQueryParameters(destination);
         if (queryParameters.TryGetErrorCode(out var error) && !string.IsNullOrWhiteSpace(error))
         {
@@ -60,7 +46,22 @@ internal partial record AuthDialogModel
             return;
         }
 
-        await _navigator.NavigateBackWithResultAsync(this, data: destination.OriginalString, cancellation: cancellationToken);
+        await _navigator.NavigateBackWithResultAsync(this, data: destination.OriginalString);
+    }
+
+    [RelayCommand]
+    private async Task ExecutePrimaryAsync()
+    {
+        if (CurrentUri is not null && IsRedirectMatch(CurrentUri))
+        {
+            await _navigator.NavigateBackWithResultAsync(this, data: CurrentUri.OriginalString);
+        }
+    }
+
+    [RelayCommand]
+    private async Task FinishAuthenticationAsync()
+    {
+        await _navigator.NavigateBackWithResultAsync(this, data: new { Success = true });
     }
 
     private bool IsRedirectMatch(Uri? destination) => _request.IsRedirectMatch(destination);

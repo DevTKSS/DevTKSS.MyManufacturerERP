@@ -14,7 +14,32 @@ public class OAuthTests
     #region AuthDictionaryExtensions
 
     [Fact]
-    public void TryGetAuthorizationCode_ShouldUseCodeKey()
+    public void TryGetCode_ShouldReturnCode()
+    {
+        var dict = new Dictionary<string, string>
+        {
+            ["code"] = "abc123"
+        };
+
+        dict.TryGetCode(out var code).ShouldBeTrue();
+        code.ShouldBe("abc123");
+    }
+
+    [Fact]
+    public void TryGetCode_ShouldReturnFalse_WhenNoCodeKey()
+    {
+        var dict = new Dictionary<string, string>
+        {
+            ["other"] = "value"
+        };
+
+        dict.TryGetCode(out var code).ShouldBeFalse();
+        code.ShouldBeNull();
+    }
+
+#pragma warning disable CS0618 // Type or member is obsolete
+    [Fact]
+    public void TryGetAuthorizationCode_ShouldDelegateToTryGetCode()
     {
         var dict = new Dictionary<string, string>
         {
@@ -35,18 +60,7 @@ public class OAuthTests
 
         dict.TryGetAuthorizationCode(out _).ShouldBeFalse();
     }
-
-    [Fact]
-    public void TryGetCode_ShouldReturnCode()
-    {
-        var dict = new Dictionary<string, string>
-        {
-            ["code"] = "abc123"
-        };
-
-        dict.TryGetCode(out var code).ShouldBeTrue();
-        code.ShouldBe("abc123");
-    }
+#pragma warning restore CS0618
 
     [Fact]
     public void TryGetErrorCode_ShouldDetectError()
@@ -70,6 +84,40 @@ public class OAuthTests
 
         dict.TryGetState(out var state).ShouldBeTrue();
         state.ShouldBe("random_state_value");
+    }
+
+    [Fact]
+    public void TryGetCodeVerifier_ShouldReturnVerifier()
+    {
+        var dict = new Dictionary<string, string>
+        {
+            [OAuthDefaults.Keys.Pkce.CodeVerifier] = "verifier_value"
+        };
+
+        dict.TryGetCodeVerifier(out var verifier).ShouldBeTrue();
+        verifier.ShouldBe("verifier_value");
+    }
+
+    [Fact]
+    public void IsErrorResponse_ShouldReturnTrue_WhenErrorPresent()
+    {
+        var dict = new Dictionary<string, string>
+        {
+            ["error"] = "invalid_grant"
+        };
+
+        dict.IsErrorResponse().ShouldBeTrue();
+    }
+
+    [Fact]
+    public void IsErrorResponse_ShouldReturnFalse_WhenNoError()
+    {
+        var dict = new Dictionary<string, string>
+        {
+            ["code"] = "abc"
+        };
+
+        dict.IsErrorResponse().ShouldBeFalse();
     }
 
     #endregion

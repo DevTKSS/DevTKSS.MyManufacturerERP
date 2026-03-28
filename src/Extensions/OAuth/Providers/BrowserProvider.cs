@@ -40,6 +40,7 @@ public class BrowserProvider : IBrowserProvider
                 logger?.LogError(ex, "Failed to open URL via UseShellExecute, trying cmd fallback");
             }
 
+            // Workaround for https://github.com/dotnet/corefx/issues/10361
             try
             {
                 url = url.Replace("&", "^&");

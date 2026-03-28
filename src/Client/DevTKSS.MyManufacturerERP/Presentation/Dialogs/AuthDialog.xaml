@@ -7,7 +7,7 @@
     Title="TITLE"
     Style="{ThemeResource DefaultContentDialogStyle}"
     PrimaryButtonText="Start Authentication Flow"
-    PrimaryButtonCommand="{Binding ExecutePrimaryCommandAsync}">
+    PrimaryButtonCommand="{Binding ExecutePrimaryCommand}">
 	<Grid>
     <WebView2 x:Name="webView"
               Source="{Binding CurrentUri, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

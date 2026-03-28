@@ -1,6 +1,9 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
 namespace DevTKSS.MyManufacturerERP.Presentation;
 
-public partial record AuthModel
+public partial class AuthModel : ObservableObject
 {
     private readonly IDispatcher _dispatcher;
     private readonly INavigator _navigator;
@@ -20,11 +23,15 @@ public partial record AuthModel
     }
 
     public string Title { get; } = "Login";
-    public IState<string> CurrentUri => State<string>.Empty(this);
 
-    public IState<bool> IsLoading => State<bool>.Value(this, () => false);
+    [ObservableProperty]
+    private string? _currentUri;
 
-    public IState<string?> ErrorMessage => State<string?>.Value(this, () => null);
+    [ObservableProperty]
+    private bool _isLoading;
+
+    [ObservableProperty]
+    private string? _errorMessage;
 
     /// <summary>
     /// Initiates OAuthDefaults login flow with Etsy via WebAPI.
@@ -37,10 +44,11 @@ public partial record AuthModel
     /// 6. WebAPI sets authentication cookie and redirects back to client
     /// 7. User is navigated to MainModel upon success
     /// </summary>
-    public async ValueTask ConnectToEtsy(CancellationToken token = default)
+    [RelayCommand(IncludeCancelCommand = true)]
+    private async Task ConnectToEtsyAsync(CancellationToken token)
     {
-        await IsLoading.UpdateAsync(_ => true, token);
-        await ErrorMessage.UpdateAsync(_ => null, token);
+        IsLoading = true;
+        ErrorMessage = null;
 
         try
         {
@@ -56,22 +64,22 @@ public partial record AuthModel
             else
             {
                 _logger.Warning("OAuth login failed or was cancelled");
-                await ErrorMessage.UpdateAsync(_ => "Login failed or was cancelled. Please try again.", token);
+                ErrorMessage = "Login failed or was cancelled. Please try again.";
             }
         }
         catch (OperationCanceledException)
         {
             _logger.Information("OAuth login was cancelled by user");
-            await ErrorMessage.UpdateAsync(_ => "Login was cancelled.", token);
+            ErrorMessage = "Login was cancelled.";
         }
         catch (Exception ex)
         {
             _logger.Error(ex, "Exception during OAuth login flow");
-            await ErrorMessage.UpdateAsync(_ => $"An error occurred: {ex.Message}", token);
+            ErrorMessage = $"An error occurred: {ex.Message}";
         }
         finally
         {
-            await IsLoading.UpdateAsync(_ => false, token);
+            IsLoading = false;
         }
     }
 }

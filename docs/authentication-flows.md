@@ -84,6 +84,8 @@ Client                     SystemBrowser              Etsy
 
 - Loopback server only supports HTTP (not HTTPS)
 - Blocked by Uno Platform PR #2890 for native `IWebAuthenticationBrokerProvider` integration
+- See also: [Uno Extensions PR #3019](https://github.com/nicknow/uno.extensions/pull/3019) for desktop authentication improvements
+- Tracked in [EPIC #6](https://github.com/nicknow/uno.extensions/issues/6)
 
 ## Flow 3: WebView2 Embedded (Desktop/Windows)
 
@@ -111,7 +113,7 @@ Client                     WebView2 Dialog            Etsy
 
 ### Known limitations
 
-- WebView2 is Windows-only; no fallback for other desktop platforms
+- WebView2 is provided cross-platform by Uno Platform SDK 6+ (Windows, Linux, macOS via WebKitGTK/WebKit); it is not Windows-only
 
 ## SevDesk API-Key Integration
 
@@ -134,3 +136,11 @@ SevDesk uses a static API token (not OAuth). The token is passed as the `Authori
 ```
 
 > **Deadline: 31.03.2026** - SevDesk API token authentication must be completed by this date.
+
+## References
+
+- [Uno Platform Getting Started](https://platform.uno/docs/articles/getting-started.html)
+- [Uno Extensions Authentication](https://platform.uno/docs/articles/external/uno.extensions/doc/Learn/Authentication/HowTo-Authentication.html)
+- [Uno Extensions Navigation](https://platform.uno/docs/articles/external/uno.extensions/doc/Learn/Navigation/HowTo-Navigation.html)
+- [EPIC #6 - Desktop Authentication](https://github.com/nicknow/uno.extensions/issues/6)
+- [Uno Extensions PR #3019](https://github.com/nicknow/uno.extensions/pull/3019)

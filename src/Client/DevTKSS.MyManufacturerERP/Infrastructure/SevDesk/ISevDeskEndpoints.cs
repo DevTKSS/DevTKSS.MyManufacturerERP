@@ -45,7 +45,7 @@ public record SevDeskObjectResponse<T>
 
 #region SevDesk domain models (minimal subset)
 
-public record SevDeskContact
+public partial record SevDeskContact
 {
     [JsonPropertyName("id")]
     public long Id { get; init; }
@@ -63,7 +63,7 @@ public record SevDeskContact
     public SevDeskCategory? Category { get; init; }
 }
 
-public record SevDeskInvoice
+public partial record SevDeskInvoice
 {
     [JsonPropertyName("id")]
     public long Id { get; init; }
@@ -87,7 +87,7 @@ public record SevDeskInvoice
     public string? TotalGross { get; init; }
 }
 
-public record SevDeskVoucher
+public partial record SevDeskVoucher
 {
     [JsonPropertyName("id")]
     public long Id { get; init; }
@@ -108,7 +108,7 @@ public record SevDeskVoucher
     public string? SumGross { get; init; }
 }
 
-public record SevDeskCategory
+public partial record SevDeskCategory
 {
     [JsonPropertyName("id")]
     public long Id { get; init; }
