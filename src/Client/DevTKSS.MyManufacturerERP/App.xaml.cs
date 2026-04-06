@@ -260,7 +260,7 @@ public partial class App : Application
             }
             else
             {
-                await navigator.NavigateViewModelAsync<AuthModel>(this, qualifier: Qualifiers.Nested);
+                await navigator.NavigateViewModelAsync<AuthViewModel>(this, qualifier: Qualifiers.Nested);
             }
         });
     }
@@ -429,7 +429,7 @@ public partial class App : Application
     {
         views.Register(
             new ViewMap(ViewModel: typeof(ShellModel)),
-            new ViewMap<AuthPage, AuthModel>(),
+            new ViewMap<AuthPage, AuthViewModel>(),
             new ViewMap<MainPage, MainModel>(),
             new DataViewMap<SecondPage, SecondModel, Entity>(),
             new ViewMap<AuthenticationDialog, AuthDialogModel>()
@@ -442,7 +442,7 @@ public partial class App : Application
                     
                     new ("Main", View: views.FindByViewModel<MainModel>(), IsDefault:true),
                     new ("Second", View: views.FindByViewModel<SecondModel>()),
-                    new ("Auth", View: views.FindByViewModel<AuthModel>()),
+                    new ("Auth", View: views.FindByViewModel<AuthViewModel>()),
                     new ("AuthDialog", View: views.FindByViewModel<AuthDialogModel>())
                 ]
             )

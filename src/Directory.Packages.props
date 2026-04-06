@@ -27,8 +27,8 @@
   </ItemGroup>
   <ItemGroup Label="CA Packages">
     <PackageVersion Include="Ardalis.GuardClauses" Version="5.0.0" />
-    <PackageVersion Include="Mediator.Abstractions" Version="3.0.1" />
-    <PackageVersion Include="Mediator.SourceGenerator" Version="3.0.1" />
+    <PackageVersion Include="Mediator.Abstractions" Version="3.0.2" />
+    <PackageVersion Include="Mediator.SourceGenerator" Version="3.0.2" />
   </ItemGroup>
   <ItemGroup Label="WebAPI Common">
     <PackageVersion Include="Microsoft.AspNetCore.Authentication" Version="2.3.9" />
@@ -46,12 +46,12 @@
   <ItemGroup Label="OpenApi Packages">
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
     <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.5" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.13.10" />
-    <PackageVersion Include="Scalar.AspNetCore.Microsoft" Version="2.13.10" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.13.20" />
+    <PackageVersion Include="Scalar.AspNetCore.Microsoft" Version="2.13.20" />
   </ItemGroup>
   <ItemGroup Label="General Test Packages">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
-    <PackageVersion Include="GitHubActionsTestLogger" Version="3.0.1" />
+    <PackageVersion Include="GitHubActionsTestLogger" Version="3.0.3" />
     <PackageVersion Include="coverlet.collector" Version="8.0.1" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
   </ItemGroup>
@@ -61,7 +61,7 @@
   </ItemGroup>
   <ItemGroup Label="NUnit Test Packages">
     <PackageVersion Include="NUnit" Version="4.5.1" />
-    <PackageVersion Include="NUnit3TestAdapter" Version="6.1.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="6.2.0" />
   </ItemGroup>
   <ItemGroup Label="UITests Packages">
     <PackageVersion Include="Uno.UITest.Helpers" Version="1.1.0-dev.92" />
@@ -73,10 +73,10 @@
     <PackageVersion Include="AspNet.Security.OAuth.Etsy" Version="10.0.1-dev" />
   </ItemGroup>
   <ItemGroup Label="Mapping">
-    <PackageVersion Include="Mapster" Version="10.0.0-pre02" />
-    <PackageVersion Include="Mapster.DependencyInjection" Version="10.0.0-pre02" />
-    <PackageVersion Include="Mapster.Async" Version="10.0.0-pre02" />
-    <PackageVersion Include="Mapster.Immutable" Version="10.0.0-pre02" />
-    <PackageVersion Include="Mapster.EFCore" Version="10.0.0-pre02" />
+    <PackageVersion Include="Mapster" Version="10.0.6" />
+    <PackageVersion Include="Mapster.DependencyInjection" Version="10.0.6" />
+    <PackageVersion Include="Mapster.Async" Version="10.0.6" />
+    <PackageVersion Include="Mapster.Immutable" Version="10.0.6" />
+    <PackageVersion Include="Mapster.EFCore" Version="10.0.6" />
   </ItemGroup>
 </Project>

@@ -26,6 +26,7 @@
       Toolkit;
       Logging;
       LoggingSerilog;
+      Mvvm;
       MVUX;
       Configuration;
       HttpKiota;
@@ -52,7 +53,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
   </ItemGroup>
   <ItemGroup>

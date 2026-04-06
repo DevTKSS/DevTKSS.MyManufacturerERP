@@ -3,14 +3,15 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace DevTKSS.MyManufacturerERP.Presentation;
 
-public partial class AuthModel : ObservableObject
+[ReactiveBindable(false)]
+public partial class AuthViewModel : ObservableObject
 {
     private readonly IDispatcher _dispatcher;
     private readonly INavigator _navigator;
     private readonly IAuthenticationService _authenticationService;
     private readonly ILogger _logger;
 
-    public AuthModel(
+    public AuthViewModel(
         IDispatcher dispatcher, 
         INavigator navigator, 
         IAuthenticationService authenticationService,
@@ -19,7 +20,7 @@ public partial class AuthModel : ObservableObject
         _dispatcher = dispatcher;
         _navigator = navigator;
         _authenticationService = authenticationService;
-        _logger = logger.ForContext<AuthModel>();
+        _logger = logger.ForContext<AuthViewModel>();
     }
 
     public string Title { get; } = "Login";
