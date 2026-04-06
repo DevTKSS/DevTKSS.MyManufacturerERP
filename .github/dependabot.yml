@@ -1,21 +1,23 @@
 version: 2
 updates:
-- package-ecosystem: nuget
-  directory: "/src/"
-  schedule:
-    interval: weekly
-    time: "10:00"
-  open-pull-requests-limit: 10
-  labels:
-  - kind/dependency
-  - do-not-merge/work-in-progress
+  - package-ecosystem: nuget
+    directories:
+      - "/src"
+      - "/.config"
+      - "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 2
+    ignore:
+      - dependency-name: "Yllibed.HttpServer"
+      - dependency-name: "Yllibed.HttpServer.Handlers.Uno"
+      - dependency-name: "AspNet.Security.OAuth.Etsy"
 
-- package-ecosystem: github-actions
-  directory: "/src/"
-  schedule:
-    interval: weekly
-    time: "10:00"
-  open-pull-requests-limit: 10
-  labels:
-  - kind/dependency
-  - do-not-merge/work-in-progress
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 1
+    commit-message:
+      prefix: "deps(gh-actions)"
+
