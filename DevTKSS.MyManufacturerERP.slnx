@@ -3,7 +3,7 @@
     <File Path=".config/dotnet-tools.json" />
     <File Path=".gitignore" />
     <File Path="src/.editorconfig" />
-    <File Path="src/Directory.Build.props" Name="Directory.Build.props (src)" />
+    <File Path="src/Directory.Build.props" />
     <File Path="src/Directory.Build.targets" />
     <File Path="src/Directory.Packages.props" />
     <File Path="global.json" />
@@ -13,15 +13,13 @@
   </Folder>
   <Folder Name="/.github/">
     <File Path=".github/copilot-instructions.md" />
-    <File Path="Directory.Build.props" />
-  </Folder>
-  <Folder Name="/.github/">
-    <File Path=".github/copilot-instructions.md" />
+    <File Path=".github/Directory.Build.props" />
   </Folder>
   <Folder Name="/docs/">
     <File Path="docs/connecting-client-and-server-projects.md" />
     <File Path="docs/knowledge-base-and-references.md" />
   </Folder>
+  <Folder Name="/src/" />
   <Folder Name="/src/Extensions/"> 
     <Project Path="src/Extensions/OAuth/DevTKSS.Extensions.OAuth.csproj" />
     <Project Path="src/Extensions/OAuth.UI.WebView2/DevTKSS.Extensions.OAuth.UI.WebView.csproj" /> 
@@ -45,7 +43,6 @@
   <Folder Name="/src/Shared DataContracts/">
     <Project Path="src/DataContracts/DataContracts.csproj" />
   </Folder>
-  <Folder Name="/src/" />
   <Folder Name="/src/Client/">
     <Project Path="src/Client/DevTKSS.MyManufacturerERP.WasmServer/DevTKSS.MyManufacturerERP.Server.csproj" />
     <Project Path="src/Client/DevTKSS.MyManufacturerERP/DevTKSS.MyManufacturerERP.csproj">
