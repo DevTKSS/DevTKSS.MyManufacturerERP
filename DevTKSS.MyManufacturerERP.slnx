@@ -20,9 +20,9 @@
     <File Path="docs/knowledge-base-and-references.md" />
   </Folder>
   <Folder Name="/src/Extensions/"> 
-    <Project Path="src/Extensions/OAuth/DevTKSS.Extensions.OAuth.csproj" /> 
+    <Project Path="src/Extensions/OAuth/DevTKSS.Extensions.OAuth.csproj" />
+    <Project Path="src/Extensions/OAuth.UI.WebView2/DevTKSS.Extensions.OAuth.UI.WebView.csproj" /> 
     <Project Path="src/Extensions/OAuth.UI/DevTKSS.Extensions.OAuth.UI.csproj" />
-    <Project Path="src/Extensions/OAuth.UI.WebView2/DevTKSS.Extensions.OAuth.UI.WebView2.csproj" />
     <Project Path="src/Extensions/OAuth.Validation/DevTKSS.Extensions.OAuth.Validation.csproj" />
   </Folder>
   <Folder Name="/src/External OpenApi Specs/">
