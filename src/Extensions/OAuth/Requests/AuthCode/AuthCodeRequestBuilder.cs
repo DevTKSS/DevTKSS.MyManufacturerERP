@@ -8,32 +8,38 @@ public class AuthCodeRequestBuilder : IAuthCodeRequestBuilder
     private List<string> _scope = [];
     private string _scopeSeparator = " ";
     private AuthCodeRequestBuilder() { }
-    public static AuthCodeRequestBuilder Empty() => new();
-    public AuthCodeRequestBuilder WithAuthorizationState(AuthorizationState authState)
+    public static IAuthCodeRequestBuilder Empty() => new AuthCodeRequestBuilder(); 
+    public IAuthCodeRequestBuilder WithAuthorizationState(AuthorizationState authState)
     {
         ArgumentNullException.ThrowIfNull(authState);
         _authState = authState;
         return this;
     }
-    public AuthCodeRequestBuilder WithRedirectUri(string redirectUri)
+    public IAuthCodeRequestBuilder WithAuthNavigationRequest(AuthNavigationRequest authNavigationRequest)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(redirectUri);
-        _redirectUri = redirectUri; 
+        ArgumentNullException.ThrowIfNull(authNavigationRequest);
+        WithAuthorizationState(authNavigationRequest.AuthState);
         return this;
     }
-    public AuthCodeRequestBuilder WithClientId(string clientId)
+    public IAuthCodeRequestBuilder WithCallbackUri(string callbackUri)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(callbackUri);
+        _redirectUri = callbackUri;
+        return this;
+    }
+    public IAuthCodeRequestBuilder WithClientId(string clientId)
     {
         ArgumentNullException.ThrowIfNull(clientId);
         _clientId = clientId;
         return this;
     }
-    public AuthCodeRequestBuilder WithScope(string scope)
+    public IAuthCodeRequestBuilder WithScope(string scope)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(scope);
         _scope.Add(scope);
         return this;
     }
-    public AuthCodeRequestBuilder WithScopes(string[] scopes)
+    public IAuthCodeRequestBuilder WithScopes(string[] scopes)
     {
         foreach (var scope in scopes)
         {
@@ -41,7 +47,7 @@ public class AuthCodeRequestBuilder : IAuthCodeRequestBuilder
         }
         return this;
     }
-    public AuthCodeRequestBuilder WithScopes(IEnumerable<string> scopes)
+    public IAuthCodeRequestBuilder WithScopes(IEnumerable<string> scopes)
     {
         foreach (var scope in scopes)
         {
@@ -49,7 +55,7 @@ public class AuthCodeRequestBuilder : IAuthCodeRequestBuilder
         }
         return this;
     }
-    public AuthCodeRequestBuilder WithScopeSeperator(string separator = " ")
+    public IAuthCodeRequestBuilder WithScopeSeperator(string separator = " ")
     {
         _scopeSeparator = separator;
         return this;

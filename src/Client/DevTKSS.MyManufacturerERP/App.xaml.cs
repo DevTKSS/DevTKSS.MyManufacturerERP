@@ -131,9 +131,9 @@ public partial class App : Application
                                          .GetSection("Web")
                                          .GetValue<string>("LoginStartUri") ?? "http://localhost:5000/auth/login").OriginalString;
                         var options = sp.GetRequiredService<IOptions<OAuthClientOptions>>().Value;
-                        if (options is not { ClientId: not null, RedirectUri: not null, Scopes: not null and { Length: > 0 } })
+                        if (options is not { ClientId: not null, CallbackUri: not null, Scopes: not null and { Length: > 0 } })
                         {
-                            throw new InvalidOperationException("OAuth ClientId, RedirectUri, or Scopes not configured");
+                            throw new InvalidOperationException("OAuth ClientId, CallbackUri, or Scopes not configured");
                         }
                         var state = OAuth2Utilitys.GenerateState();
                         var codeVerifier = OAuth2Utilitys.GenerateCodeVerifier();
@@ -145,7 +145,7 @@ public partial class App : Application
                         var authRequest = new AuthorizationCodeRequest()
                         {
                             ClientId = options.ClientId!,
-                            RedirectUri = options.RedirectUri!,
+                            RedirectUri = options.CallbackUri!,
                             Scope = options.Scopes.JoinBy(" "),
                             State = state,
                             CodeChallenge = challenge,
@@ -264,7 +264,7 @@ public partial class App : Application
             }
         });
     }
-
+    // TODO: Currently not working, after changes in Client and Navigation Service!
     private static async ValueTask<IDictionary<string, string>?> HandleLoginCallbackAsync(IServiceProvider serviceProvider, IDispatcher? dispatcher, IDictionary<string, string> credentials, CancellationToken ct)
     {
         var logger = serviceProvider.GetRequiredService<ILogger<IOAuthTokenClient>>();

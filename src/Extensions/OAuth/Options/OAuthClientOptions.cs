@@ -11,7 +11,7 @@ public class OAuthClientOptions : EndpointOptions
     public string? ClientId { get; set; }
     public string? ClientSecret { get; set; }
 
-    public string? RedirectUri { get; set; }
+    public string? CallbackUri { get; set; }
     public string[]? Scopes { get; set; }
     public TokenKeyOptions TokenKeys { get; set; } = new();
 

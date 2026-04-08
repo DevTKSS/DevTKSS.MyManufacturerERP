@@ -228,7 +228,7 @@ public class OAuthTests
         TokenEndpoint = "https://api.etsy.com/v3/public/oauth/token",
         ClientId = "test-client-id",
         ClientSecret = "test-secret",
-        RedirectUri = "http://localhost:5001/auth/callback",
+        CallbackUri = "http://localhost:5001/auth/callback",
         Scopes = ["shops_r", "email_r"],
         UsePkce = usePkce,
     };
@@ -243,7 +243,7 @@ public class OAuthTests
         var options = CreateValidOptions();
         var state = new AuthorizationState();
 
-        var url = options.BuildAuthorizationStartUrl(state);
+        var url = options.BuildAuthorizationStartUrl();
 
         url.ShouldContain("client_id=test-client-id");
         url.ShouldContain("redirect_uri=");
@@ -254,12 +254,12 @@ public class OAuthTests
     }
 
     [Fact]
-    public void ToWebAuthRequest_ShouldSetCallbackUrl()
+    public void AuthNavigationRequest_ShouldSetCallbackUrl()
     {
         var options = CreateValidOptions();
         var state = new AuthorizationState();
 
-        var request = options.ToWebAuthRequest(state);
+        var request = options.ToWebAuthRequest(state); // TODO: Method got removed, the AuthNavigationRequest now creates the State itself on init and needs to be integrated with Options Values for ClientID etc to get added to the path.
 
         request.CallbackUrl.ShouldBe("http://localhost:5001/auth/callback");
         request.StartUrl.ShouldStartWith("https://www.etsy.com/oauth/connect?");

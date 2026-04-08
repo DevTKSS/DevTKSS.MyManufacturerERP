@@ -2,7 +2,7 @@ namespace DevTKSS.Extensions.OAuth.Requests;
 
 public record AuthorizationCodeRequest
 {
-    public static AuthCodeRequestBuilder WithBuilder() => AuthCodeRequestBuilder.Empty();
+    public static IAuthCodeRequestBuilder WithBuilder() => AuthCodeRequestBuilder.Empty();
     /// <summary>
     /// Value MUST be set to <see cref="OAuthDefaults.Values.Code">code</see>.
     /// </summary>

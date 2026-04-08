@@ -1,5 +1,10 @@
 // [assembly: ApiExtension(typeof(WebAuthenticationBrokerProvider), typeof(SystemBrowserAuthBroker), operatingSystemCondition: "Windows")]
 // NOTE: The File extension is set to .Desktop.cs to only include it in Desktop builds but making it available to the non Desktop limited OAuthNavigationService
+using System.Net;
+using DevTKSS.Extensions.OAuth.Providers;
+using Yllibed.HttpServer.Extensions;
+using Yllibed.HttpServer.Handlers.Uno.Extensions;
+
 namespace DevTKSS.Extensions.OAuth.UI.SystemBrowser;
 
 public sealed class SystemBrowserAuthBroker()

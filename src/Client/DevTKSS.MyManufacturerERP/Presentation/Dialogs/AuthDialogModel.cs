@@ -20,16 +20,10 @@ internal partial class AuthDialogModel : ObservableObject
     [ObservableProperty]
     private Uri? _currentUri;
 
-    partial void OnCurrentUriChanged(Uri? value)
+    [RelayCommand]
+    private async Task HandleRedirectAsync(Uri? destination, CancellationToken ct)
     {
-        if (value is not null && IsRedirectMatch(value))
-        {
-            _ = HandleRedirectAsync(value);
-        }
-    }
-
-    private async Task HandleRedirectAsync(Uri destination)
-    {
+        if (destination is null || _request.IsRedirectMatch(destination)) return;
         var queryParameters = OAuth2Utilitys.GetQueryParameters(destination);
         if (queryParameters.TryGetErrorCode(out var error) && !string.IsNullOrWhiteSpace(error))
         {
@@ -42,13 +36,13 @@ internal partial class AuthDialogModel : ObservableObject
             return;
         }
 
-        await _navigator.NavigateBackWithResultAsync(this, data: destination.OriginalString);
+        await _navigator.NavigateBackWithResultAsync(this, data: destination.OriginalString,cancellation:  ct); // TODO: This Task should have a Return value not just a Task itself...
     }
 
     [RelayCommand]
     private async Task ExecutePrimaryAsync()
     {
-        if (CurrentUri is not null && IsRedirectMatch(CurrentUri))
+        if (CurrentUri is not null && _request.IsRedirectMatch(CurrentUri))
         {
             await _navigator.NavigateBackWithResultAsync(this, data: CurrentUri.OriginalString);
         }
@@ -59,8 +53,6 @@ internal partial class AuthDialogModel : ObservableObject
     {
         await _navigator.NavigateBackWithResultAsync(this, data: new { Success = true });
     }
-
-    private bool IsRedirectMatch(Uri? destination) => _request.IsRedirectMatch(destination);
 
     private Uri BuildStartUri()
     {

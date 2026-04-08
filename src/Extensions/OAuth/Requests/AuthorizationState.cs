@@ -13,5 +13,8 @@ public record AuthorizationState
     internal string CodeVerifier { get; }
     internal string CodeChallenge { get; } 
     // TODO: Implement validation methods here to ensure that the retrieved response values meet the OAuth2 flow requirements.
+
+    public bool IsValidState(string? state) 
+        => !string.IsNullOrEmpty(state) && State == state;
 }
 

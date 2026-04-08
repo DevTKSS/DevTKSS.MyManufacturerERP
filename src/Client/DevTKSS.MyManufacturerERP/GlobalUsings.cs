@@ -9,7 +9,6 @@ global using DevTKSS.MyManufacturerERP.Infrastructure;
 global using DevTKSS.MyManufacturerERP.Infrastructure.Endpoints;
 global using DevTKSS.MyManufacturerERP.Infrastructure.Services;
 global using DevTKSS.MyManufacturerERP.Infrastructure.SevDesk;
-global using DevTKSS.Extensions.OAuth.UI.Navigation;
 global using DevTKSS.Extensions.OAuth.UI.SystemBrowser;
 global using DevTKSS.Extensions.OAuth.UI;
 global using DevTKSS.MyManufacturerERP.Infrastructure.Endpoints.Responses;
@@ -21,7 +20,6 @@ global using DevTKSS.Extensions.OAuth;
 global using DevTKSS.Extensions.OAuth.Options;
 global using DevTKSS.Extensions.OAuth.UI.Http;
 global using DevTKSS.MyManufacturerERP.Presentation.Dialogs;
-global using Microsoft.Extensions.Configuration;
 global using Yllibed.HttpServer;
 global using FluentValidation;
 global using Microsoft.Extensions.DependencyInjection;
@@ -30,9 +28,10 @@ global using Microsoft.Extensions.Localization;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 global using DevTKSS.Extensions.OAuth.Utils;
-global using Windows.System;
 global using Refit;
 global using Serilog;
+global using CommunityToolkit.Mvvm.ComponentModel;
+global using CommunityToolkit.Mvvm.Input;
 global using ILogger = Serilog.ILogger;
 [assembly: Uno.Extensions.Reactive.Config.BindableGenerationTool(3)]
 

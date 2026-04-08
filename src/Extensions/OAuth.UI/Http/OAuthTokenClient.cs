@@ -1,13 +1,13 @@
 namespace DevTKSS.Extensions.OAuth.UI.Http;
 public sealed class OAuthTokenHttpClient
-    : IOAuthTokenClient,
+    : IOAuthTokenClient, // TODO: Fit Interface and Implementation after finding a better SOC-Service Split. Other Services should not provide the Request to the Client, they should be build by the client!
      IAuthenticationTokenProvider // Interface from Uno.Extensions.Http called in their Hostbuilder providing integration into the HttpClient pipeline for automatic token injection into outgoing requests
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger _logger;
     private readonly ITokenCache _tokenCache;
     private OAuthClientOptions? _options;
-    private AuthorizationState? _state;
+    private AuthNavigationRequest? _request;
     public OAuthTokenHttpClient(
         HttpClient httpClient,
         ILogger<OAuthTokenHttpClient> logger,
@@ -61,41 +61,34 @@ public sealed class OAuthTokenHttpClient
         if (await _tokenCache.GetAsync(cancellationToken) is not { Count: > 0 } tokens
             || !tokens.TryGetAccessToken(out var accessToken))
         {
+
             return string.Empty;
         }
         return accessToken;
     }
-    public ValueTask<AuthorizationState> GetAuthorizeStateAsync(IDictionary<string, string>? extraParameters = null)
+ 
+    public async ValueTask<TokenResponse?> HandleCallbackAsync(
+        Uri redirectUri,
+        CancellationToken cancellationToken = default)
     {
-        _state = new AuthorizationState();
-        return ValueTask.FromResult(_state);
-    }
-
-    public ValueTask<WebAuthRequest?> GetWebAuthRequestAsync(AuthorizationState state, IDictionary<string, string>? extraParameters = null)
-    {
-        if (_options is null)
+        if (_request?.AuthState is null)
         {
             if (_logger.IsEnabled(LogLevel.Warning))
             {
-                _logger.LogWarning("OAuth client options are not configured; cannot build web auth request.");
+                _logger.LogWarning("Authorization Navigation Request is not initialized.");
             }
-            return ValueTask.FromResult<WebAuthRequest?>(default);
+            return default;
         }
 
-        if (string.IsNullOrWhiteSpace(_options.AuthorizationEndpoint) || string.IsNullOrWhiteSpace(_options.RedirectUri))
+        if (!_request.IsCallbackUri(redirectUri))
         {
-            if (_logger.IsEnabled(LogLevel.Warning))
-            {
-                _logger.LogWarning("AuthorizationEndpoint or RedirectUri is not configured; cannot build web auth request.");
-            }
-            return ValueTask.FromResult<WebAuthRequest?>(default);
+            return default;
         }
 
-        var request = _options.ToWebAuthRequest(state);
-        return ValueTask.FromResult<WebAuthRequest?>(request);
+        return await ExchangeCodeAsync(redirectUri.OriginalString, cancellationToken);
     }
 
-    public async ValueTask<TokenResponse?> ExchangeCodeAsync(AuthorizationState state, string callbackResult, CancellationToken cancellationToken = default)
+    private async ValueTask<TokenResponse?> ExchangeCodeAsync(string callbackResult, CancellationToken cancellationToken = default)
     {
         if (_options is null)
         {
@@ -106,20 +99,20 @@ public sealed class OAuthTokenHttpClient
             return default;
         }
 
-        if (!TryValidateCallback(callbackResult, out var parameters))
+        if (_request is null)
         {
             if (_logger.IsEnabled(LogLevel.Warning))
             {
-                _logger.LogWarning("OAuth callback returned an error response.");
+                _logger.LogWarning("Authorization Navigation Request is not initialized.");
             }
             return default;
         }
 
-        if (!parameters.TryGetState(out var returnedState) || !string.Equals(returnedState, state.State, StringComparison.Ordinal))
+        if (!_request.IsValidCallback(callbackResult, out var parameters))
         {
             if (_logger.IsEnabled(LogLevel.Warning))
             {
-                _logger.LogWarning("OAuth callback state mismatch (possible CSRF attack).");
+                _logger.LogWarning("OAuth callback returned an error response.");
             }
             return default;
         }
@@ -136,13 +129,13 @@ public sealed class OAuthTokenHttpClient
         return await ExchangeCodeAsync(new AccessTokenRequest
         {
             ClientId = _options.ClientId!,
-            RedirectUri = _options.RedirectUri!,
+            RedirectUri = _options.CallbackUri!,
             Code = code,
-            CodeVerifier = state.CodeVerifier
+            CodeVerifier = _request.AuthState.CodeVerifier
         }, cancellationToken);
     }
 
-    public async ValueTask<TokenResponse?> ExchangeCodeAsync(AccessTokenRequest request, CancellationToken cancellationToken = default)
+    public async ValueTask<TokenResponse?> ExchangeCodeAsync(AccessTokenRequest request, CancellationToken cancellationToken = default) // TODO: Find optimal Way to integrate the Interactive Auth part between Auth Start and Exchange here. Prefer setting this to private, but currently collides with OAuthProvider. Eventually SOC Layer Evaluation Problem
     {
         if (request is null)
         {
@@ -202,34 +195,4 @@ public sealed class OAuthTokenHttpClient
         return await response.Content.ReadFromJsonAsync<TokenResponse>(cancellationToken: cancellationToken);
     }
 
-
-
-    #region Callback Validation
-    /// <summary>
-    /// Validates OAuth callback URI and returns query parameters if valid.
-    /// </summary>
-    /// <param name="callbackUri">The callback URI to validate.</param>
-    /// <param name="parameters">Query parameters if validation succeeds; null otherwise.</param>
-    /// <returns>True if callback is valid; false otherwise.</returns>
-    private bool TryValidateCallback(
-        string? callbackUri,
-        [NotNullWhen(true)] out IDictionary<string, string>? parameters)
-    {
-        parameters = null;
-
-        if (string.IsNullOrWhiteSpace(callbackUri) || !Uri.TryCreate(callbackUri, UriKind.Absolute, out var uri))
-        {
-            return false;
-        }
-
-        parameters = OAuth2Utilitys.GetQueryParameters(uri);
-        if (parameters is not { Count: > 0 })
-        {
-            parameters = null;
-            return false;
-        }
-
-        return !parameters.TryGetErrorCode(out _);
-    }
-    #endregion
 }

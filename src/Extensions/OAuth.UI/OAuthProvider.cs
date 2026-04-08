@@ -163,7 +163,7 @@ public record OAuthProvider : BaseAuthenticationProvider
             authCodeParams = new AuthorizationCodeRequest()
             {
                 ClientId = InternalSettings.Options!.ClientId!,
-                RedirectUri = InternalSettings.Options!.RedirectUri ?? InternalSettings.LoginCallbackUri!,
+                RedirectUri = InternalSettings.Options!.CallbackUri ?? InternalSettings.LoginCallbackUri!,
                 Scope = InternalSettings.Options.Scopes.JoinBy(" "),
                 State = state,
                 CodeChallenge = codeChallenge
@@ -274,7 +274,7 @@ public record OAuthProvider : BaseAuthenticationProvider
         var tokenResponse = await _client.ExchangeCodeAsync(new AccessTokenRequest
         {
             ClientId = InternalSettings!.Options!.ClientId!,
-            RedirectUri = InternalSettings.Options!.RedirectUri ?? InternalSettings.LoginCallbackUri!,
+            RedirectUri = InternalSettings.Options!.CallbackUri ?? InternalSettings.LoginCallbackUri!,
             Code = authorizationCode,
             CodeVerifier = codeVerifier
         }, cancellationToken);

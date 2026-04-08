@@ -31,10 +31,10 @@ public class OAuthClientOptionsValidator : AbstractValidator<OAuthClientOptions>
             .NotEmpty().WithMessage("ClientSecret must not be empty.")
             .When(x => !x.UsePkce);
 
-        RuleFor(x => x.RedirectUri)
+        RuleFor(x => x.CallbackUri)
             .Cascade(CascadeMode.Stop)
-            .NotEmpty().WithMessage("RedirectUri must not be empty.")
-            .Must(BeAValidUrl).WithMessage("RedirectUri must be a valid URL.");
+            .NotEmpty().WithMessage("CallbackUri must not be empty.")
+            .Must(BeAValidUrl).WithMessage("CallbackUri must be a valid URL.");
 
         RuleFor(x => x.Scopes)
             .Cascade(CascadeMode.Stop)
