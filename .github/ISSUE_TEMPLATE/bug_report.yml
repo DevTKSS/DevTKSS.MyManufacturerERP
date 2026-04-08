@@ -53,17 +53,17 @@ body:
       description: Select all or any platform that you see this issue on. This helps us determine if it's something platform-specific or in the core. If you were only able to test on 1 platform, please check the last option to inform us about that.
       multiple: true
       options:
-        - Android
-        - iOS
-        - MacOS
-        - Windows
-        - GTK
-        - Linux Framebuffer
-        - WPF
-        - Skia Desktop
-        - WebAssembly
-        - Other
-        - I was *not* able test on other platforms
+      - "All platforms 🌍"
+      - "WebAssembly"
+      - "Android"
+      - "iOS"
+      - "Desktop (Windows)"
+      - "Desktop (macOS)"
+      - "Desktop (X11)"
+      - "Desktop (Linux Framebuffer)"
+      - "Windows App SDK"
+      - Other
+      - I was *not* able test on other platforms
     validations:
       required: true
 

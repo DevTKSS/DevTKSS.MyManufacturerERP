@@ -1,5 +1,6 @@
 // Http constants providing namespaces
 global using System.Security.Claims;
+global using Microsoft.AspNetCore.Authentication;
 // Domain slice namespaces
 global using DevTKSS.MyManufacturerERP.Domain.Entities;
 // Web slice namespaces
@@ -9,10 +10,12 @@ global using DevTKSS.MyManufacturerERP.WebApi.Endpoints.Weather;
 global using DevTKSS.MyManufacturerERP.WebApi.Contracts;
 // AspNetCore namespaces
 global using Microsoft.AspNetCore.Http.HttpResults;
+global using AspNet.Security.OAuth.Etsy;
+global using Microsoft.AspNetCore.Authentication.Cookies;
 // Database namespaces
 global using Microsoft.EntityFrameworkCore;
 // OpenAPI namespaces
-global using Scalar.AspNetCore;
+//global using Scalar.AspNetCore;
 // Logging namespaces
 global using Serilog;
 global using Serilog.Templates;

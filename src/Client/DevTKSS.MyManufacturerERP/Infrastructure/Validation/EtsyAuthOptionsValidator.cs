@@ -4,14 +4,14 @@ using DevTKSS.Extensions.OAuth.Validation;
 
 namespace DevTKSS.MyManufacturerERP.Infrastructure.Validation;
 
-// Validator for EtsyOAuthEndpointOptions leveraging FluentValidation and including OAuthEndpointOptionsValidator
+// Validator for EtsyOAuthEndpointOptions leveraging FluentValidation and including OAuthClientOptionsValidator
 public sealed class EtsyOAuthEndpointOptionsValidator : AbstractValidator<EtsyOAuthEndpointOptions>
 {
     public EtsyOAuthEndpointOptionsValidator()
     {
-        // Reuse existing OAuthEndpointOptionsValidator for base properties
-        RuleFor(x => (OAuthEndpointOptions)x)
-            .SetValidator(new OAuthEndpointOptionsValidator());
+        // Reuse existing OAuthClientOptionsValidator for base properties
+        RuleFor(x => (OAuthClientOptions)x)
+            .SetValidator(new OAuthClientOptionsValidator());
 
         // Validate token key formats
         RuleFor(x => x.UserIdTokenKey)

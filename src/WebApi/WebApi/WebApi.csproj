@@ -6,7 +6,7 @@
     <AssemblyName>DevTKSS.MyManufacturerERP.WebApi</AssemblyName>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <UserSecretsId>$(MyManufacturerERPUserSecretsId)</UserSecretsId>
-    <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
+    <!--<OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>-->
     <MapsterEnabled>true</MapsterEnabled>
     <MapsterPath>$(ProjectDir)**\mapster\**\*.g.cs</MapsterPath>
     <Nullable>enable</Nullable>
@@ -18,11 +18,16 @@
     <PackageReference Include="Mediator.Abstractions" />
     <PackageReference Include="Mediator.SourceGenerator" />
   </ItemGroup>
+
   <ItemGroup Label="EntityFramework">
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+  </ItemGroup>
+
+  <ItemGroup Label="OAuth2">
+    <PackageReference Include="AspNet.Security.OAuth.Etsy" />
   </ItemGroup>
 
   <ItemGroup Label="Serilog">
@@ -32,17 +37,18 @@
 
   <ItemGroup Label="OpenApi">
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
-    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" />
-    <PackageReference Include="Scalar.AspNetCore" />
-    <PackageReference Include="Scalar.AspNetCore.Microsoft" />
+    <!--<PackageReference Include="Microsoft.Extensions.ApiDescription.Server" />-->
+    <!--<PackageReference Include="Scalar.AspNetCore" />
+    <PackageReference Include="Scalar.AspNetCore.Microsoft" />-->
   </ItemGroup>
 
   <ItemGroup> 
-   <Content Include="..\AppData\*.json" CopyToOutputDirectory="PreserveNewest" LinkBase="AppData" />
+    <Content Include="..\AppData\*.json" CopyToOutputDirectory="PreserveNewest" LinkBase="AppData" />
     <ProjectReference Include="..\Application\Application.csproj" />
+    <ProjectReference Include="..\..\DataContracts\DataContracts.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <!-- Mapster for mapping -->
+
+  <ItemGroup Label="Mapster">
     <PackageReference Include="Mapster" />
     <PackageReference Include="Mapster.DependencyInjection" />
     <PackageReference Include="Mapster.EFCore" />
@@ -57,4 +63,5 @@
       <Visible>true</Visible>
     </None>
   </ItemGroup>
- </Project>
+
+</Project>

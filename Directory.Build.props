@@ -6,7 +6,7 @@
     <Company>TKSS Development</Company>
     <Authors>Sonja Schweitzer</Authors>
     <PackageProjectUrl>https://github.com/DevTKSS/DevTKSS.MyManufacturerERP</PackageProjectUrl>
-    <Copyright>Copyright (C) 2015-$([System.DateTime]::Now.ToString(`yyyy`)) TKSS Development - all rights reserved</Copyright>
+    <Copyright>Copyright (C) 2024-$([System.DateTime]::Now.ToString(`yyyy`)) TKSS Development - all rights reserved</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 </Project>

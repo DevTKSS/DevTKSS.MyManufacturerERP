@@ -6,7 +6,7 @@ public static class EtsyAuthSpecializedTokenCacheExtensions
 {
     public static bool TryGetEtsyUserId(this IDictionary<string, string> cache, out long userId)
     {
-        if (cache.TryGetValue(OAuthTokenRefreshExtendedDefaults.UserIdKey, out var id))
+        if (cache.TryGetValue(EtsyOAuthMeRequestDefaults.UserIdKey, out var id))
         {
             if (long.TryParse(id, out var value))
             {
@@ -20,7 +20,7 @@ public static class EtsyAuthSpecializedTokenCacheExtensions
 
     public static bool TryGetEtsyShopId(this IDictionary<string, string> cache, out long shopId)
     {
-        if (cache.TryGetValue($"{OAuthTokenRefreshExtendedDefaults.UserIdKey}_{EtsyOAuthMeRequestDefaults.ShopIdKey}", out var id))
+        if (cache.TryGetValue($"{EtsyOAuthMeRequestDefaults.UserIdKey}_{EtsyOAuthMeRequestDefaults.ShopIdKey}", out var id))
         {
             if (long.TryParse(id, out var value))
             {

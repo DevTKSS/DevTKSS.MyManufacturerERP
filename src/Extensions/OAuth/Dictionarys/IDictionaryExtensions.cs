@@ -11,7 +11,7 @@ public static class IDictionaryExtensions
     /// <param name="key">The key parameter.</param>
     /// <param name="value">The value to add.</param>
     /// <returns>The previous value or its default, possibily <see langword="null"/> value.</returns>
-    public static TValue? AddOrReplace<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
+    public static TValue? AddOrReplace<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value) where TKey : notnull
     {
         if (!dictionary.TryAdd(key, value))
         {
@@ -21,9 +21,27 @@ public static class IDictionaryExtensions
         }
         return default;
     }
+
+    public static IDictionary<TKey,TValue> AddOrReplace<TKey, TValue>(this IDictionary<TKey, TValue> target, IDictionary<TKey, TValue>? source) where TKey : notnull
+    {
+        var changes = new Dictionary<TKey, TValue>();
+        if (target is null || source is not { Count: > 0 })
+        {
+            return changes;
+        }
+
+        foreach (var (key, value) in source)
+        {
+            if (target.AddOrReplace(key, value) is TValue oldValue)
+            {
+                changes.AddOrReplace(key, oldValue);
+            }
+        }
+        return changes;
+    }
     public static bool TryRemoveKeys<TKey, TValue>(this IDictionary<TKey, TValue>? dictionary, IEnumerable<TKey> keys)
     {
-        if (dictionary == null || keys == null || !keys.Any())
+        if (dictionary is null || keys is null || !keys.Any())
         {
             return false;
         }
@@ -39,20 +57,17 @@ public static class IDictionaryExtensions
     }
     public static bool TryRemove<TKey,TValue>(this IDictionary<TKey,TValue>? dictionary, TKey key)
     {
-        if (dictionary == null || key == null)
+        if (dictionary is null || key is null || !dictionary.ContainsKey(key))
         {
             return false;
         }
-        if (dictionary.ContainsKey(key))
-        {
-            dictionary.Remove(key);
-            return true;
-        }
-        return false;
+
+        dictionary.Remove(key);
+        return true;
     }
     public static bool TryRemove<TKey, TValue>(this IDictionary<TKey, TValue>? dictionary, TKey key, out TValue? value)
     {
-        if (dictionary == null || key == null)
+        if (dictionary is null || key is null)
         {
             value = default;
             return false;
